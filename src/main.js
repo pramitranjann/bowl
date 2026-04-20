@@ -230,7 +230,17 @@ function renderStatus() {
   ctx.font = CONFIG.overlayTextFont;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(game.statusText, viewport.width / 2, viewport.height / 2);
+  ctx.fillText(game.statusText, viewport.width / 2, viewport.height / 2 - 24);
+
+  if (game.state === "waiting") {
+    ctx.font = "18px system-ui, sans-serif";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.82)";
+    ctx.fillText(
+      `hands ${tracker.stats.handsDetected}  camera ${tracker.stats.videoWidth}×${tracker.stats.videoHeight}`,
+      viewport.width / 2,
+      viewport.height / 2 + 18
+    );
+  }
   ctx.restore();
 }
 

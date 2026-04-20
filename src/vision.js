@@ -10,6 +10,13 @@ export class HandTracker {
     this.ready = false;
     this.lastDetectAtMs = 0;
     this.lastHands = [];
+    this.stats = {
+      handsDetected: 0,
+      lastResultAtMs: 0,
+      videoWidth: 0,
+      videoHeight: 0,
+      errors: 0,
+    };
   }
 
   async start(onStatus = () => {}) {
@@ -63,23 +70,34 @@ export class HandTracker {
     }
 
     this.lastDetectAtMs = nowMs;
-    const result = this.handLandmarker.detectForVideo(this.video, nowMs);
-    const landmarks = result.landmarks ?? [];
-    const handedness = result.handedness ?? [];
+    this.stats.videoWidth = this.video.videoWidth;
+    this.stats.videoHeight = this.video.videoHeight;
 
-    this.lastHands = landmarks.map((points, index) => {
-      const tip = points[8];
-      const label = handedness[index]?.[0]?.categoryName ?? `Hand ${index + 1}`;
-      const color = CONFIG.handColors[label] ?? CONFIG.handColors.default;
-      return {
-        id: `${label}-${index}`,
-        label,
-        color,
-        x: (1 - tip.x) * viewport.width,
-        y: tip.y * viewport.height,
-        z: tip.z,
-      };
-    });
+    try {
+      const result = this.handLandmarker.detectForVideo(this.video, nowMs);
+      const landmarks = result.landmarks ?? [];
+      const handedness = result.handedness ?? [];
+
+      this.lastHands = landmarks.map((points, index) => {
+        const tip = points[8];
+        const label = handedness[index]?.[0]?.categoryName ?? `Hand ${index + 1}`;
+        const color = CONFIG.handColors[label] ?? CONFIG.handColors.default;
+        return {
+          id: `${label}-${index}`,
+          label,
+          color,
+          x: (1 - tip.x) * viewport.width,
+          y: tip.y * viewport.height,
+          z: tip.z,
+        };
+      });
+
+      this.stats.handsDetected = this.lastHands.length;
+      this.stats.lastResultAtMs = nowMs;
+    } catch (error) {
+      this.stats.errors += 1;
+      console.error("Hand detection failed", error);
+    }
 
     return this.lastHands;
   }

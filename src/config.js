@@ -6,7 +6,7 @@ export const CONFIG = {
   mediaPipeHandModel:
     "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
 
-  minHandConfidence: 0.5,
+  minHandConfidence: 0.35,
   trailMaxPoints: 20,
   trailDecayMs: 400,
   sliceVelocityThreshold: 800,
@@ -41,8 +41,8 @@ export const CONFIG = {
     audio: false,
     video: {
       facingMode: "user",
-      width: { ideal: 1280 },
-      height: { ideal: 720 },
+      width: { ideal: 640 },
+      height: { ideal: 480 },
     },
   },
 
