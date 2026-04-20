@@ -197,13 +197,25 @@ function drawVideoBackground() {
   ctx.save();
   ctx.translate(viewport.width, 0);
   ctx.scale(-1, 1);
-  ctx.drawImage(
-    webcam,
-    offsetX - viewport.width,
-    offsetY,
-    drawWidth,
-    drawHeight
-  );
+  ctx.drawImage(webcam, -offsetX - drawWidth, offsetY, drawWidth, drawHeight);
+  ctx.restore();
+}
+
+function renderHandMarkers(hands) {
+  if (!hands.length) {
+    return;
+  }
+
+  ctx.save();
+  for (const hand of hands) {
+    ctx.fillStyle = hand.color;
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(hand.x, hand.y, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
   ctx.restore();
 }
 
@@ -281,12 +293,13 @@ function renderGameOver(nowMs) {
   ctx.restore();
 }
 
-function render(nowMs) {
+function render(nowMs, hands) {
   ctx.clearRect(0, 0, viewport.width, viewport.height);
   drawVideoBackground();
   renderEntities(nowMs);
   renderParticles();
   trails.render(ctx, nowMs);
+  renderHandMarkers(hands);
 
   if (game.state === "playing" || game.state === "gameover") {
     renderHud(ctx, {
@@ -333,7 +346,7 @@ function animate(nowMs) {
     updateGameOver(dtSeconds, nowMs);
   }
 
-  render(nowMs);
+  render(nowMs, hands);
   requestAnimationFrame(animate);
 }
 

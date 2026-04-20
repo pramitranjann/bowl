@@ -9,8 +9,8 @@ export const CONFIG = {
   minHandConfidence: 0.35,
   trailMaxPoints: 20,
   trailDecayMs: 400,
-  sliceVelocityThreshold: 800,
-  trailMinDistance: 8,
+  sliceVelocityThreshold: 520,
+  trailMinDistance: 4,
   trailWidth: 16,
 
   fruitBaseSize: 120,
