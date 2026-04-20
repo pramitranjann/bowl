@@ -34,7 +34,19 @@ export class Compositor {
     );
   }
 
-  drawMirroredFrame(ctx, viewport, frame, alpha = 1) {
+  getPlayerFrame(viewport, frame) {
+    const scale = CONFIG.playerCompositeScale ?? 1;
+    const width = frame.width * scale;
+    const height = frame.height * scale;
+    return {
+      x: (viewport.width - width) / 2,
+      y: viewport.height - height - (CONFIG.playerBottomInset ?? 0),
+      width,
+      height,
+    };
+  }
+
+  drawMirroredFrame(ctx, viewport, frame, alpha = 1, destinationFrame = frame) {
     if (!this.hasWebcamFrame()) {
       return;
     }
@@ -44,10 +56,10 @@ export class Compositor {
     ctx.scale(-1, 1);
     ctx.drawImage(
       this.webcam,
-      viewport.width - frame.x - frame.width,
-      frame.y,
-      frame.width,
-      frame.height
+      viewport.width - destinationFrame.x - destinationFrame.width,
+      destinationFrame.y,
+      destinationFrame.width,
+      destinationFrame.height
     );
     ctx.restore();
   }
@@ -68,13 +80,14 @@ export class Compositor {
     if (!this.hasWebcamFrame()) {
       return;
     }
+    const playerFrame = this.getPlayerFrame(viewport, frame);
     if (!segmentation?.data) {
-      this.drawMirroredFrame(ctx, viewport, frame, 0.68);
+      this.drawMirroredFrame(ctx, viewport, frame, 0.68, playerFrame);
       return;
     }
 
     this.playerCtx.clearRect(0, 0, viewport.width, viewport.height);
-    this.drawMirroredFrame(this.playerCtx, viewport, frame);
+    this.drawMirroredFrame(this.playerCtx, viewport, frame, 1, playerFrame);
 
     const maskWidth = segmentation.width;
     const maskHeight = segmentation.height;
@@ -98,10 +111,10 @@ export class Compositor {
     this.playerCtx.globalCompositeOperation = "destination-in";
     this.playerCtx.drawImage(
       this.maskCanvas,
-      frame.x,
-      frame.y,
-      frame.width,
-      frame.height
+      playerFrame.x,
+      playerFrame.y,
+      playerFrame.width,
+      playerFrame.height
     );
     this.playerCtx.globalCompositeOperation = "source-over";
 
