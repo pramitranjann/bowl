@@ -39,6 +39,7 @@ const metrics = {
 const viewport = {
   width: window.innerWidth,
   height: window.innerHeight,
+  dpr: Math.min(window.devicePixelRatio || 1, 2),
 };
 
 let lastFrameMs = performance.now();
@@ -58,8 +59,12 @@ const devPanel = createDevPanel({
 function resize() {
   viewport.width = window.innerWidth;
   viewport.height = window.innerHeight;
-  canvas.width = viewport.width;
-  canvas.height = viewport.height;
+  viewport.dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = Math.round(viewport.width * viewport.dpr);
+  canvas.height = Math.round(viewport.height * viewport.dpr);
+  ctx.setTransform(viewport.dpr, 0, 0, viewport.dpr, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
 }
 
 function getCameraFrameRect() {
