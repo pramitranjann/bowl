@@ -64,7 +64,7 @@ export class HandTracker {
     });
   }
 
-  detect(nowMs, viewport) {
+  detect(nowMs, cameraFrame) {
     if (
       !this.ready ||
       !this.handLandmarker ||
@@ -97,8 +97,12 @@ export class HandTracker {
         const color = CONFIG.handColors[label] ?? CONFIG.handColors.default;
         const id = label;
         const previous = this.smoothedHands.get(id);
-        const targetX = (1 - tip.x) * viewport.width;
-        const targetY = tip.y * viewport.height;
+        const frameX = cameraFrame?.x ?? 0;
+        const frameY = cameraFrame?.y ?? 0;
+        const frameWidth = cameraFrame?.width ?? this.video.videoWidth;
+        const frameHeight = cameraFrame?.height ?? this.video.videoHeight;
+        const targetX = frameX + (1 - tip.x) * frameWidth;
+        const targetY = frameY + tip.y * frameHeight;
         const x = previous
           ? previous.x + (targetX - previous.x) * CONFIG.handSmoothing
           : targetX;

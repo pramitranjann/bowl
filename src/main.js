@@ -62,6 +62,20 @@ function resize() {
   canvas.height = viewport.height;
 }
 
+function getCameraFrameRect() {
+  const sourceWidth = webcam.videoWidth || viewport.width;
+  const sourceHeight = webcam.videoHeight || viewport.height;
+  const scale = Math.min(
+    viewport.width / sourceWidth,
+    viewport.height / sourceHeight
+  );
+  const width = sourceWidth * scale;
+  const height = sourceHeight * scale;
+  const x = (viewport.width - width) / 2;
+  const y = (viewport.height - height) / 2;
+  return { x, y, width, height };
+}
+
 function resetRound(nowMs) {
   game.score = 0;
   game.livesLost = 0;
@@ -203,13 +217,7 @@ function drawVideoBackground() {
     return;
   }
 
-  const sourceWidth = webcam.videoWidth || viewport.width;
-  const sourceHeight = webcam.videoHeight || viewport.height;
-  const scale = Math.min(viewport.width / sourceWidth, viewport.height / sourceHeight);
-  const drawWidth = sourceWidth * scale;
-  const drawHeight = sourceHeight * scale;
-  const offsetX = (viewport.width - drawWidth) / 2;
-  const offsetY = (viewport.height - drawHeight) / 2;
+  const frame = getCameraFrameRect();
 
   ctx.fillStyle = "#111111";
   ctx.fillRect(0, 0, viewport.width, viewport.height);
@@ -219,10 +227,10 @@ function drawVideoBackground() {
   ctx.scale(-1, 1);
   ctx.drawImage(
     webcam,
-    viewport.width - offsetX - drawWidth,
-    offsetY,
-    drawWidth,
-    drawHeight
+    viewport.width - frame.x - frame.width,
+    frame.y,
+    frame.width,
+    frame.height
   );
   ctx.restore();
 }
@@ -356,7 +364,8 @@ function animate(nowMs) {
   metrics.fps = Math.round(1 / Math.max(dtSeconds, 0.0001));
   lastFrameMs = nowMs;
 
-  const hands = tracker.ready ? tracker.detect(nowMs, viewport) : [];
+  const cameraFrame = getCameraFrameRect();
+  const hands = tracker.ready ? tracker.detect(nowMs, cameraFrame) : [];
   trails.update(hands, nowMs);
 
   if (game.state === "waiting" && hands.length > 0) {
