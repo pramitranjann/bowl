@@ -52,6 +52,18 @@ export class HandTracker {
     this.ready = true;
   }
 
+  async setMinConfidence(value) {
+    if (!this.handLandmarker) {
+      return;
+    }
+
+    await this.handLandmarker.setOptions({
+      minHandDetectionConfidence: value,
+      minHandPresenceConfidence: value,
+      minTrackingConfidence: value,
+    });
+  }
+
   detect(nowMs, viewport) {
     if (
       !this.ready ||

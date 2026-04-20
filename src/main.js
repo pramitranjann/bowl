@@ -1,5 +1,6 @@
 import { CONFIG } from "./config.js";
 import { AudioEngine } from "./audio.js";
+import { createDevPanel } from "./dev-panel.js";
 import { createDurianBurst, createJuiceBurst } from "./particles.js";
 import { splitFruit } from "./entities.js";
 import { renderHud } from "./hud.js";
@@ -31,12 +32,28 @@ const game = {
   restartButton: null,
 };
 
+const metrics = {
+  fps: 0,
+};
+
 const viewport = {
   width: window.innerWidth,
   height: window.innerHeight,
 };
 
 let lastFrameMs = performance.now();
+
+const devPanel = createDevPanel({
+  config: CONFIG,
+  game,
+  tracker,
+  getMetrics: () => ({
+    fps: metrics.fps,
+    entities: game.entities.length + game.halves.length,
+    particles: game.particles.length,
+  }),
+  onRestart: () => startPlay(performance.now()),
+});
 
 function resize() {
   viewport.width = window.innerWidth;
@@ -336,6 +353,7 @@ function render(nowMs, hands) {
 
 function animate(nowMs) {
   const dtSeconds = Math.min(0.033, (nowMs - lastFrameMs) / 1000);
+  metrics.fps = Math.round(1 / Math.max(dtSeconds, 0.0001));
   lastFrameMs = nowMs;
 
   const hands = tracker.ready ? tracker.detect(nowMs, viewport) : [];
@@ -355,6 +373,7 @@ function animate(nowMs) {
     updateGameOver(dtSeconds, nowMs);
   }
 
+  devPanel.update();
   render(nowMs, hands);
   requestAnimationFrame(animate);
 }

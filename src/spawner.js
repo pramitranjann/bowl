@@ -1,3 +1,4 @@
+import { CONFIG } from "./config.js";
 import { DURIAN, FRUITS, FRUIT_TYPES, createEntity } from "./entities.js";
 import { createLaunchVector } from "./physics.js";
 import { ENDLESS_WAVES } from "./waves/endless.js";
@@ -50,7 +51,8 @@ export class WaveSpawner {
       const slotIndex = this.totalSpawnsThisWave - this.remainingSpawns;
       spawned.push(this.spawnEntity(viewport, slotIndex));
       this.remainingSpawns -= 1;
-      this.nextSpawnAtMs += this.activeWave.spawnDelay * 1000;
+      this.nextSpawnAtMs +=
+        this.activeWave.spawnDelay * CONFIG.spawnDelayMultiplier * 1000;
     }
 
     const waveElapsedMs = nowMs - this.waveStartMs;
@@ -62,7 +64,8 @@ export class WaveSpawner {
       waveElapsedMs >= waveDurationMs
     ) {
       this.state = "waiting";
-      this.waveReadyAtMs = nowMs + this.activeWave.nextWaveDelay * 1000;
+      this.waveReadyAtMs =
+        nowMs + this.activeWave.nextWaveDelay * CONFIG.waveDelayMultiplier * 1000;
       this.activeWave = null;
     }
 

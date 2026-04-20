@@ -13,6 +13,8 @@ export const CONFIG = {
   trailMinDistance: 4,
   trailWidth: 16,
   handSmoothing: 0.24,
+  spawnDelayMultiplier: 1,
+  waveDelayMultiplier: 1,
 
   fruitBaseSize: 120,
   gravity: 900,
