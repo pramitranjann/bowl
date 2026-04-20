@@ -25,10 +25,11 @@ export const CONFIG = {
   segmentationIntervalMs: 60,
   segmentationEnabled: true,
   maskAlphaThreshold: 0.28,
+  maskExpandPx: 12,
   liteParticleFactor: 0.5,
   liteBackgroundTint: "rgba(22, 24, 18, 0.14)",
-  playerCompositeScale: 0.82,
-  playerBottomInset: 20,
+  playerCompositeScale: 0.68,
+  playerBottomInset: 28,
 
   fruitBaseSize: 120,
   gravity: 900,
