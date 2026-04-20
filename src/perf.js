@@ -13,7 +13,11 @@ export class PerformanceMonitor {
     const averageFps =
       this.samples.reduce((sum, sample) => sum + sample.fps, 0) /
       Math.max(1, this.samples.length);
-    this.liteMode = averageFps < CONFIG.liteFpsThreshold;
+    if (this.liteMode) {
+      this.liteMode = averageFps < CONFIG.liteRecoverFpsThreshold;
+    } else {
+      this.liteMode = averageFps < CONFIG.liteFpsThreshold;
+    }
     return {
       averageFps,
       liteMode: this.liteMode,

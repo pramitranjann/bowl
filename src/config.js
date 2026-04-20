@@ -74,7 +74,8 @@ export const CONFIG = {
   hazeBandCount: 4,
   hazeEnabled: true,
   targetFps: 60,
-  liteFpsThreshold: 40,
+  liteFpsThreshold: 34,
+  liteRecoverFpsThreshold: 42,
   liteWindowMs: 3000,
 
   flashDecayPerSecond: 3.5,

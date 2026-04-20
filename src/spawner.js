@@ -34,7 +34,7 @@ export class WaveSpawner {
     this.waveIndex = 0;
     this.state = "waiting";
     this.waveStartMs = nowMs;
-    this.waveReadyAtMs = nowMs + 400;
+    this.waveReadyAtMs = nowMs + 120;
     this.nextSpawnAtMs = nowMs;
     this.remainingSpawns = 0;
     this.activeWave = null;

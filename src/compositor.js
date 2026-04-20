@@ -3,6 +3,7 @@ import { CONFIG } from "./config.js";
 export class Compositor {
   constructor(webcam) {
     this.webcam = webcam;
+    this.dpr = 1;
     this.playerCanvas = document.createElement("canvas");
     this.playerCtx = this.playerCanvas.getContext("2d");
     this.maskCanvas = document.createElement("canvas");
@@ -12,9 +13,16 @@ export class Compositor {
   }
 
   resize(viewport) {
-    for (const canvas of [this.playerCanvas, this.maskCanvas, this.sceneCanvas]) {
-      canvas.width = Math.max(1, Math.round(viewport.width));
-      canvas.height = Math.max(1, Math.round(viewport.height));
+    this.dpr = Math.max(1, viewport.dpr ?? 1);
+    for (const [canvas, ctx] of [
+      [this.playerCanvas, this.playerCtx],
+      [this.sceneCanvas, this.sceneCtx],
+    ]) {
+      canvas.width = Math.max(1, Math.round(viewport.width * this.dpr));
+      canvas.height = Math.max(1, Math.round(viewport.height * this.dpr));
+      ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
     }
   }
 
@@ -97,6 +105,16 @@ export class Compositor {
     );
     this.playerCtx.globalCompositeOperation = "source-over";
 
-    ctx.drawImage(this.playerCanvas, 0, 0, viewport.width, viewport.height);
+    ctx.drawImage(
+      this.playerCanvas,
+      0,
+      0,
+      this.playerCanvas.width,
+      this.playerCanvas.height,
+      0,
+      0,
+      viewport.width,
+      viewport.height
+    );
   }
 }
