@@ -180,6 +180,13 @@ function updateBodies(list, dtSeconds) {
   }
 }
 
+function decayFlash(dtSeconds) {
+  game.flashStrength = Math.max(
+    0,
+    game.flashStrength - dtSeconds * CONFIG.flashDecayPerSecond
+  );
+}
+
 function appendParticles(particles) {
   if (!particles.length) {
     return;
@@ -369,10 +376,6 @@ function updateIdle(dtSeconds, nowMs) {
 }
 
 function updateGameOver(dtSeconds, nowMs) {
-  game.flashStrength = Math.max(
-    0,
-    game.flashStrength - dtSeconds * CONFIG.flashDecayPerSecond
-  );
   for (const particle of game.particles) {
     particle.update(dtSeconds);
   }
@@ -573,6 +576,7 @@ async function animate(nowMs) {
   const timeScale = nowMs < game.slowMotionUntil ? 0.55 : 1;
   const dtSeconds = baseDt * timeScale;
   lastFrameMs = nowMs;
+  decayFlash(dtSeconds);
 
   const perfStats = perf.update(nowMs, baseDt);
   metrics.fps = Math.round(1 / Math.max(baseDt, 0.0001));
