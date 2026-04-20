@@ -9,14 +9,25 @@ function pointDistance(a, b) {
 export class TrailSystem {
   constructor() {
     this.hands = new Map();
+    this.liteMode = false;
   }
 
   clear() {
     this.hands.clear();
   }
 
+  setLiteMode(liteMode) {
+    this.liteMode = liteMode;
+  }
+
   update(handPoints, nowMs) {
     const activeIds = new Set();
+    const minDistance = this.liteMode
+      ? CONFIG.trailMinDistance * CONFIG.trailLiteDistanceMultiplier
+      : CONFIG.trailMinDistance;
+    const pointBudget = this.liteMode
+      ? Math.max(8, Math.round(CONFIG.trailMaxPoints * CONFIG.trailLitePointFactor))
+      : CONFIG.trailMaxPoints;
 
     for (const hand of handPoints) {
       activeIds.add(hand.id);
@@ -40,7 +51,7 @@ export class TrailSystem {
         pointDistance(
           { x: previous.sliceX, y: previous.sliceY },
           { x: sliceX, y: sliceY }
-        ) >= CONFIG.trailMinDistance
+        ) >= minDistance
       ) {
         existing.points.push({
           x: hand.x,
@@ -77,7 +88,7 @@ export class TrailSystem {
       existing.color = hand.color;
       existing.points = existing.points
         .filter((point) => nowMs - point.time <= CONFIG.trailDecayMs)
-        .slice(-CONFIG.trailMaxPoints);
+        .slice(-pointBudget);
 
       this.hands.set(hand.id, existing);
     }

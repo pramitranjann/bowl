@@ -14,6 +14,7 @@ export function createDevPanel({
   tracker,
   getMetrics,
   onRestart,
+  onToggleLite,
 }) {
   const toggle = document.getElementById("dev-toggle");
   const panel = document.getElementById("dev-panel");
@@ -95,7 +96,7 @@ export function createDevPanel({
     <div class="dev-panel__header">
       <div>
         <h2 class="dev-panel__title">Mechanics Tuning</h2>
-        <p class="dev-panel__hint">Hidden dev overlay for Phase 1 playtests.</p>
+        <p class="dev-panel__hint">Hidden dev overlay for Phase 2 playtests.</p>
       </div>
     </div>
   `;
@@ -169,6 +170,7 @@ export function createDevPanel({
     <div class="dev-panel__actions">
       <button class="dev-panel__button" type="button" data-action="restart">Restart Round</button>
       <button class="dev-panel__button" type="button" data-action="reset">Reset Tuners</button>
+      <button class="dev-panel__button" type="button" data-action="lite">Lite Auto</button>
     </div>
   `;
   panel.appendChild(actions);
@@ -182,6 +184,9 @@ export function createDevPanel({
     .addEventListener("click", async () => {
       location.reload();
     });
+
+  const liteButton = actions.querySelector('[data-action="lite"]');
+  liteButton.addEventListener("click", () => onToggleLite());
 
   function setVisible(nextVisible) {
     visible = nextVisible;
@@ -204,6 +209,7 @@ export function createDevPanel({
     statNodes.get("entities").textContent = `${metrics.entities}`;
     statNodes.get("particles").textContent = `${metrics.particles}`;
     statNodes.get("score").textContent = `${game.score}`;
+    liteButton.textContent = game.forceLiteMode ? "Lite Forced" : "Lite Auto";
   }
 
   return {

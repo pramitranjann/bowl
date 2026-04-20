@@ -13,18 +13,23 @@ export class HandTracker {
     this.video = videoElement;
     this.stream = null;
     this.handLandmarker = null;
+    this.imageSegmenter = null;
     this.FilesetResolver = null;
     this.HandLandmarker = null;
+    this.ImageSegmenter = null;
     this.ready = false;
     this.lastDetectAtMs = 0;
+    this.lastSegmentationAtMs = 0;
     this.lastHands = [];
     this.smoothedHands = new Map();
+    this.segmentation = null;
     this.stats = {
       handsDetected: 0,
       lastResultAtMs: 0,
       videoWidth: 0,
       videoHeight: 0,
       errors: 0,
+      segmentationReady: false,
     };
   }
 
@@ -37,6 +42,7 @@ export class HandTracker {
     const visionModule = await import(CONFIG.mediaPipeVisionUrl);
     this.FilesetResolver = visionModule.FilesetResolver;
     this.HandLandmarker = visionModule.HandLandmarker;
+    this.ImageSegmenter = visionModule.ImageSegmenter;
 
     onStatus("starting camera…");
     this.stream = await navigator.mediaDevices.getUserMedia(CONFIG.webcamConstraints);
@@ -56,6 +62,23 @@ export class HandTracker {
       minHandPresenceConfidence: CONFIG.minHandConfidence,
       minTrackingConfidence: CONFIG.minHandConfidence,
     });
+
+    try {
+      this.imageSegmenter = await this.ImageSegmenter.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath: CONFIG.mediaPipeSegmentationModel,
+        },
+        runningMode: "VIDEO",
+        outputCategoryMask: true,
+        outputConfidenceMasks: false,
+      });
+      this.stats.segmentationReady = true;
+    } catch (error) {
+      this.stats.errors += 1;
+      this.imageSegmenter = null;
+      this.stats.segmentationReady = false;
+      console.warn("Segmentation unavailable, continuing without it", error);
+    }
 
     this.ready = true;
   }
@@ -184,5 +207,51 @@ export class HandTracker {
     }
 
     return this.lastHands;
+  }
+
+  segment(nowMs) {
+    if (
+      !this.imageSegmenter ||
+      !CONFIG.segmentationEnabled ||
+      this.video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA ||
+      this.video.videoWidth === 0 ||
+      this.video.videoHeight === 0 ||
+      nowMs - this.lastSegmentationAtMs < CONFIG.segmentationIntervalMs
+    ) {
+      return this.segmentation;
+    }
+
+    this.lastSegmentationAtMs = nowMs;
+
+    try {
+      const result = this.imageSegmenter.segmentForVideo(this.video, nowMs);
+      if (result?.categoryMask) {
+        const mask = result.categoryMask.getAsUint8Array();
+        let maxValue = 0;
+        for (let i = 0; i < mask.length; i += 1) {
+          if (mask[i] > maxValue) {
+            maxValue = mask[i];
+          }
+        }
+        this.segmentation = {
+          data: new Uint8Array(mask),
+          width:
+            result.categoryMask.width ??
+            result.categoryMask.displayWidth ??
+            this.video.videoWidth,
+          height:
+            result.categoryMask.height ??
+            result.categoryMask.displayHeight ??
+            this.video.videoHeight,
+          maxValue,
+        };
+      }
+      result?.close?.();
+    } catch (error) {
+      this.stats.errors += 1;
+      console.error("Segmentation failed", error);
+    }
+
+    return this.segmentation;
   }
 }

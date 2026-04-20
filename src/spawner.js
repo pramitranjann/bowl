@@ -1,7 +1,8 @@
 import { CONFIG } from "./config.js";
 import { DURIAN, FRUITS, FRUIT_TYPES, createEntity } from "./entities.js";
 import { createLaunchVector } from "./physics.js";
-import { ENDLESS_WAVES } from "./waves/endless.js";
+import { WAVES_BY_MODE } from "./waves/index.js";
+import { MODES } from "./states.js";
 
 function randomInt(min, max) {
   return Math.floor(min + Math.random() * (max - min + 1));
@@ -13,11 +14,23 @@ function pickOne(list) {
 
 export class WaveSpawner {
   constructor() {
-    this.waves = ENDLESS_WAVES;
-    this.reset(0);
+    this.mode = MODES.ENDLESS;
+    this.waves = WAVES_BY_MODE[this.mode];
+    this.paused = false;
+    this.reset(0, this.mode);
   }
 
-  reset(nowMs) {
+  setMode(mode) {
+    this.mode = mode;
+    this.waves = WAVES_BY_MODE[mode];
+  }
+
+  setPaused(paused) {
+    this.paused = paused;
+  }
+
+  reset(nowMs, mode = this.mode) {
+    this.setMode(mode);
     this.waveIndex = 0;
     this.state = "waiting";
     this.waveStartMs = nowMs;
@@ -30,6 +43,10 @@ export class WaveSpawner {
 
   update(nowMs, viewport) {
     const spawned = [];
+
+    if (this.paused) {
+      return spawned;
+    }
 
     if (this.state === "waiting") {
       if (nowMs >= this.waveReadyAtMs) {
@@ -101,7 +118,7 @@ export class WaveSpawner {
       slotCount: Math.max(1, this.totalSpawnsThisWave),
     });
 
-    return createEntity({
+    const entity = createEntity({
       kind,
       type,
       x: launch.x,
@@ -110,5 +127,31 @@ export class WaveSpawner {
       vy: launch.vy,
       bornAt: performance.now(),
     });
+
+    if (type === "lychee") {
+      return [
+        entity,
+        createEntity({
+          kind: "fruit",
+          type,
+          x: launch.x - entity.radius * 0.8,
+          y: launch.y,
+          vx: launch.vx - 35,
+          vy: launch.vy + 12,
+          bornAt: performance.now(),
+        }),
+        createEntity({
+          kind: "fruit",
+          type,
+          x: launch.x + entity.radius * 0.8,
+          y: launch.y,
+          vx: launch.vx + 35,
+          vy: launch.vy + 18,
+          bornAt: performance.now(),
+        }),
+      ];
+    }
+
+    return [entity];
   }
 }
