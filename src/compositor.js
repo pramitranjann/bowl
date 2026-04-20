@@ -1,4 +1,5 @@
 import { CONFIG } from "./config.js";
+import { STATES } from "./states.js";
 
 export class Compositor {
   constructor(webcam) {
@@ -34,13 +35,20 @@ export class Compositor {
     );
   }
 
-  getPlayerFrame(viewport, frame) {
-    const scale = CONFIG.playerCompositeScale ?? 1;
+  getPlayerFrame(viewport, frame, state) {
+    const introState =
+      state === STATES.OPENING || state === STATES.CALIBRATION;
+    const scale = introState
+      ? (CONFIG.introPlayerCompositeScale ?? CONFIG.playerCompositeScale ?? 1)
+      : (CONFIG.playerCompositeScale ?? 1);
     const width = frame.width * scale;
     const height = frame.height * scale;
+    const bottomInset = introState
+      ? (CONFIG.introPlayerBottomInset ?? CONFIG.playerBottomInset ?? 0)
+      : (CONFIG.playerBottomInset ?? 0);
     return {
       x: (viewport.width - width) / 2,
-      y: viewport.height - height - (CONFIG.playerBottomInset ?? 0),
+      y: viewport.height - height - bottomInset,
       width,
       height,
     };
@@ -64,11 +72,11 @@ export class Compositor {
     ctx.restore();
   }
 
-  drawPlayer(ctx, viewport, frame, segmentation) {
+  drawPlayer(ctx, viewport, frame, segmentation, state) {
     if (!this.hasWebcamFrame()) {
       return;
     }
-    const playerFrame = this.getPlayerFrame(viewport, frame);
+    const playerFrame = this.getPlayerFrame(viewport, frame, state);
     if (!segmentation?.data) {
       this.drawMirroredFrame(ctx, viewport, frame, 0.68, playerFrame);
       return;

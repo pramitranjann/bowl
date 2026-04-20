@@ -517,7 +517,7 @@ function renderScene(nowMs, hands, frame, segmentation) {
   sceneCtx.clearRect(0, 0, viewport.width, viewport.height);
   environment.renderBackground(sceneCtx, viewport);
   environment.renderAmbient(sceneCtx);
-  compositor.drawPlayer(sceneCtx, viewport, frame, segmentation);
+  compositor.drawPlayer(sceneCtx, viewport, frame, segmentation, game.state);
   renderEntities(sceneCtx, nowMs);
   renderParticles(sceneCtx);
   trails.render(sceneCtx, nowMs);
