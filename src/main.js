@@ -250,8 +250,18 @@ function renderHandMarkers(hands) {
     ctx.fillStyle = hand.color;
     ctx.strokeStyle = "rgba(0, 0, 0, 0.5)";
     ctx.lineWidth = 2;
+
     ctx.beginPath();
-    ctx.arc(hand.x, hand.y, 10, 0, Math.PI * 2);
+    ctx.moveTo(hand.bladeStartX ?? hand.x, hand.bladeStartY ?? hand.y);
+    ctx.lineTo(hand.bladeEndX ?? hand.x, hand.bladeEndY ?? hand.y);
+    ctx.strokeStyle = hand.color;
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(hand.x, hand.y, 7, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
   }

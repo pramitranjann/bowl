@@ -14,6 +14,8 @@ export const CONFIG = {
   trailWidth: 16,
   handSmoothing: 0.18,
   sliceCollisionPadding: 18,
+  sliceBladeHalfWidth: 18,
+  sliceBladeBackOffset: 12,
   spawnDelayMultiplier: 1,
   waveDelayMultiplier: 1,
 

@@ -40,12 +40,23 @@ export function detectSlices(segments, entities, velocityThreshold) {
         continue;
       }
 
-      const point = segmentIntersectsCircle(
-        segment.from,
-        segment.to,
-        entity,
-        entity.radius + CONFIG.sliceCollisionPadding
-      );
+      const paths =
+        segment.paths && segment.paths.length
+          ? segment.paths
+          : [{ from: segment.from, to: segment.to }];
+      let point = null;
+
+      for (const path of paths) {
+        point = segmentIntersectsCircle(
+          path.from,
+          path.to,
+          entity,
+          entity.radius + CONFIG.sliceCollisionPadding
+        );
+        if (point) {
+          break;
+        }
+      }
 
       if (point) {
         claimed.add(entity.id);

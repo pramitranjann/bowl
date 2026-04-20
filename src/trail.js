@@ -22,6 +22,10 @@ export class TrailSystem {
       activeIds.add(hand.id);
       const sliceX = hand.rawX ?? hand.x;
       const sliceY = hand.rawY ?? hand.y;
+      const rawBladeStartX = hand.rawBladeStartX ?? sliceX;
+      const rawBladeStartY = hand.rawBladeStartY ?? sliceY;
+      const rawBladeEndX = hand.rawBladeEndX ?? sliceX;
+      const rawBladeEndY = hand.rawBladeEndY ?? sliceY;
       const existing =
         this.hands.get(hand.id) ?? {
           id: hand.id,
@@ -43,6 +47,14 @@ export class TrailSystem {
           y: hand.y,
           sliceX,
           sliceY,
+          bladeStartX: hand.bladeStartX ?? hand.x,
+          bladeStartY: hand.bladeStartY ?? hand.y,
+          bladeEndX: hand.bladeEndX ?? hand.x,
+          bladeEndY: hand.bladeEndY ?? hand.y,
+          rawBladeStartX,
+          rawBladeStartY,
+          rawBladeEndX,
+          rawBladeEndY,
           time: nowMs,
         });
       } else {
@@ -50,6 +62,14 @@ export class TrailSystem {
         previous.y = hand.y;
         previous.sliceX = sliceX;
         previous.sliceY = sliceY;
+        previous.bladeStartX = hand.bladeStartX ?? hand.x;
+        previous.bladeStartY = hand.bladeStartY ?? hand.y;
+        previous.bladeEndX = hand.bladeEndX ?? hand.x;
+        previous.bladeEndY = hand.bladeEndY ?? hand.y;
+        previous.rawBladeStartX = rawBladeStartX;
+        previous.rawBladeStartY = rawBladeStartY;
+        previous.rawBladeEndX = rawBladeEndX;
+        previous.rawBladeEndY = rawBladeEndY;
         previous.time = nowMs;
       }
 
@@ -89,6 +109,24 @@ export class TrailSystem {
           color: trail.color,
           from: { x: a.sliceX, y: a.sliceY },
           to: { x: b.sliceX, y: b.sliceY },
+          paths: [
+            {
+              from: { x: a.sliceX, y: a.sliceY },
+              to: { x: b.sliceX, y: b.sliceY },
+            },
+            {
+              from: { x: a.rawBladeStartX, y: a.rawBladeStartY },
+              to: { x: b.rawBladeStartX, y: b.rawBladeStartY },
+            },
+            {
+              from: { x: a.rawBladeEndX, y: a.rawBladeEndY },
+              to: { x: b.rawBladeEndX, y: b.rawBladeEndY },
+            },
+            {
+              from: { x: b.rawBladeStartX, y: b.rawBladeStartY },
+              to: { x: b.rawBladeEndX, y: b.rawBladeEndY },
+            },
+          ],
           velocity:
             (pointDistance(
               { x: a.sliceX, y: a.sliceY },
@@ -123,6 +161,12 @@ export class TrailSystem {
         ctx.beginPath();
         ctx.moveTo(a.x, a.y);
         ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+
+        ctx.lineWidth = Math.max(1.5, CONFIG.trailWidth * 0.24 * life);
+        ctx.beginPath();
+        ctx.moveTo(b.bladeStartX, b.bladeStartY);
+        ctx.lineTo(b.bladeEndX, b.bladeEndY);
         ctx.stroke();
       }
     }
