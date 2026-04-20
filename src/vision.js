@@ -10,6 +10,7 @@ export class HandTracker {
     this.ready = false;
     this.lastDetectAtMs = 0;
     this.lastHands = [];
+    this.smoothedHands = new Map();
     this.stats = {
       handsDetected: 0,
       lastResultAtMs: 0,
@@ -78,17 +79,41 @@ export class HandTracker {
       const landmarks = result.landmarks ?? [];
       const handedness = result.handedness ?? [];
 
-      this.lastHands = landmarks.map((points, index) => {
+      const detectedHands = landmarks.map((points, index) => {
         const tip = points[8];
         const label = handedness[index]?.[0]?.categoryName ?? `Hand ${index + 1}`;
         const color = CONFIG.handColors[label] ?? CONFIG.handColors.default;
-        return {
-          id: `${label}-${index}`,
+        const id = label;
+        const previous = this.smoothedHands.get(id);
+        const targetX = (1 - tip.x) * viewport.width;
+        const targetY = tip.y * viewport.height;
+        const x = previous
+          ? previous.x + (targetX - previous.x) * CONFIG.handSmoothing
+          : targetX;
+        const y = previous
+          ? previous.y + (targetY - previous.y) * CONFIG.handSmoothing
+          : targetY;
+        const hand = {
+          id,
           label,
           color,
-          x: (1 - tip.x) * viewport.width,
-          y: tip.y * viewport.height,
+          x,
+          y,
           z: tip.z,
+        };
+        this.smoothedHands.set(id, hand);
+        return hand;
+      });
+
+      for (const id of [...this.smoothedHands.keys()]) {
+        if (!detectedHands.some((hand) => hand.id === id)) {
+          this.smoothedHands.delete(id);
+        }
+      }
+
+      this.lastHands = detectedHands.map((hand) => {
+        return {
+          ...hand,
         };
       });
 

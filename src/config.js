@@ -12,6 +12,7 @@ export const CONFIG = {
   sliceVelocityThreshold: 520,
   trailMinDistance: 4,
   trailWidth: 16,
+  handSmoothing: 0.24,
 
   fruitBaseSize: 120,
   gravity: 900,

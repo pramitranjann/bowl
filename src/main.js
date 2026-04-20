@@ -197,7 +197,13 @@ function drawVideoBackground() {
   ctx.save();
   ctx.translate(viewport.width, 0);
   ctx.scale(-1, 1);
-  ctx.drawImage(webcam, -offsetX - drawWidth, offsetY, drawWidth, drawHeight);
+  ctx.drawImage(
+    webcam,
+    viewport.width - offsetX - drawWidth,
+    offsetY,
+    drawWidth,
+    drawHeight
+  );
   ctx.restore();
 }
 
