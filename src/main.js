@@ -188,11 +188,14 @@ function drawVideoBackground() {
 
   const sourceWidth = webcam.videoWidth || viewport.width;
   const sourceHeight = webcam.videoHeight || viewport.height;
-  const scale = Math.max(viewport.width / sourceWidth, viewport.height / sourceHeight);
+  const scale = Math.min(viewport.width / sourceWidth, viewport.height / sourceHeight);
   const drawWidth = sourceWidth * scale;
   const drawHeight = sourceHeight * scale;
   const offsetX = (viewport.width - drawWidth) / 2;
   const offsetY = (viewport.height - drawHeight) / 2;
+
+  ctx.fillStyle = "#111111";
+  ctx.fillRect(0, 0, viewport.width, viewport.height);
 
   ctx.save();
   ctx.translate(viewport.width, 0);
