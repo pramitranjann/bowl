@@ -213,6 +213,7 @@ export class SliceHalf {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rotation);
+    ctx.globalAlpha = 0.92;
     ctx.fillStyle = this.color;
     ctx.beginPath();
     if (this.side === "left") {
@@ -222,6 +223,14 @@ export class SliceHalf {
     }
     ctx.closePath();
     ctx.fill();
+
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+    ctx.lineWidth = Math.max(2, this.radius * 0.06);
+    ctx.beginPath();
+    ctx.moveTo(0, -this.radius * 0.96);
+    ctx.lineTo(0, this.radius * 0.96);
+    ctx.stroke();
+
     ctx.restore();
   }
 }
@@ -252,16 +261,17 @@ export function createEntity({ kind, type, x, y, vx, vy, bornAt }) {
 export function splitFruit(entity, point, nowMs) {
   const baseVx = entity.vx * 0.55;
   const baseVy = entity.vy * 0.65;
-  const escape = Math.max(180, entity.radius * 2.2);
-  const radius = entity.radius * 0.92;
+  const escape = Math.max(260, entity.radius * 3.1);
+  const radius = entity.radius * 0.72;
   const color = entity.data.juiceColor;
+  const offset = entity.radius * 0.34;
 
   return [
     new SliceHalf({
-      x: point.x - entity.radius * 0.18,
+      x: point.x - offset,
       y: point.y,
       vx: baseVx - escape,
-      vy: baseVy - 110,
+      vy: baseVy - 140,
       radius,
       color,
       side: "left",
@@ -269,10 +279,10 @@ export function splitFruit(entity, point, nowMs) {
       spin: -3.2,
     }),
     new SliceHalf({
-      x: point.x + entity.radius * 0.18,
+      x: point.x + offset,
       y: point.y,
       vx: baseVx + escape,
-      vy: baseVy - 110,
+      vy: baseVy - 140,
       radius,
       color,
       side: "right",
