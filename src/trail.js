@@ -20,6 +20,8 @@ export class TrailSystem {
 
     for (const hand of handPoints) {
       activeIds.add(hand.id);
+      const sliceX = hand.rawX ?? hand.x;
+      const sliceY = hand.rawY ?? hand.y;
       const existing =
         this.hands.get(hand.id) ?? {
           id: hand.id,
@@ -29,15 +31,25 @@ export class TrailSystem {
         };
 
       const previous = existing.points[existing.points.length - 1];
-      if (!previous || pointDistance(previous, hand) >= CONFIG.trailMinDistance) {
+      if (
+        !previous ||
+        pointDistance(
+          { x: previous.sliceX, y: previous.sliceY },
+          { x: sliceX, y: sliceY }
+        ) >= CONFIG.trailMinDistance
+      ) {
         existing.points.push({
           x: hand.x,
           y: hand.y,
+          sliceX,
+          sliceY,
           time: nowMs,
         });
       } else {
         previous.x = hand.x;
         previous.y = hand.y;
+        previous.sliceX = sliceX;
+        previous.sliceY = sliceY;
         previous.time = nowMs;
       }
 
@@ -75,9 +87,15 @@ export class TrailSystem {
         segments.push({
           handId: trail.id,
           color: trail.color,
-          from: a,
-          to: b,
-          velocity: (pointDistance(a, b) / dtMs) * 1000,
+          from: { x: a.sliceX, y: a.sliceY },
+          to: { x: b.sliceX, y: b.sliceY },
+          velocity:
+            (pointDistance(
+              { x: a.sliceX, y: a.sliceY },
+              { x: b.sliceX, y: b.sliceY }
+            ) /
+              dtMs) *
+            1000,
         });
       }
     }

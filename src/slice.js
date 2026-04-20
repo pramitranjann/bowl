@@ -1,3 +1,5 @@
+import { CONFIG } from "./config.js";
+
 export function segmentIntersectsCircle(from, to, center, radius) {
   const dx = to.x - from.x;
   const dy = to.y - from.y;
@@ -42,7 +44,7 @@ export function detectSlices(segments, entities, velocityThreshold) {
         segment.from,
         segment.to,
         entity,
-        entity.radius
+        entity.radius + CONFIG.sliceCollisionPadding
       );
 
       if (point) {

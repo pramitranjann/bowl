@@ -9,10 +9,11 @@ export const CONFIG = {
   minHandConfidence: 0.35,
   trailMaxPoints: 20,
   trailDecayMs: 400,
-  sliceVelocityThreshold: 520,
+  sliceVelocityThreshold: 420,
   trailMinDistance: 4,
   trailWidth: 16,
-  handSmoothing: 0.24,
+  handSmoothing: 0.18,
+  sliceCollisionPadding: 18,
   spawnDelayMultiplier: 1,
   waveDelayMultiplier: 1,
 

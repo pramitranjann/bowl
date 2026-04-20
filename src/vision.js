@@ -101,20 +101,22 @@ export class HandTracker {
         const frameY = cameraFrame?.y ?? 0;
         const frameWidth = cameraFrame?.width ?? this.video.videoWidth;
         const frameHeight = cameraFrame?.height ?? this.video.videoHeight;
-        const targetX = frameX + (1 - tip.x) * frameWidth;
-        const targetY = frameY + tip.y * frameHeight;
+        const rawX = frameX + (1 - tip.x) * frameWidth;
+        const rawY = frameY + tip.y * frameHeight;
         const x = previous
-          ? previous.x + (targetX - previous.x) * CONFIG.handSmoothing
-          : targetX;
+          ? previous.x + (rawX - previous.x) * CONFIG.handSmoothing
+          : rawX;
         const y = previous
-          ? previous.y + (targetY - previous.y) * CONFIG.handSmoothing
-          : targetY;
+          ? previous.y + (rawY - previous.y) * CONFIG.handSmoothing
+          : rawY;
         const hand = {
           id,
           label,
           color,
           x,
           y,
+          rawX,
+          rawY,
           z: tip.z,
         };
         this.smoothedHands.set(id, hand);
