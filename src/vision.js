@@ -8,7 +8,7 @@ export class HandTracker {
     this.FilesetResolver = null;
     this.HandLandmarker = null;
     this.ready = false;
-    this.lastVideoTime = -1;
+    this.lastDetectAtMs = 0;
     this.lastHands = [];
   }
 
@@ -48,16 +48,21 @@ export class HandTracker {
     if (
       !this.ready ||
       !this.handLandmarker ||
-      this.video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA
+      this.video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA ||
+      this.video.videoWidth === 0 ||
+      this.video.videoHeight === 0
     ) {
       return this.lastHands;
     }
 
-    if (this.video.currentTime === this.lastVideoTime) {
+    // Live MediaStream elements do not always advance currentTime reliably.
+    // Throttle by wall-clock time instead of video timeline so detection
+    // continues on webcam streams across browsers.
+    if (nowMs - this.lastDetectAtMs < 1000 / 45) {
       return this.lastHands;
     }
 
-    this.lastVideoTime = this.video.currentTime;
+    this.lastDetectAtMs = nowMs;
     const result = this.handLandmarker.detectForVideo(this.video, nowMs);
     const landmarks = result.landmarks ?? [];
     const handedness = result.handedness ?? [];
