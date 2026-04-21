@@ -199,14 +199,14 @@ export class TrailSystem {
         ctx.globalAlpha = life * 0.95;
         ctx.lineWidth = Math.max(2, CONFIG.trailWidth * life);
         ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(b.x, b.y);
+        ctx.moveTo(a.sliceX, a.sliceY);
+        ctx.lineTo(b.sliceX, b.sliceY);
         ctx.stroke();
 
         ctx.lineWidth = Math.max(1.5, CONFIG.trailWidth * 0.24 * life);
         ctx.beginPath();
-        ctx.moveTo(b.bladeStartX, b.bladeStartY);
-        ctx.lineTo(b.bladeEndX, b.bladeEndY);
+        ctx.moveTo(b.rawBladeStartX, b.rawBladeStartY);
+        ctx.lineTo(b.rawBladeEndX, b.rawBladeEndY);
         ctx.stroke();
       }
     }

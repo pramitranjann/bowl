@@ -100,7 +100,7 @@ function resize() {
 function getCameraFrameRect() {
   const sourceWidth = webcam.videoWidth || viewport.width;
   const sourceHeight = webcam.videoHeight || viewport.height;
-  const scale = Math.min(
+  const scale = Math.max(
     viewport.width / sourceWidth,
     viewport.height / sourceHeight
   );
@@ -522,13 +522,13 @@ function renderHandMarkers(sceneCtx, hands) {
     sceneCtx.strokeStyle = hand.color;
     sceneCtx.lineWidth = 4;
     sceneCtx.beginPath();
-    sceneCtx.moveTo(hand.bladeStartX ?? hand.x, hand.bladeStartY ?? hand.y);
-    sceneCtx.lineTo(hand.bladeEndX ?? hand.x, hand.bladeEndY ?? hand.y);
+    sceneCtx.moveTo(hand.rawBladeStartX ?? hand.rawX ?? hand.x, hand.rawBladeStartY ?? hand.rawY ?? hand.y);
+    sceneCtx.lineTo(hand.rawBladeEndX ?? hand.rawX ?? hand.x, hand.rawBladeEndY ?? hand.rawY ?? hand.y);
     sceneCtx.stroke();
 
     sceneCtx.fillStyle = hand.color;
     sceneCtx.beginPath();
-    sceneCtx.arc(hand.x, hand.y, 7, 0, Math.PI * 2);
+    sceneCtx.arc(hand.rawX ?? hand.x, hand.rawY ?? hand.y, 7, 0, Math.PI * 2);
     sceneCtx.fill();
   }
   sceneCtx.restore();
