@@ -53,8 +53,6 @@ const game = {
   segmentation: null,
   liteMode: false,
   forceLiteMode: false,
-  bowlComposed: [],
-  modeSelectedAt: 0,
 };
 
 const metrics = {
@@ -157,7 +155,6 @@ function resetRound(nowMs, mode = game.currentMode) {
       : mode === MODES.SUNSET
         ? nowMs + CONFIG.sunsetDurationMs
         : Infinity;
-  game.bowlComposed = [];
   bowl.reset();
   trails.clear();
   spawner.reset(nowMs, mode);
@@ -191,7 +188,7 @@ function beginGameOver(nowMs) {
     return;
   }
   game.gameOverAt = nowMs;
-  game.bowlComposed = bowl.compose(viewport);
+  bowl.compose(viewport);
   setState(STATES.GAMEOVER, nowMs, "again");
 }
 
@@ -501,7 +498,6 @@ function renderModeSelect(sceneCtx, hands) {
     );
     sceneCtx.restore();
   }
-  renderHandMarkers(sceneCtx, hands);
 }
 
 function renderHandMarkers(sceneCtx, hands) {
@@ -553,13 +549,16 @@ function renderScene(nowMs, hands, frame, segmentation) {
   const sceneCtx = compositor.sceneCtx;
   const useSunsetComposite = shouldUseSunsetComposite();
   const hasHealthyEnvironmentVideo = environment.hasRenderableVideo(nowMs);
+  const renderSunsetPlayer = useSunsetComposite && !game.liteMode;
   sceneCtx.clearRect(0, 0, viewport.width, viewport.height);
   if (useSunsetComposite) {
     if (!hasHealthyEnvironmentVideo) {
       environment.renderBackground(sceneCtx, viewport);
     }
     environment.renderAmbient(sceneCtx);
-    compositor.drawPlayer(sceneCtx, viewport, frame, segmentation, game.state);
+    if (renderSunsetPlayer) {
+      compositor.drawPlayer(sceneCtx, viewport, frame, segmentation, game.state);
+    }
   } else {
     sceneCtx.fillStyle = "#101010";
     sceneCtx.fillRect(0, 0, viewport.width, viewport.height);
@@ -636,7 +635,7 @@ async function animate(nowMs) {
     const useSunsetComposite = shouldUseSunsetComposite();
     const hands = tracker.ready ? tracker.detect(nowMs, frame) : [];
     updateMovement(hands, nowMs);
-    if (useSunsetComposite && CONFIG.segmentationEnabled) {
+    if (useSunsetComposite && CONFIG.segmentationEnabled && !game.liteMode) {
       game.segmentation = tracker.segment(nowMs);
     } else {
       game.segmentation = null;

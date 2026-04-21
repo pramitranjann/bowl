@@ -92,18 +92,6 @@ export class Compositor {
     ctx.restore();
   }
 
-  drawLiteBackground(ctx, viewport, frame) {
-    ctx.fillStyle = "#0f0f0d";
-    ctx.fillRect(0, 0, viewport.width, viewport.height);
-    if (this.hasWebcamFrame()) {
-      this.drawMirroredFrame(ctx, viewport, frame, 0.92);
-    }
-    ctx.save();
-    ctx.fillStyle = CONFIG.liteBackgroundTint;
-    ctx.fillRect(0, 0, viewport.width, viewport.height);
-    ctx.restore();
-  }
-
   drawPlayer(ctx, viewport, frame, segmentation, state) {
     if (!this.hasWebcamFrame()) {
       return;
