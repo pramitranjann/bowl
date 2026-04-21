@@ -32,7 +32,7 @@ export class EnvironmentSystem {
     this.video.load();
     this.video.addEventListener("ended", () => {
       this.video.currentTime = 0;
-      void this.ensurePlayback(true);
+      this.requestPlayback(true);
     });
     try {
       await this.ensurePlayback(true);
@@ -51,6 +51,12 @@ export class EnvironmentSystem {
     }
     this.lastPlaybackAttemptAt = nowMs;
     await this.video.play();
+  }
+
+  requestPlayback(force = false) {
+    void this.ensurePlayback(force).catch(() => {
+      // Ignore playback retries that browsers reject outside a direct gesture.
+    });
   }
 
   reset(nowMs) {
@@ -126,7 +132,7 @@ export class EnvironmentSystem {
 
   renderBackground(ctx, viewport) {
     if (this.video.src && this.video.paused && !this.video.ended) {
-      void this.ensurePlayback();
+      this.requestPlayback();
     }
     if (this.video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
       ctx.drawImage(this.video, 0, 0, viewport.width, viewport.height);
