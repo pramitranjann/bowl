@@ -515,9 +515,15 @@ function renderParticles(sceneCtx) {
 function renderScene(nowMs, hands, frame, segmentation) {
   const sceneCtx = compositor.sceneCtx;
   sceneCtx.clearRect(0, 0, viewport.width, viewport.height);
-  environment.renderBackground(sceneCtx, viewport);
+  if (game.liteMode) {
+    compositor.drawLiteBackground(sceneCtx, viewport, frame);
+  } else {
+    environment.renderBackground(sceneCtx, viewport);
+  }
   environment.renderAmbient(sceneCtx);
-  compositor.drawPlayer(sceneCtx, viewport, frame, segmentation);
+  if (!game.liteMode) {
+    compositor.drawPlayer(sceneCtx, viewport, frame, segmentation);
+  }
   renderEntities(sceneCtx, nowMs);
   renderParticles(sceneCtx);
   trails.render(sceneCtx, nowMs);
@@ -575,19 +581,16 @@ async function animate(nowMs) {
   const perfStats = perf.update(nowMs, baseDt);
   metrics.fps = Math.round(1 / Math.max(baseDt, 0.0001));
   metrics.averageFps = Math.round(perfStats.averageFps);
-  const allowAutoLite =
-    game.state === STATES.PLAY ||
-    game.state === STATES.IDLE ||
-    game.state === STATES.GAMEOVER;
-  setLiteMode(
-    game.forceLiteMode || (allowAutoLite && perfStats.liteMode),
-    game.forceLiteMode ? "manual" : "auto"
-  );
+  setLiteMode(game.forceLiteMode || perfStats.liteMode, game.forceLiteMode ? "manual" : "auto");
 
   const frame = getCameraFrameRect();
   const hands = tracker.ready ? tracker.detect(nowMs, frame) : [];
   updateMovement(hands, nowMs);
-  game.segmentation = tracker.segment(nowMs);
+  if (!game.liteMode) {
+    game.segmentation = tracker.segment(nowMs);
+  } else {
+    game.segmentation = null;
+  }
   trails.update(hands, nowMs);
 
   if (game.state === STATES.OPENING) {
