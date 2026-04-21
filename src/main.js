@@ -111,6 +111,14 @@ function getCameraFrameRect() {
   return { x, y, width, height };
 }
 
+function hasLiveWebcamFrame() {
+  return (
+    webcam.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
+    webcam.videoWidth > 0 &&
+    webcam.videoHeight > 0
+  );
+}
+
 function setState(state, nowMs, statusText = game.statusText) {
   game.state = state;
   game.stateSince = nowMs;
@@ -550,9 +558,14 @@ function shouldUseSunsetComposite() {
   );
 }
 
+function shouldShowLiveWebcamLayer() {
+  return !shouldUseSunsetComposite() && hasLiveWebcamFrame();
+}
+
 function renderScene(nowMs, hands, frame, segmentation) {
   const sceneCtx = compositor.sceneCtx;
   const useSunsetComposite = shouldUseSunsetComposite();
+  const showLiveWebcamLayer = shouldShowLiveWebcamLayer();
   const hasEnvironmentFrame = environment.hasVideoFrame();
   const hasHealthyEnvironmentVideo = environment.hasRenderableVideo(nowMs);
   sceneCtx.clearRect(0, 0, viewport.width, viewport.height);
@@ -565,9 +578,11 @@ function renderScene(nowMs, hands, frame, segmentation) {
     environment.renderAmbient(sceneCtx);
     compositor.drawPlayer(sceneCtx, viewport, frame, segmentation, game.state);
   } else {
-    sceneCtx.fillStyle = "#101010";
-    sceneCtx.fillRect(0, 0, viewport.width, viewport.height);
-    compositor.drawMirroredFrame(sceneCtx, viewport, frame);
+    if (!showLiveWebcamLayer) {
+      sceneCtx.fillStyle = "#101010";
+      sceneCtx.fillRect(0, 0, viewport.width, viewport.height);
+      compositor.drawMirroredFrame(sceneCtx, viewport, frame);
+    }
   }
   renderEntities(sceneCtx, nowMs);
   renderParticles(sceneCtx);
@@ -697,6 +712,7 @@ async function animate(nowMs) {
       liteMode: game.liteMode || !useSunsetComposite,
     });
     environment.setVisible(useSunsetComposite && environment.hasVideoFrame());
+    webcam.style.opacity = shouldShowLiveWebcamLayer() ? "1" : "0";
 
     renderScene(nowMs, hands, frame, game.segmentation);
     ctx.clearRect(0, 0, viewport.width, viewport.height);
