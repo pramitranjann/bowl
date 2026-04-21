@@ -215,7 +215,7 @@ export class HandTracker {
     // Live MediaStream elements do not always advance currentTime reliably.
     // Throttle by wall-clock time instead of video timeline so detection
     // continues on webcam streams across browsers.
-    if (nowMs - this.lastDetectAtMs < 1000 / 45) {
+    if (nowMs - this.lastDetectAtMs < 1000 / (CONFIG.handDetectFps ?? 60)) {
       return this.lastHands;
     }
 

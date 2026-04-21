@@ -9,12 +9,13 @@ export const CONFIG = {
     "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter_landscape/float16/latest/selfie_segmenter_landscape.tflite",
 
   minHandConfidence: 0.35,
+  handDetectFps: 60,
   trailMaxPoints: 20,
   trailDecayMs: 400,
   sliceVelocityThreshold: 340,
   trailMinDistance: 4,
   trailWidth: 16,
-  handSmoothing: 0.18,
+  handSmoothing: 0.08,
   trailLitePointFactor: 0.55,
   trailLiteDistanceMultiplier: 1.5,
   sliceCollisionPadding: 18,
@@ -92,8 +93,9 @@ export const CONFIG = {
     audio: false,
     video: {
       facingMode: "user",
-      width: { ideal: 1280 },
-      height: { ideal: 720 },
+      width: { ideal: 960, max: 960 },
+      height: { ideal: 540, max: 540 },
+      frameRate: { ideal: 60, max: 60 },
     },
   },
 
