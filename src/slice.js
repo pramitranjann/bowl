@@ -6,7 +6,11 @@ export function segmentIntersectsCircle(from, to, center, radius) {
   const lengthSq = dx * dx + dy * dy;
 
   if (lengthSq === 0) {
-    return null;
+    const distance = Math.hypot(center.x - from.x, center.y - from.y);
+    if (distance > radius) {
+      return null;
+    }
+    return { x: from.x, y: from.y };
   }
 
   const t =
@@ -51,7 +55,9 @@ export function detectSlices(segments, entities, velocityThreshold) {
           path.from,
           path.to,
           entity,
-          entity.radius + CONFIG.sliceCollisionPadding
+          entity.radius +
+            CONFIG.sliceCollisionPadding +
+            (path.radius ?? 0)
         );
         if (point) {
           break;

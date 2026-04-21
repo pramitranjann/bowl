@@ -6,6 +6,13 @@ function pointDistance(a, b) {
   return Math.hypot(dx, dy);
 }
 
+function pathVelocity(from, to, dtMs) {
+  if (dtMs <= 0) {
+    return 0;
+  }
+  return (pointDistance(from, to) / dtMs) * 1000;
+}
+
 export class TrailSystem {
   constructor() {
     this.hands = new Map();
@@ -115,36 +122,58 @@ export class TrailSystem {
         if (dtMs <= 0) {
           continue;
         }
+        const centerFrom = { x: a.sliceX, y: a.sliceY };
+        const centerTo = { x: b.sliceX, y: b.sliceY };
+        const startFrom = { x: a.rawBladeStartX, y: a.rawBladeStartY };
+        const startTo = { x: b.rawBladeStartX, y: b.rawBladeStartY };
+        const endFrom = { x: a.rawBladeEndX, y: a.rawBladeEndY };
+        const endTo = { x: b.rawBladeEndX, y: b.rawBladeEndY };
+        const bladeSpanRadius = Math.max(
+          6,
+          CONFIG.slicePathRadius ?? CONFIG.sliceBladeHalfWidth * 0.9
+        );
         segments.push({
           handId: trail.id,
           color: trail.color,
-          from: { x: a.sliceX, y: a.sliceY },
-          to: { x: b.sliceX, y: b.sliceY },
+          from: centerFrom,
+          to: centerTo,
           paths: [
             {
-              from: { x: a.sliceX, y: a.sliceY },
-              to: { x: b.sliceX, y: b.sliceY },
+              from: centerFrom,
+              to: centerTo,
+              radius: bladeSpanRadius,
             },
             {
-              from: { x: a.rawBladeStartX, y: a.rawBladeStartY },
-              to: { x: b.rawBladeStartX, y: b.rawBladeStartY },
+              from: startFrom,
+              to: startTo,
+              radius: bladeSpanRadius,
             },
             {
-              from: { x: a.rawBladeEndX, y: a.rawBladeEndY },
-              to: { x: b.rawBladeEndX, y: b.rawBladeEndY },
+              from: endFrom,
+              to: endTo,
+              radius: bladeSpanRadius,
             },
             {
               from: { x: b.rawBladeStartX, y: b.rawBladeStartY },
               to: { x: b.rawBladeEndX, y: b.rawBladeEndY },
+              radius: bladeSpanRadius * 0.65,
+            },
+            {
+              from: { x: a.rawBladeStartX, y: a.rawBladeStartY },
+              to: { x: b.rawBladeEndX, y: b.rawBladeEndY },
+              radius: bladeSpanRadius * 0.5,
+            },
+            {
+              from: { x: a.rawBladeEndX, y: a.rawBladeEndY },
+              to: { x: b.rawBladeStartX, y: b.rawBladeStartY },
+              radius: bladeSpanRadius * 0.5,
             },
           ],
-          velocity:
-            (pointDistance(
-              { x: a.sliceX, y: a.sliceY },
-              { x: b.sliceX, y: b.sliceY }
-            ) /
-              dtMs) *
-            1000,
+          velocity: Math.max(
+            pathVelocity(centerFrom, centerTo, dtMs),
+            pathVelocity(startFrom, startTo, dtMs),
+            pathVelocity(endFrom, endTo, dtMs)
+          ),
         });
       }
     }
