@@ -71,8 +71,8 @@ export class HandTracker {
           modelAssetPath: CONFIG.mediaPipeSegmentationModel,
         },
         runningMode: "VIDEO",
-        outputCategoryMask: true,
-        outputConfidenceMasks: false,
+        outputCategoryMask: false,
+        outputConfidenceMasks: true,
       });
       this.segmentationLabels = this.imageSegmenter.getLabels?.() ?? [];
       this.personCategoryIndex = this.resolvePersonCategoryIndex(
@@ -258,21 +258,22 @@ export class HandTracker {
 
     try {
       const result = this.imageSegmenter.segmentForVideo(this.video, nowMs);
-      if (result?.categoryMask) {
-        const mask = result.categoryMask.getAsUint8Array();
-        const alphaMask = new Uint8Array(mask.length);
-        for (let i = 0; i < mask.length; i += 1) {
-          alphaMask[i] = mask[i] === this.personCategoryIndex ? 255 : 0;
+      const personMask = result?.confidenceMasks?.[this.personCategoryIndex];
+      if (personMask) {
+        const confidence = personMask.getAsFloat32Array();
+        const alphaMask = new Uint8Array(confidence.length);
+        for (let i = 0; i < confidence.length; i += 1) {
+          alphaMask[i] = confidence[i] >= CONFIG.maskAlphaThreshold ? 255 : 0;
         }
         this.segmentation = {
           data: alphaMask,
           width:
-            result.categoryMask.width ??
-            result.categoryMask.displayWidth ??
+            personMask.width ??
+            personMask.displayWidth ??
             this.video.videoWidth,
           height:
-            result.categoryMask.height ??
-            result.categoryMask.displayHeight ??
+            personMask.height ??
+            personMask.displayHeight ??
             this.video.videoHeight,
         };
       }
