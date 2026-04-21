@@ -92,6 +92,14 @@ export class EnvironmentSystem {
     this.viewport = { width: viewport.width, height: viewport.height };
   }
 
+  hasRenderableVideo() {
+    return this.video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA;
+  }
+
+  setVisible(visible) {
+    this.video.style.opacity = visible ? "1" : "0";
+  }
+
   update(nowMs, dtSeconds, { idle, mode, sunsetProgress, liteMode }) {
     if (!liteMode && nowMs >= this.nextBirdAt) {
       this.spawnBird(nowMs);
@@ -155,7 +163,7 @@ export class EnvironmentSystem {
     if (this.video.src && this.video.paused && !this.video.ended) {
       this.requestPlayback();
     }
-    if (this.video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+    if (this.hasRenderableVideo()) {
       ctx.drawImage(this.video, 0, 0, viewport.width, viewport.height);
     } else {
       const gradient = ctx.createLinearGradient(0, 0, 0, viewport.height);
