@@ -71,7 +71,7 @@ export class HandTracker {
           modelAssetPath: CONFIG.mediaPipeSegmentationModel,
         },
         runningMode: "VIDEO",
-        outputCategoryMask: false,
+        outputCategoryMask: true,
         outputConfidenceMasks: true,
       });
       this.segmentationLabels = this.imageSegmenter.getLabels?.() ?? [];
@@ -114,6 +114,59 @@ export class HandTracker {
     }
 
     return 1;
+  }
+
+  choosePersonConfidenceMask(confidenceMasks) {
+    if (!confidenceMasks?.length) {
+      return null;
+    }
+
+    if (confidenceMasks.length === 1) {
+      return confidenceMasks[0];
+    }
+
+    if (confidenceMasks.length === 2) {
+      const means = confidenceMasks.map((mask) => {
+        const values = mask.getAsFloat32Array();
+        let sum = 0;
+        for (let i = 0; i < values.length; i += 1) {
+          sum += values[i];
+        }
+        return {
+          mask,
+          values,
+          mean: sum / Math.max(1, values.length),
+        };
+      });
+
+      means.sort((a, b) => a.mean - b.mean);
+      return means[0];
+    }
+
+    const resolved =
+      confidenceMasks[this.personCategoryIndex] ?? confidenceMasks[0];
+    return {
+      mask: resolved,
+      values: resolved.getAsFloat32Array(),
+    };
+  }
+
+  normalizeAlphaMask(alphaMask) {
+    let filled = 0;
+    for (let i = 0; i < alphaMask.length; i += 1) {
+      if (alphaMask[i] > 0) {
+        filled += 1;
+      }
+    }
+
+    const coverage = filled / Math.max(1, alphaMask.length);
+    if (coverage > 0.65) {
+      for (let i = 0; i < alphaMask.length; i += 1) {
+        alphaMask[i] = alphaMask[i] > 0 ? 0 : 255;
+      }
+    }
+
+    return alphaMask;
   }
 
   async setMinConfidence(value) {
@@ -258,22 +311,41 @@ export class HandTracker {
 
     try {
       const result = this.imageSegmenter.segmentForVideo(this.video, nowMs);
-      const personMask = result?.confidenceMasks?.[this.personCategoryIndex];
-      if (personMask) {
-        const confidence = personMask.getAsFloat32Array();
+      const selectedMask = this.choosePersonConfidenceMask(
+        result?.confidenceMasks ?? []
+      );
+      if (selectedMask?.mask && selectedMask?.values) {
+        const confidence = selectedMask.values;
         const alphaMask = new Uint8Array(confidence.length);
         for (let i = 0; i < confidence.length; i += 1) {
           alphaMask[i] = confidence[i] >= CONFIG.maskAlphaThreshold ? 255 : 0;
         }
         this.segmentation = {
-          data: alphaMask,
+          data: this.normalizeAlphaMask(alphaMask),
           width:
-            personMask.width ??
-            personMask.displayWidth ??
+            selectedMask.mask.width ??
+            selectedMask.mask.displayWidth ??
             this.video.videoWidth,
           height:
-            personMask.height ??
-            personMask.displayHeight ??
+            selectedMask.mask.height ??
+            selectedMask.mask.displayHeight ??
+            this.video.videoHeight,
+        };
+      } else if (result?.categoryMask) {
+        const categories = result.categoryMask.getAsUint8Array();
+        const alphaMask = new Uint8Array(categories.length);
+        for (let i = 0; i < categories.length; i += 1) {
+          alphaMask[i] = categories[i] === this.personCategoryIndex ? 255 : 0;
+        }
+        this.segmentation = {
+          data: this.normalizeAlphaMask(alphaMask),
+          width:
+            result.categoryMask.width ??
+            result.categoryMask.displayWidth ??
+            this.video.videoWidth,
+          height:
+            result.categoryMask.height ??
+            result.categoryMask.displayHeight ??
             this.video.videoHeight,
         };
       }
