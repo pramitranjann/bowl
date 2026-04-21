@@ -512,12 +512,28 @@ function renderParticles(sceneCtx) {
   }
 }
 
+function shouldUseSunsetComposite() {
+  return (
+    game.currentMode === MODES.SUNSET &&
+    (game.state === STATES.PLAY ||
+      game.state === STATES.IDLE ||
+      game.state === STATES.GAMEOVER)
+  );
+}
+
 function renderScene(nowMs, hands, frame, segmentation) {
   const sceneCtx = compositor.sceneCtx;
+  const useSunsetComposite = shouldUseSunsetComposite();
   sceneCtx.clearRect(0, 0, viewport.width, viewport.height);
-  environment.renderBackground(sceneCtx, viewport);
-  environment.renderAmbient(sceneCtx);
-  compositor.drawPlayer(sceneCtx, viewport, frame, segmentation, game.state);
+  if (useSunsetComposite) {
+    environment.renderBackground(sceneCtx, viewport);
+    environment.renderAmbient(sceneCtx);
+    compositor.drawPlayer(sceneCtx, viewport, frame, segmentation, game.state);
+  } else {
+    sceneCtx.fillStyle = "#101010";
+    sceneCtx.fillRect(0, 0, viewport.width, viewport.height);
+    compositor.drawMirroredFrame(sceneCtx, viewport, frame);
+  }
   renderEntities(sceneCtx, nowMs);
   renderParticles(sceneCtx);
   trails.render(sceneCtx, nowMs);
@@ -585,9 +601,10 @@ async function animate(nowMs) {
   );
 
   const frame = getCameraFrameRect();
+  const useSunsetComposite = shouldUseSunsetComposite();
   const hands = tracker.ready ? tracker.detect(nowMs, frame) : [];
   updateMovement(hands, nowMs);
-  if (CONFIG.segmentationEnabled) {
+  if (useSunsetComposite && CONFIG.segmentationEnabled) {
     game.segmentation = tracker.segment(nowMs);
   } else {
     game.segmentation = null;
@@ -632,11 +649,11 @@ async function animate(nowMs) {
   audio.setDurianWarning(game.entities.some((entity) => entity.kind === "durian"));
 
   environment.update(nowMs, baseDt, {
-    idle: game.state === STATES.IDLE,
+    idle: game.state === STATES.IDLE && useSunsetComposite,
     mode: game.currentMode,
     sunsetProgress: getSunsetProgress(nowMs),
     viewport,
-    liteMode: game.liteMode,
+    liteMode: game.liteMode || !useSunsetComposite,
   });
 
   renderScene(nowMs, hands, frame, game.segmentation);

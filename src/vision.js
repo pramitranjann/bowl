@@ -257,8 +257,19 @@ export class HandTracker {
       if (result?.categoryMask) {
         const mask = result.categoryMask.getAsUint8Array();
         const alphaMask = new Uint8Array(mask.length);
+        const previousMask =
+          this.segmentation?.data?.length === alphaMask.length
+            ? this.segmentation.data
+            : null;
+        const smoothing = Math.min(
+          Math.max(CONFIG.maskTemporalSmoothing ?? 0, 0),
+          0.95
+        );
         for (let i = 0; i < mask.length; i += 1) {
-          alphaMask[i] = mask[i] === this.personCategoryIndex ? 255 : 0;
+          const nextValue = mask[i] === this.personCategoryIndex ? 255 : 0;
+          alphaMask[i] = previousMask
+            ? Math.round(previousMask[i] * smoothing + nextValue * (1 - smoothing))
+            : nextValue;
         }
         this.segmentation = {
           data: alphaMask,

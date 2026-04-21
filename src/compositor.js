@@ -77,6 +77,9 @@ export class Compositor {
 
   drawMirroredMask(ctx, viewport, frame) {
     ctx.save();
+    if ((CONFIG.maskEdgeBlurPx ?? 0) > 0) {
+      ctx.filter = `blur(${CONFIG.maskEdgeBlurPx}px)`;
+    }
     ctx.translate(viewport.width, 0);
     ctx.scale(-1, 1);
     ctx.drawImage(
@@ -127,6 +130,8 @@ export class Compositor {
     }
     this.maskCanvas.width = maskWidth;
     this.maskCanvas.height = maskHeight;
+    this.maskCtx.imageSmoothingEnabled = true;
+    this.maskCtx.imageSmoothingQuality = "high";
     this.maskCtx.putImageData(maskImage, 0, 0);
 
     this.playerCtx.globalCompositeOperation = "destination-in";

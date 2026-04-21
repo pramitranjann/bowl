@@ -11,6 +11,7 @@ export class EnvironmentSystem {
     this.viewport = { width: window.innerWidth, height: window.innerHeight };
     this.birds = [];
     this.fireflies = [];
+    this.lastPlaybackAttemptAt = 0;
     this.nextBirdAt =
       performance.now() +
       randomBetween(CONFIG.birdSpawnMinMs, CONFIG.birdSpawnMaxMs);
@@ -19,12 +20,37 @@ export class EnvironmentSystem {
 
   async start() {
     const src = "./assets/environment/beach.mp4";
+    this.video.muted = true;
+    this.video.defaultMuted = true;
+    this.video.loop = true;
+    this.video.playsInline = true;
+    this.video.preload = "auto";
+    this.video.setAttribute("muted", "");
+    this.video.setAttribute("loop", "");
+    this.video.setAttribute("playsinline", "");
     this.video.src = src;
+    this.video.load();
+    this.video.addEventListener("ended", () => {
+      this.video.currentTime = 0;
+      void this.ensurePlayback(true);
+    });
     try {
-      await this.video.play();
+      await this.ensurePlayback(true);
     } catch {
       // Placeholder gradient fallback when no environment asset exists.
     }
+  }
+
+  async ensurePlayback(force = false) {
+    const nowMs = performance.now();
+    if (
+      !force &&
+      (!this.video.paused || nowMs - this.lastPlaybackAttemptAt < 1000)
+    ) {
+      return;
+    }
+    this.lastPlaybackAttemptAt = nowMs;
+    await this.video.play();
   }
 
   reset(nowMs) {
@@ -99,6 +125,9 @@ export class EnvironmentSystem {
   }
 
   renderBackground(ctx, viewport) {
+    if (this.video.src && this.video.paused && !this.video.ended) {
+      void this.ensurePlayback();
+    }
     if (this.video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
       ctx.drawImage(this.video, 0, 0, viewport.width, viewport.height);
     } else {
