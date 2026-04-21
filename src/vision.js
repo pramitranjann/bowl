@@ -90,10 +90,6 @@ export class HandTracker {
   }
 
   resolvePersonCategoryIndex(labels) {
-    if (CONFIG.mediaPipeSegmentationModel.includes("selfie_segmenter")) {
-      return 1;
-    }
-
     if (!labels.length) {
       return 1;
     }
