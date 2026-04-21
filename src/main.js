@@ -553,11 +553,14 @@ function shouldUseSunsetComposite() {
 function renderScene(nowMs, hands, frame, segmentation) {
   const sceneCtx = compositor.sceneCtx;
   const useSunsetComposite = shouldUseSunsetComposite();
+  const hasEnvironmentFrame = environment.hasVideoFrame();
   const hasHealthyEnvironmentVideo = environment.hasRenderableVideo(nowMs);
   sceneCtx.clearRect(0, 0, viewport.width, viewport.height);
   if (useSunsetComposite) {
-    if (!hasHealthyEnvironmentVideo) {
+    if (!hasEnvironmentFrame) {
       environment.renderBackground(sceneCtx, viewport);
+    } else if (!hasHealthyEnvironmentVideo) {
+      environment.requestPlayback();
     }
     environment.renderAmbient(sceneCtx);
     compositor.drawPlayer(sceneCtx, viewport, frame, segmentation, game.state);
@@ -688,9 +691,7 @@ async function animate(nowMs) {
       viewport,
       liteMode: game.liteMode || !useSunsetComposite,
     });
-    environment.setVisible(
-      useSunsetComposite && environment.hasRenderableVideo(nowMs)
-    );
+    environment.setVisible(useSunsetComposite && environment.hasVideoFrame());
 
     renderScene(nowMs, hands, frame, game.segmentation);
     ctx.clearRect(0, 0, viewport.width, viewport.height);

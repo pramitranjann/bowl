@@ -96,9 +96,18 @@ export class EnvironmentSystem {
     this.viewport = { width: viewport.width, height: viewport.height };
   }
 
+  hasVideoFrame() {
+    return (
+      !!this.video.src &&
+      this.video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
+      this.video.videoWidth > 0 &&
+      this.video.videoHeight > 0
+    );
+  }
+
   hasRenderableVideo(nowMs = performance.now()) {
     return (
-      this.video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
+      this.hasVideoFrame() &&
       nowMs - this.lastVideoAdvanceAt <= CONFIG.environmentPlaybackStallMs
     );
   }
@@ -182,7 +191,7 @@ export class EnvironmentSystem {
     if (!this.hasRenderableVideo()) {
       this.requestPlayback();
     }
-    if (this.hasRenderableVideo()) {
+    if (this.hasVideoFrame()) {
       ctx.drawImage(this.video, 0, 0, viewport.width, viewport.height);
     } else {
       const gradient = ctx.createLinearGradient(0, 0, 0, viewport.height);

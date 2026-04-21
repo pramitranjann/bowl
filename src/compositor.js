@@ -5,6 +5,8 @@ export class Compositor {
   constructor(webcam) {
     this.webcam = webcam;
     this.dpr = 1;
+    this.webcamFrameCanvas = document.createElement("canvas");
+    this.webcamFrameCtx = this.webcamFrameCanvas.getContext("2d");
     this.playerCanvas = document.createElement("canvas");
     this.playerCtx = this.playerCanvas.getContext("2d");
     this.maskCanvas = document.createElement("canvas");
@@ -28,10 +30,49 @@ export class Compositor {
   }
 
   hasWebcamFrame() {
+    return this.hasCurrentWebcamFrame() || this.hasCachedWebcamFrame();
+  }
+
+  hasCurrentWebcamFrame() {
     return (
       this.webcam.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
       this.webcam.videoWidth > 0 &&
       this.webcam.videoHeight > 0
+    );
+  }
+
+  hasCachedWebcamFrame() {
+    return (
+      this.webcamFrameCanvas.width > 0 &&
+      this.webcamFrameCanvas.height > 0
+    );
+  }
+
+  updateWebcamCache() {
+    if (!this.hasCurrentWebcamFrame()) {
+      return;
+    }
+    if (
+      this.webcamFrameCanvas.width !== this.webcam.videoWidth ||
+      this.webcamFrameCanvas.height !== this.webcam.videoHeight
+    ) {
+      this.webcamFrameCanvas.width = this.webcam.videoWidth;
+      this.webcamFrameCanvas.height = this.webcam.videoHeight;
+      this.webcamFrameCtx.imageSmoothingEnabled = true;
+      this.webcamFrameCtx.imageSmoothingQuality = "high";
+    }
+    this.webcamFrameCtx.clearRect(
+      0,
+      0,
+      this.webcamFrameCanvas.width,
+      this.webcamFrameCanvas.height
+    );
+    this.webcamFrameCtx.drawImage(
+      this.webcam,
+      0,
+      0,
+      this.webcamFrameCanvas.width,
+      this.webcamFrameCanvas.height
     );
   }
 
@@ -58,15 +99,17 @@ export class Compositor {
   }
 
   drawMirroredFrame(ctx, viewport, frame, alpha = 1) {
+    this.updateWebcamCache();
     if (!this.hasWebcamFrame()) {
       return;
     }
+    const source = this.hasCurrentWebcamFrame() ? this.webcam : this.webcamFrameCanvas;
     ctx.save();
     ctx.globalAlpha = alpha;
     ctx.translate(viewport.width, 0);
     ctx.scale(-1, 1);
     ctx.drawImage(
-      this.webcam,
+      source,
       viewport.width - frame.x - frame.width,
       frame.y,
       frame.width,

@@ -87,7 +87,7 @@ export const CONFIG = {
   liteFpsThreshold: 34,
   liteRecoverFpsThreshold: 42,
   liteWindowMs: 3000,
-  environmentPlaybackStallMs: 450,
+  environmentPlaybackStallMs: 1400,
   environmentPlaybackEpsilon: 0.02,
 
   flashDecayPerSecond: 3.5,
