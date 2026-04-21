@@ -153,9 +153,13 @@ function beginCalibration(nowMs) {
   game.modeHover.clear();
 }
 
-function startMode(mode, nowMs) {
+async function startMode(mode, nowMs) {
   resetRound(nowMs, mode);
   if (mode === MODES.SUNSET) {
+    game.statusText = "loading sunset mask…";
+    await tracker.ensureSegmentation((statusText) => {
+      game.statusText = statusText;
+    });
     environmentVideo.currentTime = 0;
     environment.requestPlayback(true);
   }
@@ -409,7 +413,7 @@ function getModeButtons() {
   }));
 }
 
-function updateModeSelect(hands, nowMs) {
+async function updateModeSelect(hands, nowMs) {
   for (const button of getModeButtons()) {
     const hovering = hands.some(
       (hand) =>
@@ -425,7 +429,7 @@ function updateModeSelect(hands, nowMs) {
     const started = game.modeHover.get(button.mode) ?? nowMs;
     game.modeHover.set(button.mode, started);
     if (nowMs - started >= CONFIG.modeHoverMs) {
-      startMode(button.mode, nowMs);
+      await startMode(button.mode, nowMs);
       return;
     }
   }
@@ -634,7 +638,7 @@ async function animate(nowMs) {
       }
     }
   } else if (game.state === STATES.MODE_SELECT) {
-    updateModeSelect(hands, nowMs);
+    await updateModeSelect(hands, nowMs);
   } else if (game.state === STATES.PLAY) {
     updatePlay(dtSeconds, nowMs, hands);
   } else if (game.state === STATES.IDLE) {

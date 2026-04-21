@@ -22,6 +22,8 @@ export class HandTracker {
     this.HandLandmarker = null;
     this.ImageSegmenter = null;
     this.ready = false;
+    this.vision = null;
+    this.segmenterLoadingPromise = null;
     this.lastDetectAtMs = 0;
     this.lastSegmentationAtMs = 0;
     this.lastHands = [];
@@ -57,8 +59,8 @@ export class HandTracker {
     await this.video.play();
 
     onStatus("warming up hand model…");
-    const vision = await this.FilesetResolver.forVisionTasks(CONFIG.mediaPipeWasmRoot);
-    this.handLandmarker = await this.HandLandmarker.createFromOptions(vision, {
+    this.vision = await this.FilesetResolver.forVisionTasks(CONFIG.mediaPipeWasmRoot);
+    this.handLandmarker = await this.HandLandmarker.createFromOptions(this.vision, {
       baseOptions: {
         modelAssetPath: CONFIG.mediaPipeHandModel,
       },
@@ -69,28 +71,47 @@ export class HandTracker {
       minTrackingConfidence: CONFIG.minHandConfidence,
     });
 
-    try {
-      this.imageSegmenter = await this.ImageSegmenter.createFromOptions(vision, {
-        baseOptions: {
-          modelAssetPath: CONFIG.mediaPipeSegmentationModel,
-        },
-        runningMode: "VIDEO",
-        outputCategoryMask: true,
-        outputConfidenceMasks: true,
-      });
-      this.segmentationLabels = this.imageSegmenter.getLabels?.() ?? [];
-      this.personCategoryIndex = this.resolvePersonCategoryIndex(
-        this.segmentationLabels
-      );
-      this.stats.segmentationReady = true;
-    } catch (error) {
-      this.stats.errors += 1;
-      this.imageSegmenter = null;
-      this.stats.segmentationReady = false;
-      console.warn("Segmentation unavailable, continuing without it", error);
+    this.ready = true;
+  }
+
+  async ensureSegmentation(onStatus = () => {}) {
+    if (this.imageSegmenter) {
+      return true;
     }
 
-    this.ready = true;
+    if (this.segmenterLoadingPromise) {
+      return this.segmenterLoadingPromise;
+    }
+
+    this.segmenterLoadingPromise = (async () => {
+      try {
+        onStatus("loading sunset mask…");
+        this.imageSegmenter = await this.ImageSegmenter.createFromOptions(this.vision, {
+          baseOptions: {
+            modelAssetPath: CONFIG.mediaPipeSegmentationModel,
+          },
+          runningMode: "VIDEO",
+          outputCategoryMask: true,
+          outputConfidenceMasks: true,
+        });
+        this.segmentationLabels = this.imageSegmenter.getLabels?.() ?? [];
+        this.personCategoryIndex = this.resolvePersonCategoryIndex(
+          this.segmentationLabels
+        );
+        this.stats.segmentationReady = true;
+        return true;
+      } catch (error) {
+        this.stats.errors += 1;
+        this.imageSegmenter = null;
+        this.stats.segmentationReady = false;
+        console.warn("Segmentation unavailable, continuing without it", error);
+        return false;
+      } finally {
+        this.segmenterLoadingPromise = null;
+      }
+    })();
+
+    return this.segmenterLoadingPromise;
   }
 
   resolvePersonCategoryIndex(labels) {
