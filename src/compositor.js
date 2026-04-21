@@ -40,12 +40,18 @@ export class Compositor {
       return frame;
     }
 
-    const scale = CONFIG.introPlayerCompositeScale ?? 1;
-    const width = frame.width * scale;
-    const height = frame.height * scale;
+    const maxWidth =
+      viewport.width * (CONFIG.introPlayerMaxWidthRatio ?? 0.58);
+    const maxHeight =
+      viewport.height * (CONFIG.introPlayerMaxHeightRatio ?? 0.46);
+    const fitScale = Math.min(maxWidth / frame.width, maxHeight / frame.height);
+    const width = frame.width * fitScale;
+    const height = frame.height * fitScale;
+    const bottomInset =
+      viewport.height * (CONFIG.introPlayerBottomInsetRatio ?? 0.08);
     return {
       x: (viewport.width - width) / 2,
-      y: viewport.height - height - (CONFIG.introPlayerBottomInset ?? 0),
+      y: viewport.height - height - bottomInset,
       width,
       height,
     };
