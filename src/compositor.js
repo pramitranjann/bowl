@@ -103,12 +103,8 @@ export class Compositor {
     const maskWidth = segmentation.width;
     const maskHeight = segmentation.height;
     const maskImage = this.maskCtx.createImageData(maskWidth, maskHeight);
-    const threshold =
-      (segmentation.maxValue ?? 1) <= 1
-        ? CONFIG.maskAlphaThreshold
-        : CONFIG.maskAlphaThreshold * (segmentation.maxValue ?? 255);
     for (let i = 0; i < segmentation.data.length; i += 1) {
-      const maskValue = segmentation.data[i] >= threshold ? 255 : 0;
+      const maskValue = segmentation.data[i];
       const index = i * 4;
       maskImage.data[index] = 255;
       maskImage.data[index + 1] = 255;

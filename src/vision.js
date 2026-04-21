@@ -23,6 +23,8 @@ export class HandTracker {
     this.lastHands = [];
     this.smoothedHands = new Map();
     this.segmentation = null;
+    this.segmentationLabels = [];
+    this.personCategoryIndex = 1;
     this.stats = {
       handsDetected: 0,
       lastResultAtMs: 0,
@@ -72,6 +74,10 @@ export class HandTracker {
         outputCategoryMask: true,
         outputConfidenceMasks: false,
       });
+      this.segmentationLabels = this.imageSegmenter.getLabels?.() ?? [];
+      this.personCategoryIndex = this.resolvePersonCategoryIndex(
+        this.segmentationLabels
+      );
       this.stats.segmentationReady = true;
     } catch (error) {
       this.stats.errors += 1;
@@ -81,6 +87,29 @@ export class HandTracker {
     }
 
     this.ready = true;
+  }
+
+  resolvePersonCategoryIndex(labels) {
+    if (!labels.length) {
+      return 1;
+    }
+
+    const normalized = labels.map((label) => label.toLowerCase());
+    const personIndex = normalized.findIndex((label) =>
+      /(person|selfie|human|foreground)/.test(label)
+    );
+    if (personIndex >= 0) {
+      return personIndex;
+    }
+
+    const backgroundIndex = normalized.findIndex((label) =>
+      /background/.test(label)
+    );
+    if (backgroundIndex >= 0 && labels.length === 2) {
+      return backgroundIndex === 0 ? 1 : 0;
+    }
+
+    return 1;
   }
 
   async setMinConfidence(value) {
@@ -227,14 +256,12 @@ export class HandTracker {
       const result = this.imageSegmenter.segmentForVideo(this.video, nowMs);
       if (result?.categoryMask) {
         const mask = result.categoryMask.getAsUint8Array();
-        let maxValue = 0;
+        const alphaMask = new Uint8Array(mask.length);
         for (let i = 0; i < mask.length; i += 1) {
-          if (mask[i] > maxValue) {
-            maxValue = mask[i];
-          }
+          alphaMask[i] = mask[i] === this.personCategoryIndex ? 255 : 0;
         }
         this.segmentation = {
-          data: new Uint8Array(mask),
+          data: alphaMask,
           width:
             result.categoryMask.width ??
             result.categoryMask.displayWidth ??
@@ -243,7 +270,6 @@ export class HandTracker {
             result.categoryMask.height ??
             result.categoryMask.displayHeight ??
             this.video.videoHeight,
-          maxValue,
         };
       }
       result?.close?.();
