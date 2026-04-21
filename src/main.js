@@ -549,16 +549,13 @@ function renderScene(nowMs, hands, frame, segmentation) {
   const sceneCtx = compositor.sceneCtx;
   const useSunsetComposite = shouldUseSunsetComposite();
   const hasHealthyEnvironmentVideo = environment.hasRenderableVideo(nowMs);
-  const renderSunsetPlayer = useSunsetComposite && !game.liteMode;
   sceneCtx.clearRect(0, 0, viewport.width, viewport.height);
   if (useSunsetComposite) {
     if (!hasHealthyEnvironmentVideo) {
       environment.renderBackground(sceneCtx, viewport);
     }
     environment.renderAmbient(sceneCtx);
-    if (renderSunsetPlayer) {
-      compositor.drawPlayer(sceneCtx, viewport, frame, segmentation, game.state);
-    }
+    compositor.drawPlayer(sceneCtx, viewport, frame, segmentation, game.state);
   } else {
     sceneCtx.fillStyle = "#101010";
     sceneCtx.fillRect(0, 0, viewport.width, viewport.height);
