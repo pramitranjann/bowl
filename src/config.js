@@ -27,6 +27,7 @@ export const CONFIG = {
   spawnDelayMultiplier: 1,
   waveDelayMultiplier: 1,
   segmentationIntervalMs: 60,
+  liteSegmentationIntervalMs: 140,
   segmentationEnabled: true,
   maskAlphaThreshold: 0.5,
   maskAlphaFeather: 0.18,

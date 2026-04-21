@@ -351,14 +351,14 @@ export class HandTracker {
     return this.lastHands;
   }
 
-  segment(nowMs) {
+  segment(nowMs, intervalMs = CONFIG.segmentationIntervalMs) {
     if (
       !this.imageSegmenter ||
       !CONFIG.segmentationEnabled ||
       this.video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA ||
       this.video.videoWidth === 0 ||
       this.video.videoHeight === 0 ||
-      nowMs - this.lastSegmentationAtMs < CONFIG.segmentationIntervalMs
+      nowMs - this.lastSegmentationAtMs < intervalMs
     ) {
       return this.segmentation;
     }

@@ -640,8 +640,13 @@ async function animate(nowMs) {
     const useSunsetComposite = shouldUseSunsetComposite();
     const hands = tracker.ready ? tracker.detect(nowMs, frame) : [];
     updateMovement(hands, nowMs);
-    if (useSunsetComposite && CONFIG.segmentationEnabled && !game.liteMode) {
-      game.segmentation = tracker.segment(nowMs);
+    if (useSunsetComposite && CONFIG.segmentationEnabled) {
+      game.segmentation = tracker.segment(
+        nowMs,
+        game.liteMode
+          ? CONFIG.liteSegmentationIntervalMs
+          : CONFIG.segmentationIntervalMs
+      );
     } else {
       game.segmentation = null;
     }
