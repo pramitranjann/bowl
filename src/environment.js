@@ -20,15 +20,36 @@ export class EnvironmentSystem {
 
   async start() {
     const src = "./assets/environment/beach.mp4";
+    this.video.autoplay = true;
     this.video.muted = true;
     this.video.defaultMuted = true;
     this.video.loop = true;
     this.video.playsInline = true;
+    this.video.disableRemotePlayback = true;
     this.video.preload = "auto";
+    this.video.setAttribute("autoplay", "");
     this.video.setAttribute("muted", "");
     this.video.setAttribute("loop", "");
     this.video.setAttribute("playsinline", "");
+    this.video.setAttribute("webkit-playsinline", "");
     this.video.src = src;
+    this.video.addEventListener("loadeddata", () => {
+      this.requestPlayback(true);
+    });
+    this.video.addEventListener("canplay", () => {
+      this.requestPlayback(true);
+    });
+    this.video.addEventListener("pause", () => {
+      if (!this.video.ended) {
+        this.requestPlayback();
+      }
+    });
+    this.video.addEventListener("stalled", () => {
+      this.requestPlayback(true);
+    });
+    this.video.addEventListener("waiting", () => {
+      this.requestPlayback();
+    });
     this.video.load();
     this.video.addEventListener("ended", () => {
       this.video.currentTime = 0;

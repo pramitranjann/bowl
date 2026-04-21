@@ -155,6 +155,10 @@ function beginCalibration(nowMs) {
 
 function startMode(mode, nowMs) {
   resetRound(nowMs, mode);
+  if (mode === MODES.SUNSET) {
+    environmentVideo.currentTime = 0;
+    environment.requestPlayback(true);
+  }
   setState(STATES.PLAY, nowMs, "");
 }
 
@@ -676,7 +680,14 @@ async function animate(nowMs) {
 async function init() {
   resize();
   window.addEventListener("resize", resize);
-  window.addEventListener("pointerdown", () => audio.unlock(), { passive: true });
+  window.addEventListener(
+    "pointerdown",
+    () => {
+      audio.unlock();
+      environment.requestPlayback(true);
+    },
+    { passive: true }
+  );
 
   canvas.addEventListener("pointerdown", (event) => {
     audio.unlock();
