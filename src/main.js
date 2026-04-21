@@ -69,6 +69,7 @@ const viewport = {
 };
 
 let lastFrameMs = performance.now();
+let startupComplete = false;
 
 const devPanel = createDevPanel({
   config: CONFIG,
@@ -118,6 +119,22 @@ function setState(state, nowMs, statusText = game.statusText) {
   game.statusText = statusText;
 }
 
+function toErrorMessage(error, fallback) {
+  return error instanceof Error && error.message ? error.message : fallback;
+}
+
+function handleFatalError(error, phase = "runtime") {
+  console.error(error);
+  const nowMs = performance.now();
+  const statusText =
+    phase === "startup"
+      ? toErrorMessage(error, "camera or model setup failed")
+      : phase === "sunset"
+        ? toErrorMessage(error, "sunset setup failed")
+        : toErrorMessage(error, "runtime failed");
+  setState(STATES.ERROR, nowMs, statusText);
+}
+
 function resetRound(nowMs, mode = game.currentMode) {
   game.currentMode = mode;
   game.score = 0;
@@ -157,9 +174,12 @@ async function startMode(mode, nowMs) {
   resetRound(nowMs, mode);
   if (mode === MODES.SUNSET) {
     game.statusText = "loading sunset mask…";
-    await tracker.ensureSegmentation((statusText) => {
+    const segmentationReady = await tracker.ensureSegmentation((statusText) => {
       game.statusText = statusText;
     });
+    if (!segmentationReady) {
+      throw new Error("sunset mask unavailable");
+    }
     environmentVideo.currentTime = 0;
     environment.requestPlayback(true);
   }
@@ -593,98 +613,103 @@ function renderScene(nowMs, hands, frame, segmentation) {
 }
 
 async function animate(nowMs) {
-  const baseDt = Math.min(0.033, (nowMs - lastFrameMs) / 1000);
-  const timeScale = nowMs < game.slowMotionUntil ? 0.55 : 1;
-  const dtSeconds = baseDt * timeScale;
-  lastFrameMs = nowMs;
-  decayFlash(dtSeconds);
+  try {
+    const baseDt = Math.min(0.033, (nowMs - lastFrameMs) / 1000);
+    const timeScale = nowMs < game.slowMotionUntil ? 0.55 : 1;
+    const dtSeconds = baseDt * timeScale;
+    lastFrameMs = nowMs;
+    decayFlash(dtSeconds);
 
-  const perfStats = perf.update(nowMs, baseDt);
-  metrics.fps = Math.round(1 / Math.max(baseDt, 0.0001));
-  metrics.averageFps = Math.round(perfStats.averageFps);
-  const allowAutoLite =
-    game.state === STATES.PLAY ||
-    game.state === STATES.IDLE ||
-    game.state === STATES.GAMEOVER;
-  setLiteMode(
-    game.forceLiteMode || (allowAutoLite && perfStats.liteMode),
-    game.forceLiteMode ? "manual" : "auto"
-  );
+    const perfStats = perf.update(nowMs, baseDt);
+    metrics.fps = Math.round(1 / Math.max(baseDt, 0.0001));
+    metrics.averageFps = Math.round(perfStats.averageFps);
+    const allowAutoLite =
+      game.state === STATES.PLAY ||
+      game.state === STATES.IDLE ||
+      game.state === STATES.GAMEOVER;
+    setLiteMode(
+      game.forceLiteMode || (allowAutoLite && perfStats.liteMode),
+      game.forceLiteMode ? "manual" : "auto"
+    );
 
-  const frame = getCameraFrameRect();
-  const useSunsetComposite = shouldUseSunsetComposite();
-  const hands = tracker.ready ? tracker.detect(nowMs, frame) : [];
-  updateMovement(hands, nowMs);
-  if (useSunsetComposite && CONFIG.segmentationEnabled) {
-    game.segmentation = tracker.segment(nowMs);
-  } else {
-    game.segmentation = null;
-  }
-  trails.update(hands, nowMs);
-
-  if (game.state === STATES.OPENING) {
-    if (hands.length > 0 && nowMs - game.stateSince > CONFIG.openingPromptMs) {
-      beginCalibration(nowMs);
-    }
-  } else if (game.state === STATES.CALIBRATION) {
-    if (hands.length === 0) {
-      game.calibrationStartedAt = 0;
+    const frame = getCameraFrameRect();
+    const useSunsetComposite = shouldUseSunsetComposite();
+    const hands = tracker.ready ? tracker.detect(nowMs, frame) : [];
+    updateMovement(hands, nowMs);
+    if (useSunsetComposite && CONFIG.segmentationEnabled) {
+      game.segmentation = tracker.segment(nowMs);
     } else {
-      if (!game.calibrationStartedAt) {
-        game.calibrationStartedAt = nowMs;
-      }
-      if (nowMs - game.calibrationStartedAt >= CONFIG.calibrationHoldMs) {
-        game.modeHover.clear();
-        setState(STATES.MODE_SELECT, nowMs, "");
-      }
+      game.segmentation = null;
     }
-  } else if (game.state === STATES.MODE_SELECT) {
-    await updateModeSelect(hands, nowMs);
-  } else if (game.state === STATES.PLAY) {
-    updatePlay(dtSeconds, nowMs, hands);
-  } else if (game.state === STATES.IDLE) {
-    updateIdle(dtSeconds, nowMs);
-  } else if (game.state === STATES.GAMEOVER) {
-    updateGameOver(dtSeconds, nowMs);
+    trails.update(hands, nowMs);
+
+    if (game.state === STATES.OPENING) {
+      if (hands.length > 0 && nowMs - game.stateSince > CONFIG.openingPromptMs) {
+        beginCalibration(nowMs);
+      }
+    } else if (game.state === STATES.CALIBRATION) {
+      if (hands.length === 0) {
+        game.calibrationStartedAt = 0;
+      } else {
+        if (!game.calibrationStartedAt) {
+          game.calibrationStartedAt = nowMs;
+        }
+        if (nowMs - game.calibrationStartedAt >= CONFIG.calibrationHoldMs) {
+          game.modeHover.clear();
+          setState(STATES.MODE_SELECT, nowMs, "");
+        }
+      }
+    } else if (game.state === STATES.MODE_SELECT) {
+      await updateModeSelect(hands, nowMs);
+    } else if (game.state === STATES.PLAY) {
+      updatePlay(dtSeconds, nowMs, hands);
+    } else if (game.state === STATES.IDLE) {
+      updateIdle(dtSeconds, nowMs);
+    } else if (game.state === STATES.GAMEOVER) {
+      updateGameOver(dtSeconds, nowMs);
+    }
+
+    audio.setAmbientTarget(
+      game.state === STATES.GAMEOVER
+        ? 0.09
+        : game.state === STATES.IDLE
+          ? 0.1
+          : game.state === STATES.PLAY
+            ? 0.06
+            : 0.035
+    );
+    audio.setDurianWarning(game.entities.some((entity) => entity.kind === "durian"));
+
+    environment.update(nowMs, baseDt, {
+      idle: game.state === STATES.IDLE && useSunsetComposite,
+      mode: game.currentMode,
+      sunsetProgress: getSunsetProgress(nowMs),
+      viewport,
+      liteMode: game.liteMode || !useSunsetComposite,
+    });
+    environment.setVisible(
+      useSunsetComposite && environment.hasRenderableVideo(nowMs)
+    );
+
+    renderScene(nowMs, hands, frame, game.segmentation);
+    ctx.clearRect(0, 0, viewport.width, viewport.height);
+    const hazeActiveStates = new Set([STATES.PLAY, STATES.IDLE, STATES.GAMEOVER]);
+    applyHaze(
+      compositor.sceneCanvas,
+      ctx,
+      nowMs,
+      viewport,
+      !game.liteMode &&
+        !useSunsetComposite &&
+        game.currentMode !== MODES.TIMED &&
+        hazeActiveStates.has(game.state)
+    );
+    devPanel.update();
+  } catch (error) {
+    handleFatalError(error, startupComplete ? "runtime" : "startup");
+  } finally {
+    requestAnimationFrame(animate);
   }
-
-  audio.setAmbientTarget(
-    game.state === STATES.GAMEOVER
-      ? 0.09
-      : game.state === STATES.IDLE
-        ? 0.1
-        : game.state === STATES.PLAY
-          ? 0.06
-          : 0.035
-  );
-  audio.setDurianWarning(game.entities.some((entity) => entity.kind === "durian"));
-
-  environment.update(nowMs, baseDt, {
-    idle: game.state === STATES.IDLE && useSunsetComposite,
-    mode: game.currentMode,
-    sunsetProgress: getSunsetProgress(nowMs),
-    viewport,
-    liteMode: game.liteMode || !useSunsetComposite,
-  });
-  environment.setVisible(
-    useSunsetComposite && environment.hasRenderableVideo(nowMs)
-  );
-
-  renderScene(nowMs, hands, frame, game.segmentation);
-  ctx.clearRect(0, 0, viewport.width, viewport.height);
-  const hazeActiveStates = new Set([STATES.PLAY, STATES.IDLE, STATES.GAMEOVER]);
-  applyHaze(
-    compositor.sceneCanvas,
-    ctx,
-    nowMs,
-    viewport,
-    !game.liteMode &&
-      !useSunsetComposite &&
-      game.currentMode !== MODES.TIMED &&
-      hazeActiveStates.has(game.state)
-  );
-  devPanel.update();
-  requestAnimationFrame(animate);
 }
 
 async function init() {
@@ -719,13 +744,17 @@ async function init() {
   });
 
   window.addEventListener("error", (event) => {
-    console.error(event.error ?? event.message);
-    setState(STATES.ERROR, performance.now(), "startup failed");
+    handleFatalError(
+      event.error ?? new Error(event.message),
+      startupComplete ? "runtime" : "startup"
+    );
   });
 
   window.addEventListener("unhandledrejection", (event) => {
-    console.error(event.reason);
-    setState(STATES.ERROR, performance.now(), "startup failed");
+    handleFatalError(
+      event.reason,
+      startupComplete ? "runtime" : "startup"
+    );
   });
 
   requestAnimationFrame(animate);
@@ -737,14 +766,10 @@ async function init() {
       }),
       environment.start(),
     ]);
+    startupComplete = true;
     setState(STATES.OPENING, performance.now(), "raise your hands");
   } catch (error) {
-    console.error(error);
-    setState(
-      STATES.ERROR,
-      performance.now(),
-      error instanceof Error ? error.message : "camera or model setup failed"
-    );
+    handleFatalError(error, "startup");
   }
 }
 
