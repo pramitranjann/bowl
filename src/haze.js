@@ -6,6 +6,8 @@ export function applyHaze(sourceCanvas, targetCtx, nowMs, viewport, enabled) {
     return;
   }
 
+  const scaleX = sourceCanvas.width / viewport.width;
+  const scaleY = sourceCanvas.height / viewport.height;
   const bandHeight = Math.ceil(viewport.height / CONFIG.hazeBandCount);
   for (let band = 0; band < CONFIG.hazeBandCount; band += 1) {
     const y = band * bandHeight;
@@ -15,9 +17,9 @@ export function applyHaze(sourceCanvas, targetCtx, nowMs, viewport, enabled) {
     targetCtx.drawImage(
       sourceCanvas,
       0,
-      y,
-      viewport.width,
-      bandHeight,
+      y * scaleY,
+      viewport.width * scaleX,
+      bandHeight * scaleY,
       offset,
       y,
       viewport.width,

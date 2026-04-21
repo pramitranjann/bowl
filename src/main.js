@@ -660,12 +660,15 @@ async function animate(nowMs) {
 
   renderScene(nowMs, hands, frame, game.segmentation);
   ctx.clearRect(0, 0, viewport.width, viewport.height);
+  const hazeActiveStates = new Set([STATES.PLAY, STATES.IDLE, STATES.GAMEOVER]);
   applyHaze(
     compositor.sceneCanvas,
     ctx,
     nowMs,
     viewport,
-    !game.liteMode && game.currentMode !== MODES.TIMED
+    !game.liteMode &&
+      game.currentMode !== MODES.TIMED &&
+      hazeActiveStates.has(game.state)
   );
   devPanel.update();
   requestAnimationFrame(animate);
