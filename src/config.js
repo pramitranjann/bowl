@@ -25,6 +25,7 @@ export const CONFIG = {
   segmentationIntervalMs: 60,
   segmentationEnabled: true,
   maskAlphaThreshold: 0.5,
+  maskAlphaFeather: 0.18,
   maskTemporalSmoothing: 0.4,
   maskEdgeBlurPx: 4,
   liteParticleFactor: 0.5,

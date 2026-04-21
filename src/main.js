@@ -665,6 +665,7 @@ async function animate(nowMs) {
     nowMs,
     viewport,
     !game.liteMode &&
+      !useSunsetComposite &&
       game.currentMode !== MODES.TIMED &&
       hazeActiveStates.has(game.state)
   );

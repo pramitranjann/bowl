@@ -8,6 +8,10 @@ function normalizeVector(dx, dy) {
   return { x: dx / length, y: dy / length };
 }
 
+function clamp01(value) {
+  return Math.min(1, Math.max(0, value));
+}
+
 export class HandTracker {
   constructor(videoElement) {
     this.video = videoElement;
@@ -72,7 +76,7 @@ export class HandTracker {
         },
         runningMode: "VIDEO",
         outputCategoryMask: true,
-        outputConfidenceMasks: false,
+        outputConfidenceMasks: true,
       });
       this.segmentationLabels = this.imageSegmenter.getLabels?.() ?? [];
       this.personCategoryIndex = this.resolvePersonCategoryIndex(
@@ -122,6 +126,79 @@ export class HandTracker {
       minHandPresenceConfidence: value,
       minTrackingConfidence: value,
     });
+  }
+
+  smoothAlphaMask(nextMask) {
+    const alphaMask = new Uint8Array(nextMask.length);
+    const previousMask =
+      this.segmentation?.data?.length === alphaMask.length
+        ? this.segmentation.data
+        : null;
+    const smoothing = Math.min(
+      Math.max(CONFIG.maskTemporalSmoothing ?? 0, 0),
+      0.95
+    );
+
+    for (let i = 0; i < nextMask.length; i += 1) {
+      alphaMask[i] = previousMask
+        ? Math.round(previousMask[i] * smoothing + nextMask[i] * (1 - smoothing))
+        : nextMask[i];
+    }
+
+    return alphaMask;
+  }
+
+  createAlphaMaskFromConfidenceMask(confidenceMask) {
+    if (!confidenceMask) {
+      return null;
+    }
+
+    const confidence = confidenceMask.getAsFloat32Array();
+    const alphaMask = new Uint8Array(confidence.length);
+    const feather = Math.max(0.01, CONFIG.maskAlphaFeather ?? 0.18);
+    const low = clamp01((CONFIG.maskAlphaThreshold ?? 0.5) - feather * 0.5);
+    const high = clamp01((CONFIG.maskAlphaThreshold ?? 0.5) + feather * 0.5);
+
+    for (let i = 0; i < confidence.length; i += 1) {
+      const normalized = clamp01((confidence[i] - low) / Math.max(0.001, high - low));
+      alphaMask[i] = Math.round(normalized * 255);
+    }
+
+    return {
+      data: this.smoothAlphaMask(alphaMask),
+      width:
+        confidenceMask.width ??
+        confidenceMask.displayWidth ??
+        this.video.videoWidth,
+      height:
+        confidenceMask.height ??
+        confidenceMask.displayHeight ??
+        this.video.videoHeight,
+    };
+  }
+
+  createAlphaMaskFromCategoryMask(categoryMask) {
+    if (!categoryMask) {
+      return null;
+    }
+
+    const mask = categoryMask.getAsUint8Array();
+    const alphaMask = new Uint8Array(mask.length);
+    for (let i = 0; i < mask.length; i += 1) {
+      alphaMask[i] = mask[i] === this.personCategoryIndex ? 255 : 0;
+    }
+
+    return {
+      data: this.smoothAlphaMask(alphaMask),
+      width:
+        categoryMask.width ??
+        categoryMask.displayWidth ??
+        this.video.videoWidth,
+      height:
+        categoryMask.height ??
+        categoryMask.displayHeight ??
+        this.video.videoHeight,
+    };
   }
 
   detect(nowMs, cameraFrame) {
@@ -254,35 +331,19 @@ export class HandTracker {
 
     try {
       const result = this.imageSegmenter.segmentForVideo(this.video, nowMs);
-      if (result?.categoryMask) {
-        const mask = result.categoryMask.getAsUint8Array();
-        const alphaMask = new Uint8Array(mask.length);
-        const previousMask =
-          this.segmentation?.data?.length === alphaMask.length
-            ? this.segmentation.data
-            : null;
-        const smoothing = Math.min(
-          Math.max(CONFIG.maskTemporalSmoothing ?? 0, 0),
-          0.95
-        );
-        for (let i = 0; i < mask.length; i += 1) {
-          const nextValue = mask[i] === this.personCategoryIndex ? 255 : 0;
-          alphaMask[i] = previousMask
-            ? Math.round(previousMask[i] * smoothing + nextValue * (1 - smoothing))
-            : nextValue;
+      const confidenceMask =
+        result?.confidenceMasks?.[this.personCategoryIndex] ??
+        result?.confidenceMasks?.[result?.confidenceMasks?.length - 1];
+      this.segmentation =
+        this.createAlphaMaskFromConfidenceMask(confidenceMask) ??
+        this.createAlphaMaskFromCategoryMask(result?.categoryMask) ??
+        this.segmentation;
+      if (result?.confidenceMasks) {
+        for (const mask of result.confidenceMasks) {
+          mask?.close?.();
         }
-        this.segmentation = {
-          data: alphaMask,
-          width:
-            result.categoryMask.width ??
-            result.categoryMask.displayWidth ??
-            this.video.videoWidth,
-          height:
-            result.categoryMask.height ??
-            result.categoryMask.displayHeight ??
-            this.video.videoHeight,
-        };
       }
+      result?.categoryMask?.close?.();
       result?.close?.();
     } catch (error) {
       this.stats.errors += 1;
