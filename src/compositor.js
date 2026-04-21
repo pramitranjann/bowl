@@ -1,4 +1,5 @@
 import { CONFIG } from "./config.js";
+import { STATES } from "./states.js";
 
 export class Compositor {
   constructor(webcam) {
@@ -34,6 +35,22 @@ export class Compositor {
     );
   }
 
+  getPlayerFrame(viewport, frame, state) {
+    if (state !== STATES.OPENING && state !== STATES.CALIBRATION) {
+      return frame;
+    }
+
+    const scale = CONFIG.introPlayerCompositeScale ?? 1;
+    const width = frame.width * scale;
+    const height = frame.height * scale;
+    return {
+      x: (viewport.width - width) / 2,
+      y: viewport.height - height - (CONFIG.introPlayerBottomInset ?? 0),
+      width,
+      height,
+    };
+  }
+
   drawMirroredFrame(ctx, viewport, frame, alpha = 1) {
     if (!this.hasWebcamFrame()) {
       return;
@@ -64,17 +81,18 @@ export class Compositor {
     ctx.restore();
   }
 
-  drawPlayer(ctx, viewport, frame, segmentation) {
+  drawPlayer(ctx, viewport, frame, segmentation, state) {
     if (!this.hasWebcamFrame()) {
       return;
     }
+    const playerFrame = this.getPlayerFrame(viewport, frame, state);
     if (!segmentation?.data) {
-      this.drawMirroredFrame(ctx, viewport, frame, 0.68);
+      this.drawMirroredFrame(ctx, viewport, playerFrame, 0.68);
       return;
     }
 
     this.playerCtx.clearRect(0, 0, viewport.width, viewport.height);
-    this.drawMirroredFrame(this.playerCtx, viewport, frame);
+    this.drawMirroredFrame(this.playerCtx, viewport, playerFrame);
 
     const maskWidth = segmentation.width;
     const maskHeight = segmentation.height;
@@ -98,10 +116,10 @@ export class Compositor {
     this.playerCtx.globalCompositeOperation = "destination-in";
     this.playerCtx.drawImage(
       this.maskCanvas,
-      frame.x,
-      frame.y,
-      frame.width,
-      frame.height
+      playerFrame.x,
+      playerFrame.y,
+      playerFrame.width,
+      playerFrame.height
     );
     this.playerCtx.globalCompositeOperation = "source-over";
 

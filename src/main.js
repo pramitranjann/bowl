@@ -522,7 +522,7 @@ function renderScene(nowMs, hands, frame, segmentation) {
   }
   environment.renderAmbient(sceneCtx);
   if (!game.liteMode) {
-    compositor.drawPlayer(sceneCtx, viewport, frame, segmentation);
+    compositor.drawPlayer(sceneCtx, viewport, frame, segmentation, game.state);
   }
   renderEntities(sceneCtx, nowMs);
   renderParticles(sceneCtx);

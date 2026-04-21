@@ -27,6 +27,8 @@ export const CONFIG = {
   maskAlphaThreshold: 0.5,
   liteParticleFactor: 0.5,
   liteBackgroundTint: "rgba(22, 24, 18, 0.14)",
+  introPlayerCompositeScale: 0.78,
+  introPlayerBottomInset: 24,
 
   fruitBaseSize: 120,
   gravity: 900,
