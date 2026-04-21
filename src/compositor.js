@@ -75,18 +75,6 @@ export class Compositor {
     ctx.restore();
   }
 
-  drawLiteBackground(ctx, viewport, frame) {
-    ctx.fillStyle = "#0f0f0d";
-    ctx.fillRect(0, 0, viewport.width, viewport.height);
-    if (this.hasWebcamFrame()) {
-      this.drawMirroredFrame(ctx, viewport, frame, 0.92);
-    }
-    ctx.save();
-    ctx.fillStyle = CONFIG.liteBackgroundTint;
-    ctx.fillRect(0, 0, viewport.width, viewport.height);
-    ctx.restore();
-  }
-
   drawPlayer(ctx, viewport, frame, segmentation, state) {
     if (!this.hasWebcamFrame()) {
       return;
@@ -116,13 +104,17 @@ export class Compositor {
     this.maskCtx.putImageData(maskImage, 0, 0);
 
     this.playerCtx.globalCompositeOperation = "destination-in";
+    this.playerCtx.save();
+    this.playerCtx.translate(viewport.width, 0);
+    this.playerCtx.scale(-1, 1);
     this.playerCtx.drawImage(
       this.maskCanvas,
-      playerFrame.x,
+      viewport.width - playerFrame.x - playerFrame.width,
       playerFrame.y,
       playerFrame.width,
       playerFrame.height
     );
+    this.playerCtx.restore();
     this.playerCtx.globalCompositeOperation = "source-over";
 
     ctx.drawImage(

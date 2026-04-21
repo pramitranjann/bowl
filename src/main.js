@@ -514,24 +514,10 @@ function renderParticles(sceneCtx) {
 
 function renderScene(nowMs, hands, frame, segmentation) {
   const sceneCtx = compositor.sceneCtx;
-  const sceneStates = new Set([
-    STATES.OPENING,
-    STATES.CALIBRATION,
-    STATES.MODE_SELECT,
-  ]);
-  const forceEnvironmentScene = sceneStates.has(game.state);
-  const useLiteBackground = game.liteMode && !forceEnvironmentScene;
-  const renderPlayerLayer = !game.liteMode || forceEnvironmentScene;
   sceneCtx.clearRect(0, 0, viewport.width, viewport.height);
-  if (useLiteBackground) {
-    compositor.drawLiteBackground(sceneCtx, viewport, frame);
-  } else {
-    environment.renderBackground(sceneCtx, viewport);
-  }
+  environment.renderBackground(sceneCtx, viewport);
   environment.renderAmbient(sceneCtx);
-  if (renderPlayerLayer) {
-    compositor.drawPlayer(sceneCtx, viewport, frame, segmentation, game.state);
-  }
+  compositor.drawPlayer(sceneCtx, viewport, frame, segmentation, game.state);
   renderEntities(sceneCtx, nowMs);
   renderParticles(sceneCtx);
   trails.render(sceneCtx, nowMs);
