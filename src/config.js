@@ -30,8 +30,6 @@ export const CONFIG = {
   liteBackgroundTint: "rgba(22, 24, 18, 0.14)",
   playerCompositeScale: 0.68,
   playerBottomInset: 28,
-  introPlayerCompositeScale: 0.5,
-  introPlayerBottomInset: 42,
 
   fruitBaseSize: 120,
   gravity: 900,
