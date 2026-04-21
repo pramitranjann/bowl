@@ -48,14 +48,18 @@ export class Particle {
   }
 }
 
-export function createJuiceBurst({ x, y, color, behavior }) {
+export function createJuiceBurst({ x, y, color, behavior, intensity = 1 }) {
   const multiplier = behavior === "splatter" ? 2 : 1;
-  const count = Math.round(CONFIG.particleBaseCount * multiplier);
+  const burstScale = Math.min(1.8, Math.max(0.75, intensity));
+  const count = Math.round(CONFIG.particleBaseCount * multiplier * burstScale);
   const particles = [];
 
   for (let i = 0; i < count; i += 1) {
     const angle = Math.random() * Math.PI * 2;
-    const speed = randomBetween(90, 360) * (behavior === "splatter" ? 1.2 : 1);
+    const speed =
+      randomBetween(90, 360) *
+      (behavior === "splatter" ? 1.2 : 1) *
+      burstScale;
     particles.push(
       new Particle({
         x,

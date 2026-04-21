@@ -258,36 +258,64 @@ export function createEntity({ kind, type, x, y, vx, vy, bornAt }) {
   });
 }
 
-export function splitFruit(entity, point, nowMs) {
-  const baseVx = entity.vx * 0.55;
-  const baseVy = entity.vy * 0.65;
-  const escape = Math.max(260, entity.radius * 3.1);
+export function splitFruit(entity, point, nowMs, segment = null) {
+  const directionLength = Math.hypot(
+    (segment?.to?.x ?? 0) - (segment?.from?.x ?? 0),
+    (segment?.to?.y ?? 0) - (segment?.from?.y ?? 0)
+  );
+  const direction =
+    directionLength > 0.0001
+      ? {
+          x: (segment.to.x - segment.from.x) / directionLength,
+          y: (segment.to.y - segment.from.y) / directionLength,
+        }
+      : { x: 1, y: 0 };
+  const normal = { x: -direction.y, y: direction.x };
+  const impactVelocity = Math.max(
+    CONFIG.sliceVelocityThreshold,
+    segment?.velocity ?? CONFIG.sliceVelocityThreshold
+  );
+  const impactRatio = Math.min(
+    1.4,
+    impactVelocity / Math.max(1, CONFIG.sliceVelocityThreshold)
+  );
+  const baseVx = entity.vx * 0.42;
+  const baseVy = entity.vy * 0.48;
+  const carry = Math.min(460, impactVelocity * 0.22);
+  const carryVx = baseVx + direction.x * carry;
+  const carryVy = baseVy + direction.y * carry * 0.45;
+  const escape = Math.max(260, entity.radius * (2.8 + impactRatio * 0.9));
+  const lift = 120 + impactRatio * 90;
   const radius = entity.radius * 0.72;
   const color = entity.data.juiceColor;
   const offset = entity.radius * 0.34;
+  const splitOffsetX = normal.x * offset;
+  const splitOffsetY = normal.y * offset;
+  const verticalSpread = normal.y * escape * 0.18;
+  const spin = 3.2 + impactRatio * 1.8;
 
   return [
     new SliceHalf({
-      x: point.x - offset,
-      y: point.y,
-      vx: baseVx - escape,
-      vy: baseVy - 140,
+      x: point.x - splitOffsetX,
+      y: point.y - splitOffsetY,
+      vx: carryVx - normal.x * escape,
+      vy: carryVy - lift - verticalSpread,
       radius,
       color,
       side: "left",
       bornAt: nowMs,
-      spin: -3.2,
+      spin: -spin,
     }),
     new SliceHalf({
-      x: point.x + offset,
-      y: point.y,
-      vx: baseVx + escape,
-      vy: baseVy - 140,
+      x: point.x + splitOffsetX,
+      y: point.y + splitOffsetY,
+      vx: carryVx + normal.x * escape,
+      vy: carryVy - lift + verticalSpread,
       radius,
       color,
       side: "right",
       bornAt: nowMs,
-      spin: 3.2,
+      spin,
     }),
   ];
 }

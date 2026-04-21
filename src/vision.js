@@ -12,6 +12,10 @@ function clamp01(value) {
   return Math.min(1, Math.max(0, value));
 }
 
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
+
 export class HandTracker {
   constructor(videoElement) {
     this.video = videoElement;
@@ -264,17 +268,27 @@ export class HandTracker {
         const rawY = frameY + tip.y * frameHeight;
         const rawBaseX = frameX + (1 - base.x) * frameWidth;
         const rawBaseY = frameY + base.y * frameHeight;
-        const x = previous
-          ? previous.x + (rawX - previous.x) * CONFIG.handSmoothing
-          : rawX;
-        const y = previous
-          ? previous.y + (rawY - previous.y) * CONFIG.handSmoothing
-          : rawY;
+        const previousDetectedAt = previous?.detectedAt ?? nowMs - 16;
+        const dtMs = Math.max(1, nowMs - previousDetectedAt);
+        const rawVelocity =
+          previous
+            ? (Math.hypot(rawX - previous.rawX, rawY - previous.rawY) / dtMs) * 1000
+            : CONFIG.handFastVelocity ?? 900;
+        const fastMotion = clamp01(rawVelocity / Math.max(1, CONFIG.handFastVelocity ?? 900));
+        const smoothing = previous
+          ? lerp(
+              CONFIG.handSmoothing ?? 0.42,
+              CONFIG.handFastSmoothing ?? 0.78,
+              fastMotion
+            )
+          : 1;
+        const x = previous ? previous.x + (rawX - previous.x) * smoothing : rawX;
+        const y = previous ? previous.y + (rawY - previous.y) * smoothing : rawY;
         const baseX = previous
-          ? previous.baseX + (rawBaseX - previous.baseX) * CONFIG.handSmoothing
+          ? previous.baseX + (rawBaseX - previous.baseX) * smoothing
           : rawBaseX;
         const baseY = previous
-          ? previous.baseY + (rawBaseY - previous.baseY) * CONFIG.handSmoothing
+          ? previous.baseY + (rawBaseY - previous.baseY) * smoothing
           : rawBaseY;
         const rawDirection = normalizeVector(rawX - rawBaseX, rawY - rawBaseY);
         const direction = normalizeVector(x - baseX, y - baseY);
@@ -309,6 +323,7 @@ export class HandTracker {
           rawBladeEndY:
             rawBladeCenterY + rawNormal.y * CONFIG.sliceBladeHalfWidth,
           z: tip.z,
+          detectedAt: nowMs,
         };
         this.smoothedHands.set(id, hand);
         return hand;

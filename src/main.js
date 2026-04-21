@@ -312,13 +312,18 @@ function handleSlices(segments, nowMs) {
     }
 
     game.score += hit.entity.data.score;
-    game.halves.push(...splitFruit(hit.entity, hit.point, nowMs));
+    const impactScale = Math.min(
+      1.8,
+      Math.max(0.8, hit.segment.velocity / CONFIG.sliceVelocityThreshold)
+    );
+    game.halves.push(...splitFruit(hit.entity, hit.point, nowMs, hit.segment));
     appendParticles(
       createJuiceBurst({
         x: hit.point.x,
         y: hit.point.y,
         color: hit.entity.data.juiceColor,
         behavior: hit.entity.data.behavior,
+        intensity: impactScale,
       })
     );
 
@@ -351,13 +356,13 @@ function updatePlay(dtSeconds, nowMs, hands) {
     game.entities.push(...spawned);
   }
 
+  handleSlices(trails.getSegments(), nowMs);
+
   updateBodies(game.entities, dtSeconds);
   updateBodies(game.halves, dtSeconds);
   for (const particle of game.particles) {
     particle.update(dtSeconds);
   }
-
-  handleSlices(trails.getSegments(), nowMs);
 
   const survivors = [];
   for (const entity of game.entities) {
