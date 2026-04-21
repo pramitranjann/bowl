@@ -12,6 +12,8 @@ export class EnvironmentSystem {
     this.birds = [];
     this.fireflies = [];
     this.lastPlaybackAttemptAt = 0;
+    this.lastVideoTime = 0;
+    this.lastVideoAdvanceAt = 0;
     this.nextBirdAt =
       performance.now() +
       randomBetween(CONFIG.birdSpawnMinMs, CONFIG.birdSpawnMaxMs);
@@ -83,6 +85,8 @@ export class EnvironmentSystem {
   reset(nowMs) {
     this.birds = [];
     this.fireflies = [];
+    this.lastVideoAdvanceAt = nowMs;
+    this.lastVideoTime = this.video.currentTime || 0;
     this.nextBirdAt =
       nowMs + randomBetween(CONFIG.birdSpawnMinMs, CONFIG.birdSpawnMaxMs);
     this.fireflyAccumulator = 0;
@@ -92,8 +96,11 @@ export class EnvironmentSystem {
     this.viewport = { width: viewport.width, height: viewport.height };
   }
 
-  hasRenderableVideo() {
-    return this.video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA;
+  hasRenderableVideo(nowMs = performance.now()) {
+    return (
+      this.video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
+      nowMs - this.lastVideoAdvanceAt <= CONFIG.environmentPlaybackStallMs
+    );
   }
 
   setVisible(visible) {
@@ -101,6 +108,15 @@ export class EnvironmentSystem {
   }
 
   update(nowMs, dtSeconds, { idle, mode, sunsetProgress, liteMode }) {
+    if (
+      this.video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
+      Math.abs(this.video.currentTime - this.lastVideoTime) >=
+        CONFIG.environmentPlaybackEpsilon
+    ) {
+      this.lastVideoTime = this.video.currentTime;
+      this.lastVideoAdvanceAt = nowMs;
+    }
+
     if (!liteMode && nowMs >= this.nextBirdAt) {
       this.spawnBird(nowMs);
       this.nextBirdAt =
@@ -161,6 +177,9 @@ export class EnvironmentSystem {
 
   renderBackground(ctx, viewport) {
     if (this.video.src && this.video.paused && !this.video.ended) {
+      this.requestPlayback();
+    }
+    if (!this.hasRenderableVideo()) {
       this.requestPlayback();
     }
     if (this.hasRenderableVideo()) {
