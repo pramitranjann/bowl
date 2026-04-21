@@ -75,6 +75,20 @@ export class Compositor {
     ctx.restore();
   }
 
+  drawMirroredMask(ctx, viewport, frame) {
+    ctx.save();
+    ctx.translate(viewport.width, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(
+      this.maskCanvas,
+      viewport.width - frame.x - frame.width,
+      frame.y,
+      frame.width,
+      frame.height
+    );
+    ctx.restore();
+  }
+
   drawLiteBackground(ctx, viewport, frame) {
     ctx.fillStyle = "#0f0f0d";
     ctx.fillRect(0, 0, viewport.width, viewport.height);
@@ -116,13 +130,7 @@ export class Compositor {
     this.maskCtx.putImageData(maskImage, 0, 0);
 
     this.playerCtx.globalCompositeOperation = "destination-in";
-    this.playerCtx.drawImage(
-      this.maskCanvas,
-      playerFrame.x,
-      playerFrame.y,
-      playerFrame.width,
-      playerFrame.height
-    );
+    this.drawMirroredMask(this.playerCtx, viewport, playerFrame);
     this.playerCtx.globalCompositeOperation = "source-over";
 
     ctx.drawImage(
