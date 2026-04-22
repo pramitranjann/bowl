@@ -1,11 +1,32 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Reenie+Beanie&display=swap");
+
+:root {
+  --color-coconut-cream: #f4ebd9;
+  --color-coconut-brown: #2a1f18;
+  --color-pandan: #c5d86d;
+  --color-hibiscus: #d94423;
+  --color-evening-amber: #e6a85c;
+  --color-durian: #c5c533;
+  --color-muted-brown: #8a7a6d;
+  --ink-shadow: rgba(42, 31, 24, 0.16);
+  --surface-shadow:
+    0 18px 40px rgba(42, 31, 24, 0.14),
+    0 0 0 1px rgba(42, 31, 24, 0.08);
+  --font-display: "Reenie Beanie", cursive;
+  --font-body: "Fraunces", Georgia, serif;
+}
+
 html,
 body {
   margin: 0;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #101010;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--color-coconut-cream);
+  color: var(--color-coconut-brown);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 body {
@@ -40,22 +61,20 @@ body {
 #nav-controls button {
   --finger-progress: 0;
   pointer-events: auto;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(10, 10, 10, 0.72);
-  color: #fff;
+  border: 1px solid rgba(42, 31, 24, 0.1);
+  background: rgba(244, 235, 217, 0.82);
+  color: var(--color-coconut-brown);
   border-radius: 999px;
   min-width: 112px;
   min-height: 52px;
   padding: 12px 18px;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.02em;
   text-align: center;
   cursor: pointer;
   backdrop-filter: blur(12px);
-  box-shadow:
-    0 10px 24px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.04);
+  box-shadow: var(--surface-shadow);
   transform: translateY(calc(var(--finger-progress) * -1px))
     scale(calc(1 + var(--finger-progress) * 0.04));
   transition:
@@ -67,11 +86,11 @@ body {
 
 #nav-controls button:hover,
 #nav-controls button.is-finger-hovered {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.34);
+  background: rgba(197, 216, 109, 0.82);
+  border-color: rgba(42, 31, 24, 0.14);
   box-shadow:
-    0 16px 32px rgba(0, 0, 0, 0.26),
-    0 0 0 1px rgba(255, 255, 255, 0.08);
+    0 22px 44px rgba(42, 31, 24, 0.18),
+    0 0 0 1px rgba(42, 31, 24, 0.08);
 }
 
 #nav-controls button[hidden] {
@@ -128,15 +147,16 @@ body {
   left: 16px;
   bottom: 16px;
   z-index: 20;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(10, 10, 10, 0.76);
-  color: #fff;
+  border: 1px solid rgba(42, 31, 24, 0.12);
+  background: rgba(244, 235, 217, 0.88);
+  color: var(--color-coconut-brown);
   border-radius: 999px;
   padding: 10px 14px;
   font-size: 14px;
   letter-spacing: 0.02em;
   cursor: pointer;
   backdrop-filter: blur(12px);
+  box-shadow: var(--surface-shadow);
 }
 
 #dev-panel {

@@ -4,6 +4,34 @@ function randomBetween(min, max) {
   return min + Math.random() * (max - min);
 }
 
+function hexToRgb(color) {
+  const normalized = color.replace("#", "");
+  const expanded =
+    normalized.length === 3
+      ? normalized
+          .split("")
+          .map((value) => value + value)
+          .join("")
+      : normalized;
+  const value = Number.parseInt(expanded, 16);
+  return {
+    r: (value >> 16) & 255,
+    g: (value >> 8) & 255,
+    b: value & 255,
+  };
+}
+
+function withAlpha(color, alpha) {
+  if (color.startsWith("rgba")) {
+    return color.replace(/rgba\((.+),\s*[\d.]+\)/, "rgba($1, " + alpha + ")");
+  }
+  if (color.startsWith("rgb")) {
+    return color.replace("rgb(", "rgba(").replace(")", `, ${alpha})`);
+  }
+  const { r, g, b } = hexToRgb(color);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 export class Particle {
   constructor({
     x,
@@ -23,6 +51,8 @@ export class Particle {
     this.color = color;
     this.lifeMs = lifeMs;
     this.ageMs = performance.now() - bornAt;
+    this.drift = randomBetween(-0.7, 0.7);
+    this.seed = Math.random() * Math.PI * 2;
     this.dead = false;
   }
 
@@ -38,11 +68,28 @@ export class Particle {
 
   render(ctx) {
     const lifeRatio = Math.max(0, 1 - this.ageMs / this.lifeMs);
+    const wobble = Math.sin(this.seed + this.ageMs * 0.015) * this.drift * this.radius;
+    const drawX = this.x + wobble;
+    const drawY = this.y;
+    const outerRadius = this.radius * (1.2 + lifeRatio * 0.65);
+    const gradient = ctx.createRadialGradient(
+      drawX - this.radius * 0.18,
+      drawY - this.radius * 0.18,
+      this.radius * 0.12,
+      drawX,
+      drawY,
+      outerRadius
+    );
+    gradient.addColorStop(0, withAlpha("#ffffff", lifeRatio * 0.38));
+    gradient.addColorStop(0.18, withAlpha(this.color, lifeRatio * 0.95));
+    gradient.addColorStop(0.72, withAlpha(this.color, lifeRatio * 0.28));
+    gradient.addColorStop(1, withAlpha(this.color, 0));
+
     ctx.save();
-    ctx.globalAlpha = lifeRatio;
-    ctx.fillStyle = this.color;
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = gradient;
     ctx.beginPath();
-    ctx.arc(this.x, this.y, this.radius * (0.7 + lifeRatio * 0.3), 0, Math.PI * 2);
+    ctx.arc(drawX, drawY, outerRadius, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   }
