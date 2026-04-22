@@ -20,6 +20,9 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const webcam = document.getElementById("webcam");
 const environmentVideo = document.getElementById("environment");
+const navControls = document.getElementById("nav-controls");
+const navBackButton = document.getElementById("nav-back");
+const navRestartButton = document.getElementById("nav-restart");
 
 const audio = new AudioEngine();
 const tracker = new HandTracker(webcam);
@@ -123,6 +126,99 @@ function setState(state, nowMs, statusText = game.statusText) {
   game.state = state;
   game.stateSince = nowMs;
   game.statusText = statusText;
+  updateNavControls();
+}
+
+function getNavControlState() {
+  switch (game.state) {
+    case STATES.CALIBRATION:
+      return {
+        visible: true,
+        backLabel: "intro",
+        showBack: true,
+        restartLabel: "restart",
+        showRestart: true,
+      };
+    case STATES.MODE_SELECT:
+      return {
+        visible: true,
+        backLabel: "camera",
+        showBack: true,
+        restartLabel: "",
+        showRestart: false,
+      };
+    case STATES.PLAY:
+    case STATES.IDLE:
+    case STATES.GAMEOVER:
+      return {
+        visible: true,
+        backLabel: "modes",
+        showBack: true,
+        restartLabel: "restart",
+        showRestart: true,
+      };
+    case STATES.ERROR:
+      return {
+        visible: true,
+        backLabel: "intro",
+        showBack: true,
+        restartLabel: "retry",
+        showRestart: true,
+      };
+    default:
+      return {
+        visible: false,
+        backLabel: "",
+        showBack: false,
+        restartLabel: "",
+        showRestart: false,
+      };
+  }
+}
+
+function updateNavControls() {
+  const controls = getNavControlState();
+  navControls.hidden = !controls.visible;
+  navBackButton.hidden = !controls.showBack;
+  navRestartButton.hidden = !controls.showRestart;
+  if (controls.showBack) {
+    navBackButton.textContent = controls.backLabel;
+  }
+  if (controls.showRestart) {
+    navRestartButton.textContent = controls.restartLabel;
+  }
+}
+
+function goBack(nowMs) {
+  if (game.state === STATES.PLAY || game.state === STATES.IDLE || game.state === STATES.GAMEOVER) {
+    resetRound(nowMs, game.currentMode);
+    setState(STATES.MODE_SELECT, nowMs, "");
+    return;
+  }
+
+  if (game.state === STATES.MODE_SELECT) {
+    beginCalibration(nowMs);
+    return;
+  }
+
+  if (game.state === STATES.CALIBRATION || game.state === STATES.ERROR) {
+    trails.clear();
+    game.modeHover.clear();
+    game.calibrationStartedAt = 0;
+    setState(STATES.OPENING, nowMs, "raise your hands");
+  }
+}
+
+async function restartFlow(nowMs) {
+  if (game.state === STATES.PLAY || game.state === STATES.IDLE || game.state === STATES.GAMEOVER) {
+    await startMode(game.currentMode, nowMs);
+    return;
+  }
+
+  if (game.state === STATES.CALIBRATION || game.state === STATES.MODE_SELECT || game.state === STATES.ERROR) {
+    resetRound(nowMs, game.currentMode);
+    beginCalibration(nowMs);
+  }
 }
 
 function toErrorMessage(error, fallback) {
@@ -765,6 +861,18 @@ async function init() {
     { passive: true }
   );
 
+  navBackButton.addEventListener("click", () => {
+    goBack(performance.now());
+  });
+
+  navRestartButton.addEventListener("click", async () => {
+    try {
+      await restartFlow(performance.now());
+    } catch (error) {
+      handleFatalError(error, game.currentMode === MODES.SUNSET ? "sunset" : "runtime");
+    }
+  });
+
   canvas.addEventListener("pointerdown", (event) => {
     audio.unlock();
     if (game.state !== STATES.GAMEOVER || !game.restartButton) {
@@ -809,6 +917,7 @@ async function init() {
     ]);
     startupComplete = true;
     setState(STATES.OPENING, performance.now(), "raise your hands");
+    updateNavControls();
   } catch (error) {
     handleFatalError(error, "startup");
   }
