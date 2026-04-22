@@ -16,6 +16,10 @@ function lerp(a, b, t) {
   return a + (b - a) * t;
 }
 
+function projectPoint(point, velocity, dtMs) {
+  return point + velocity * (dtMs / 1000);
+}
+
 function erodeAlphaMask(data, width, height, passes = 1) {
   if (passes <= 0 || width <= 2 || height <= 2) {
     return data;
@@ -344,6 +348,10 @@ export class HandTracker {
         const rawBladeCenterY = rawY - rawDirection.y * CONFIG.sliceBladeBackOffset;
         const bladeCenterX = x - direction.x * CONFIG.sliceBladeBackOffset;
         const bladeCenterY = y - direction.y * CONFIG.sliceBladeBackOffset;
+        const velocityX = previous ? (rawX - previous.rawX) / (dtMs / 1000) : 0;
+        const velocityY = previous ? (rawY - previous.rawY) / (dtMs / 1000) : 0;
+        const baseVelocityX = previous ? (rawBaseX - previous.rawBaseX) / (dtMs / 1000) : 0;
+        const baseVelocityY = previous ? (rawBaseY - previous.rawBaseY) / (dtMs / 1000) : 0;
         const hand = {
           id,
           label,
@@ -368,6 +376,10 @@ export class HandTracker {
             rawBladeCenterX + rawNormal.x * CONFIG.sliceBladeHalfWidth,
           rawBladeEndY:
             rawBladeCenterY + rawNormal.y * CONFIG.sliceBladeHalfWidth,
+          velocityX,
+          velocityY,
+          baseVelocityX,
+          baseVelocityY,
           z: tip.z,
           detectedAt: nowMs,
         };
@@ -375,10 +387,66 @@ export class HandTracker {
         return hand;
       });
 
-      for (const id of [...this.smoothedHands.keys()]) {
-        if (!detectedHands.some((hand) => hand.id === id)) {
-          this.smoothedHands.delete(id);
+      for (const [id, previous] of this.smoothedHands.entries()) {
+        if (detectedHands.some((hand) => hand.id === id)) {
+          continue;
         }
+
+        const missingForMs = nowMs - (previous.detectedAt ?? nowMs);
+        if (missingForMs > (CONFIG.handLostHoldMs ?? 90)) {
+          this.smoothedHands.delete(id);
+          continue;
+        }
+
+        const predictionMs = Math.min(
+          missingForMs,
+          CONFIG.handPredictionMs ?? 55
+        );
+        const rawX = projectPoint(previous.rawX, previous.velocityX ?? 0, predictionMs);
+        const rawY = projectPoint(previous.rawY, previous.velocityY ?? 0, predictionMs);
+        const rawBaseX = projectPoint(
+          previous.rawBaseX,
+          previous.baseVelocityX ?? 0,
+          predictionMs
+        );
+        const rawBaseY = projectPoint(
+          previous.rawBaseY,
+          previous.baseVelocityY ?? 0,
+          predictionMs
+        );
+        const rawDirection = normalizeVector(rawX - rawBaseX, rawY - rawBaseY);
+        const rawNormal = { x: -rawDirection.y, y: rawDirection.x };
+        const rawBladeCenterX = rawX - rawDirection.x * CONFIG.sliceBladeBackOffset;
+        const rawBladeCenterY = rawY - rawDirection.y * CONFIG.sliceBladeBackOffset;
+        const retainedHand = {
+          ...previous,
+          x: rawX,
+          y: rawY,
+          baseX: rawBaseX,
+          baseY: rawBaseY,
+          rawX,
+          rawY,
+          rawBaseX,
+          rawBaseY,
+          bladeStartX:
+            rawBladeCenterX - rawNormal.x * CONFIG.sliceBladeHalfWidth,
+          bladeStartY:
+            rawBladeCenterY - rawNormal.y * CONFIG.sliceBladeHalfWidth,
+          bladeEndX:
+            rawBladeCenterX + rawNormal.x * CONFIG.sliceBladeHalfWidth,
+          bladeEndY:
+            rawBladeCenterY + rawNormal.y * CONFIG.sliceBladeHalfWidth,
+          rawBladeStartX:
+            rawBladeCenterX - rawNormal.x * CONFIG.sliceBladeHalfWidth,
+          rawBladeStartY:
+            rawBladeCenterY - rawNormal.y * CONFIG.sliceBladeHalfWidth,
+          rawBladeEndX:
+            rawBladeCenterX + rawNormal.x * CONFIG.sliceBladeHalfWidth,
+          rawBladeEndY:
+            rawBladeCenterY + rawNormal.y * CONFIG.sliceBladeHalfWidth,
+        };
+        this.smoothedHands.set(id, retainedHand);
+        detectedHands.push(retainedHand);
       }
 
       this.lastHands = detectedHands.map((hand) => {

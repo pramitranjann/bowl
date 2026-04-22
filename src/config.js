@@ -8,7 +8,7 @@ export const CONFIG = {
   mediaPipeSegmentationModel:
     "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter_landscape/float16/latest/selfie_segmenter_landscape.tflite",
 
-  minHandConfidence: 0.35,
+  minHandConfidence: 0.3,
   handDetectFps: 60,
   trailMaxPoints: 20,
   trailDecayMs: 400,
@@ -18,6 +18,8 @@ export const CONFIG = {
   handSmoothing: 0.42,
   handFastSmoothing: 0.78,
   handFastVelocity: 900,
+  handLostHoldMs: 90,
+  handPredictionMs: 55,
   trailLitePointFactor: 0.55,
   trailLiteDistanceMultiplier: 1.5,
   sliceCollisionPadding: 18,
