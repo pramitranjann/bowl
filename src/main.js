@@ -559,7 +559,13 @@ function shouldUseSunsetComposite() {
 }
 
 function shouldShowLiveWebcamLayer() {
-  return !shouldUseSunsetComposite() && hasLiveWebcamFrame();
+  if (!hasLiveWebcamFrame()) {
+    return false;
+  }
+  if (!shouldUseSunsetComposite()) {
+    return true;
+  }
+  return !!game.segmentation?.data;
 }
 
 function renderScene(nowMs, hands, frame, segmentation) {
@@ -570,13 +576,27 @@ function renderScene(nowMs, hands, frame, segmentation) {
   const hasHealthyEnvironmentVideo = environment.hasRenderableVideo(nowMs);
   sceneCtx.clearRect(0, 0, viewport.width, viewport.height);
   if (useSunsetComposite) {
-    if (!hasEnvironmentFrame) {
+    if (showLiveWebcamLayer) {
       environment.renderBackground(sceneCtx, viewport);
-    } else if (!hasHealthyEnvironmentVideo) {
-      environment.requestPlayback();
+      compositor.cutOutPlayer(
+        sceneCtx,
+        viewport,
+        frame,
+        segmentation,
+        game.state
+      );
+      if (!hasHealthyEnvironmentVideo) {
+        environment.requestPlayback();
+      }
+    } else {
+      if (!hasEnvironmentFrame) {
+        environment.renderBackground(sceneCtx, viewport);
+      } else if (!hasHealthyEnvironmentVideo) {
+        environment.requestPlayback();
+      }
+      compositor.drawPlayer(sceneCtx, viewport, frame, segmentation, game.state);
     }
     environment.renderAmbient(sceneCtx);
-    compositor.drawPlayer(sceneCtx, viewport, frame, segmentation, game.state);
   } else {
     if (!showLiveWebcamLayer) {
       sceneCtx.fillStyle = "#101010";

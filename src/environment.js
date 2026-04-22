@@ -5,6 +5,29 @@ function randomBetween(min, max) {
   return min + Math.random() * (max - min);
 }
 
+function getCoverSourceRect(sourceWidth, sourceHeight, targetWidth, targetHeight) {
+  const sourceAspect = sourceWidth / Math.max(1, sourceHeight);
+  const targetAspect = targetWidth / Math.max(1, targetHeight);
+
+  if (sourceAspect > targetAspect) {
+    const drawWidth = sourceHeight * targetAspect;
+    return {
+      sx: (sourceWidth - drawWidth) * 0.5,
+      sy: 0,
+      sw: drawWidth,
+      sh: sourceHeight,
+    };
+  }
+
+  const drawHeight = sourceWidth / Math.max(0.0001, targetAspect);
+  return {
+    sx: 0,
+    sy: (sourceHeight - drawHeight) * 0.5,
+    sw: sourceWidth,
+    sh: drawHeight,
+  };
+}
+
 export class EnvironmentSystem {
   constructor(videoElement) {
     this.video = videoElement;
@@ -192,7 +215,23 @@ export class EnvironmentSystem {
       this.requestPlayback();
     }
     if (this.hasVideoFrame()) {
-      ctx.drawImage(this.video, 0, 0, viewport.width, viewport.height);
+      const { sx, sy, sw, sh } = getCoverSourceRect(
+        this.video.videoWidth,
+        this.video.videoHeight,
+        viewport.width,
+        viewport.height
+      );
+      ctx.drawImage(
+        this.video,
+        sx,
+        sy,
+        sw,
+        sh,
+        0,
+        0,
+        viewport.width,
+        viewport.height
+      );
     } else {
       const gradient = ctx.createLinearGradient(0, 0, 0, viewport.height);
       if (this.mode === MODES.SUNSET) {

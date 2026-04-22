@@ -181,4 +181,33 @@ export class Compositor {
       viewport.height
     );
   }
+
+  cutOutPlayer(ctx, viewport, frame, segmentation, state) {
+    if (!segmentation?.data) {
+      return;
+    }
+
+    const playerFrame = this.getPlayerFrame(viewport, frame, state);
+    const maskWidth = segmentation.width;
+    const maskHeight = segmentation.height;
+    const maskImage = this.maskCtx.createImageData(maskWidth, maskHeight);
+    for (let i = 0; i < segmentation.data.length; i += 1) {
+      const maskValue = segmentation.data[i];
+      const index = i * 4;
+      maskImage.data[index] = 255;
+      maskImage.data[index + 1] = 255;
+      maskImage.data[index + 2] = 255;
+      maskImage.data[index + 3] = maskValue;
+    }
+    this.maskCanvas.width = maskWidth;
+    this.maskCanvas.height = maskHeight;
+    this.maskCtx.imageSmoothingEnabled = true;
+    this.maskCtx.imageSmoothingQuality = "high";
+    this.maskCtx.putImageData(maskImage, 0, 0);
+
+    ctx.save();
+    ctx.globalCompositeOperation = "destination-out";
+    this.drawMirroredMask(ctx, viewport, playerFrame);
+    ctx.restore();
+  }
 }

@@ -16,6 +16,36 @@ function lerp(a, b, t) {
   return a + (b - a) * t;
 }
 
+function erodeAlphaMask(data, width, height, passes = 1) {
+  if (passes <= 0 || width <= 2 || height <= 2) {
+    return data;
+  }
+
+  let source = data;
+  for (let pass = 0; pass < passes; pass += 1) {
+    const next = new Uint8Array(source.length);
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) {
+        const index = y * width + x;
+        let value = source[index];
+        if (value === 0) {
+          next[index] = 0;
+          continue;
+        }
+        for (let ny = Math.max(0, y - 1); ny <= Math.min(height - 1, y + 1); ny += 1) {
+          for (let nx = Math.max(0, x - 1); nx <= Math.min(width - 1, x + 1); nx += 1) {
+            value = Math.min(value, source[ny * width + nx]);
+          }
+        }
+        next[index] = value;
+      }
+    }
+    source = next;
+  }
+
+  return source;
+}
+
 export class HandTracker {
   constructor(videoElement) {
     this.video = videoElement;
@@ -189,16 +219,24 @@ export class HandTracker {
       alphaMask[i] = Math.round(normalized * 255);
     }
 
+    const width =
+      confidenceMask.width ??
+      confidenceMask.displayWidth ??
+      this.video.videoWidth;
+    const height =
+      confidenceMask.height ??
+      confidenceMask.displayHeight ??
+      this.video.videoHeight;
+
     return {
-      data: this.smoothAlphaMask(alphaMask),
-      width:
-        confidenceMask.width ??
-        confidenceMask.displayWidth ??
-        this.video.videoWidth,
-      height:
-        confidenceMask.height ??
-        confidenceMask.displayHeight ??
-        this.video.videoHeight,
+      data: erodeAlphaMask(
+        this.smoothAlphaMask(alphaMask),
+        width,
+        height,
+        CONFIG.maskErodePasses ?? 0
+      ),
+      width,
+      height,
     };
   }
 
@@ -213,16 +251,24 @@ export class HandTracker {
       alphaMask[i] = mask[i] === this.personCategoryIndex ? 255 : 0;
     }
 
+    const width =
+      categoryMask.width ??
+      categoryMask.displayWidth ??
+      this.video.videoWidth;
+    const height =
+      categoryMask.height ??
+      categoryMask.displayHeight ??
+      this.video.videoHeight;
+
     return {
-      data: this.smoothAlphaMask(alphaMask),
-      width:
-        categoryMask.width ??
-        categoryMask.displayWidth ??
-        this.video.videoWidth,
-      height:
-        categoryMask.height ??
-        categoryMask.displayHeight ??
-        this.video.videoHeight,
+      data: erodeAlphaMask(
+        this.smoothAlphaMask(alphaMask),
+        width,
+        height,
+        CONFIG.maskErodePasses ?? 0
+      ),
+      width,
+      height,
     };
   }
 
