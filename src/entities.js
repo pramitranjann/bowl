@@ -1,4 +1,5 @@
 import { CONFIG } from "./config.js";
+import { drawFruitHalfSvg, drawFruitSvg } from "./vector-art.js";
 
 export const FRUITS = {
   watermelon: {
@@ -142,34 +143,37 @@ export class FlyingEntity {
     ctx.save();
     ctx.translate(this.x, this.y + wobble);
     ctx.rotate(this.rotation);
+    const rendered = drawFruitSvg(ctx, this.kind === "durian" ? "durian" : this.type, this.radius);
 
-    if (this.kind === "durian") {
-      ctx.fillStyle = "#826248";
-      ctx.strokeStyle = this.data.warningColor;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
+    if (!rendered) {
+      if (this.kind === "durian") {
+        ctx.fillStyle = "#826248";
+        ctx.strokeStyle = this.data.warningColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
 
-      ctx.beginPath();
-      for (let i = 0; i < 14; i += 1) {
-        const angle = (i / 14) * Math.PI * 2;
-        const inner = this.radius * 0.85;
-        const outer = this.radius * 1.12;
-        const x1 = Math.cos(angle) * inner;
-        const y1 = Math.sin(angle) * inner;
-        const x2 = Math.cos(angle) * outer;
-        const y2 = Math.sin(angle) * outer;
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
+        ctx.beginPath();
+        for (let i = 0; i < 14; i += 1) {
+          const angle = (i / 14) * Math.PI * 2;
+          const inner = this.radius * 0.85;
+          const outer = this.radius * 1.12;
+          const x1 = Math.cos(angle) * inner;
+          const y1 = Math.sin(angle) * inner;
+          const x2 = Math.cos(angle) * outer;
+          const y2 = Math.sin(angle) * outer;
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+        }
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = this.data.juiceColor;
+        ctx.beginPath();
+        ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+        ctx.fill();
       }
-      ctx.stroke();
-    } else {
-      ctx.fillStyle = this.data.juiceColor;
-      ctx.beginPath();
-      ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-      ctx.fill();
     }
 
     ctx.restore();
@@ -184,6 +188,7 @@ export class SliceHalf {
     vy,
     radius,
     color,
+    type,
     side,
     bornAt,
     spin,
@@ -195,6 +200,7 @@ export class SliceHalf {
     this.vy = vy;
     this.radius = radius;
     this.color = color;
+    this.type = type;
     this.side = side;
     this.bornAt = bornAt;
     this.spin = spin;
@@ -214,22 +220,26 @@ export class SliceHalf {
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rotation);
     ctx.globalAlpha = 0.92;
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    if (this.side === "left") {
-      ctx.arc(0, 0, this.radius, Math.PI / 2, (Math.PI * 3) / 2);
-    } else {
-      ctx.arc(0, 0, this.radius, -Math.PI / 2, Math.PI / 2);
-    }
-    ctx.closePath();
-    ctx.fill();
+    const rendered = drawFruitHalfSvg(ctx, this.type, this.radius, this.color, this.side);
 
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
-    ctx.lineWidth = Math.max(2, this.radius * 0.06);
-    ctx.beginPath();
-    ctx.moveTo(0, -this.radius * 0.96);
-    ctx.lineTo(0, this.radius * 0.96);
-    ctx.stroke();
+    if (!rendered) {
+      ctx.fillStyle = this.color;
+      ctx.beginPath();
+      if (this.side === "left") {
+        ctx.arc(0, 0, this.radius, Math.PI / 2, (Math.PI * 3) / 2);
+      } else {
+        ctx.arc(0, 0, this.radius, -Math.PI / 2, Math.PI / 2);
+      }
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+      ctx.lineWidth = Math.max(2, this.radius * 0.06);
+      ctx.beginPath();
+      ctx.moveTo(0, -this.radius * 0.96);
+      ctx.lineTo(0, this.radius * 0.96);
+      ctx.stroke();
+    }
 
     ctx.restore();
   }
@@ -302,6 +312,7 @@ export function splitFruit(entity, point, nowMs, segment = null) {
       vy: carryVy - lift - verticalSpread,
       radius,
       color,
+      type: entity.type,
       side: "left",
       bornAt: nowMs,
       spin: -spin,
@@ -313,6 +324,7 @@ export function splitFruit(entity, point, nowMs, segment = null) {
       vy: carryVy - lift + verticalSpread,
       radius,
       color,
+      type: entity.type,
       side: "right",
       bornAt: nowMs,
       spin,

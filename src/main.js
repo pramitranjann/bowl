@@ -14,6 +14,7 @@ import { detectSlices } from "./slice.js";
 import { WaveSpawner } from "./spawner.js";
 import { MODE_META, MODES, STATES } from "./states.js";
 import { TrailSystem } from "./trail.js";
+import { preloadVectorArt } from "./vector-art.js";
 import { HandTracker } from "./vision.js";
 
 const canvas = document.getElementById("game");
@@ -92,6 +93,23 @@ const viewport = {
 
 let lastFrameMs = performance.now();
 let startupComplete = false;
+
+function normalizeSafariLoopbackOrigin() {
+  const isSafari =
+    /Safari/.test(navigator.userAgent) &&
+    !/Chrome|Chromium|Edg\//.test(navigator.userAgent);
+  if (!isSafari) {
+    return false;
+  }
+  if (location.protocol !== "http:" || location.hostname !== "127.0.0.1") {
+    return false;
+  }
+
+  const nextUrl = new URL(location.href);
+  nextUrl.hostname = "localhost";
+  location.replace(nextUrl.toString());
+  return true;
+}
 
 const devPanel = createDevPanel({
   config: CONFIG,
@@ -1074,7 +1092,11 @@ async function animate(nowMs) {
 }
 
 async function init() {
+  if (normalizeSafariLoopbackOrigin()) {
+    return;
+  }
   resize();
+  preloadVectorArt();
   window.addEventListener("resize", resize);
   window.addEventListener(
     "pointerdown",

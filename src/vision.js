@@ -24,6 +24,29 @@ function pointDistance(a, b) {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
+function waitForVideoMetadata(video) {
+  if (video.readyState >= HTMLMediaElement.HAVE_METADATA && video.videoWidth > 0) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    const handleReady = () => {
+      cleanup();
+      resolve();
+    };
+
+    const cleanup = () => {
+      video.removeEventListener("loadedmetadata", handleReady);
+      video.removeEventListener("loadeddata", handleReady);
+      video.removeEventListener("canplay", handleReady);
+    };
+
+    video.addEventListener("loadedmetadata", handleReady, { once: true });
+    video.addEventListener("loadeddata", handleReady, { once: true });
+    video.addEventListener("canplay", handleReady, { once: true });
+  });
+}
+
 function erodeAlphaMask(data, width, height, passes = 1) {
   if (passes <= 0 || width <= 2 || height <= 2) {
     return data;
@@ -98,8 +121,17 @@ export class HandTracker {
     onStatus("starting camera…");
     this.stream = await navigator.mediaDevices.getUserMedia(CONFIG.webcamConstraints);
     this.video.srcObject = this.stream;
-
-    await this.video.play();
+    await waitForVideoMetadata(this.video);
+    try {
+      await this.video.play();
+    } catch (error) {
+      // Safari can reject play() for live MediaStreams with AbortError even
+      // though camera capture has already started and frames will still arrive.
+      // Keep startup moving and let later gesture-driven retries stabilize playback.
+      if (!(error instanceof DOMException) || error.name !== "AbortError") {
+        throw error;
+      }
+    }
 
     onStatus("warming up hand model…");
     this.vision = await this.FilesetResolver.forVisionTasks(CONFIG.mediaPipeWasmRoot);

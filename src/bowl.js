@@ -1,4 +1,5 @@
 import { CONFIG } from "./config.js";
+import { drawBowlSvg, drawFruitSvg } from "./vector-art.js";
 
 const BOWL_COLORS = {
   cream: "rgba(244, 235, 217, 0.78)",
@@ -110,29 +111,39 @@ export class BowlSystem {
     ctx.fillRect(0, 0, viewport.width, viewport.height);
 
     ctx.globalAlpha = bowlAlpha;
+    ctx.save();
+    ctx.translate(centerX, centerY);
     ctx.shadowColor = "rgba(42, 31, 24, 0.18)";
     ctx.shadowBlur = 34;
     ctx.shadowOffsetY = 18;
-    ctx.fillStyle = BOWL_COLORS.shell;
-    ctx.beginPath();
-    ctx.ellipse(centerX, centerY, bowlRadius, bowlRadius * 0.58, 0, 0, Math.PI * 2);
-    ctx.fill();
+    const bowlRendered = drawBowlSvg(ctx, bowlRadius);
+    ctx.restore();
 
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = BOWL_COLORS.shellShadow;
-    ctx.beginPath();
-    ctx.ellipse(centerX, centerY - 10, bowlRadius * 0.84, bowlRadius * 0.38, 0, 0, Math.PI * 2);
-    ctx.fill();
+    if (!bowlRendered) {
+      ctx.shadowColor = "rgba(42, 31, 24, 0.18)";
+      ctx.shadowBlur = 34;
+      ctx.shadowOffsetY = 18;
+      ctx.fillStyle = BOWL_COLORS.shell;
+      ctx.beginPath();
+      ctx.ellipse(centerX, centerY, bowlRadius, bowlRadius * 0.58, 0, 0, Math.PI * 2);
+      ctx.fill();
 
-    ctx.fillStyle = BOWL_COLORS.shellHighlight;
-    ctx.beginPath();
-    ctx.ellipse(centerX, centerY - bowlRadius * 0.1, bowlRadius * 0.62, bowlRadius * 0.16, 0, 0, Math.PI * 2);
-    ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = BOWL_COLORS.shellShadow;
+      ctx.beginPath();
+      ctx.ellipse(centerX, centerY - 10, bowlRadius * 0.84, bowlRadius * 0.38, 0, 0, Math.PI * 2);
+      ctx.fill();
 
-    ctx.fillStyle = BOWL_COLORS.creamSoft;
-    ctx.beginPath();
-    ctx.ellipse(centerX, centerY + bowlRadius * 0.52, bowlRadius * 0.92, bowlRadius * 0.18, 0, 0, Math.PI * 2);
-    ctx.fill();
+      ctx.fillStyle = BOWL_COLORS.shellHighlight;
+      ctx.beginPath();
+      ctx.ellipse(centerX, centerY - bowlRadius * 0.1, bowlRadius * 0.62, bowlRadius * 0.16, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = BOWL_COLORS.creamSoft;
+      ctx.beginPath();
+      ctx.ellipse(centerX, centerY + bowlRadius * 0.52, bowlRadius * 0.92, bowlRadius * 0.18, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     for (const fruit of this.composed) {
       const fruitAlpha = easeOutCubic(
@@ -142,20 +153,30 @@ export class BowlSystem {
         continue;
       }
       ctx.globalAlpha = bowlAlpha * fruitAlpha;
+      ctx.save();
+      ctx.translate(fruit.x, fruit.y);
       ctx.shadowColor = "rgba(42, 31, 24, 0.14)";
       ctx.shadowBlur = 14;
       ctx.shadowOffsetY = 6;
-      ctx.fillStyle = fruit.color;
-      ctx.beginPath();
-      ctx.arc(fruit.x, fruit.y, fruit.radius, 0, Math.PI * 2);
-      ctx.fill();
+      const rendered = drawFruitSvg(ctx, fruit.type, fruit.radius, "bowl");
+      ctx.restore();
 
-      ctx.shadowBlur = 0;
-      ctx.strokeStyle = "rgba(244, 235, 217, 0.45)";
-      ctx.lineWidth = Math.max(1.2, fruit.radius * 0.06);
-      ctx.beginPath();
-      ctx.arc(fruit.x, fruit.y, fruit.radius, 0, Math.PI * 2);
-      ctx.stroke();
+      if (!rendered) {
+        ctx.shadowColor = "rgba(42, 31, 24, 0.14)";
+        ctx.shadowBlur = 14;
+        ctx.shadowOffsetY = 6;
+        ctx.fillStyle = fruit.color;
+        ctx.beginPath();
+        ctx.arc(fruit.x, fruit.y, fruit.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = "rgba(244, 235, 217, 0.45)";
+        ctx.lineWidth = Math.max(1.2, fruit.radius * 0.06);
+        ctx.beginPath();
+        ctx.arc(fruit.x, fruit.y, fruit.radius, 0, Math.PI * 2);
+        ctx.stroke();
+      }
     }
 
     ctx.globalAlpha = bowlAlpha;
