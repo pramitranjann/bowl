@@ -678,9 +678,7 @@ async function animate(nowMs) {
     if (useSunsetComposite && CONFIG.segmentationEnabled) {
       game.segmentation = tracker.segment(
         nowMs,
-        game.liteMode
-          ? CONFIG.liteSegmentationIntervalMs
-          : CONFIG.segmentationIntervalMs
+        CONFIG.segmentationIntervalMs
       );
     } else {
       game.segmentation = null;
