@@ -22,12 +22,15 @@ body {
 
 #nav-controls {
   position: fixed;
-  top: 16px;
-  right: 16px;
+  top: 50%;
+  right: max(16px, env(safe-area-inset-right));
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
   z-index: 20;
   pointer-events: none;
+  transform: translateY(-50%);
 }
 
 #nav-controls[hidden] {
@@ -41,10 +44,13 @@ body {
   background: rgba(10, 10, 10, 0.72);
   color: #fff;
   border-radius: 999px;
-  padding: 10px 14px;
-  min-height: 40px;
-  font-size: 14px;
+  min-width: 112px;
+  min-height: 52px;
+  padding: 12px 18px;
+  font-size: 15px;
+  font-weight: 600;
   letter-spacing: 0.02em;
+  text-align: center;
   cursor: pointer;
   backdrop-filter: blur(12px);
   box-shadow:
@@ -70,6 +76,14 @@ body {
 
 #nav-controls button[hidden] {
   display: none;
+}
+
+@media (max-height: 760px) {
+  #nav-controls {
+    top: auto;
+    bottom: max(20px, env(safe-area-inset-bottom));
+    transform: none;
+  }
 }
 
 #game {
