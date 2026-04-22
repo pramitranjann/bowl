@@ -23,6 +23,7 @@ const environmentVideo = document.getElementById("environment");
 const navControls = document.getElementById("nav-controls");
 const navBackButton = document.getElementById("nav-back");
 const navRestartButton = document.getElementById("nav-restart");
+const trackedUiButtons = [navBackButton, navRestartButton];
 
 const audio = new AudioEngine();
 const tracker = new HandTracker(webcam);
@@ -50,6 +51,7 @@ const game = {
   modeEndsAt: Infinity,
   calibrationStartedAt: 0,
   modeHover: new Map(),
+  uiButtonHover: new Map(),
   lastMovementAt: performance.now(),
   lastHandSnapshot: new Map(),
   slowMotionUntil: 0,
@@ -186,6 +188,87 @@ function updateNavControls() {
   }
   if (controls.showRestart) {
     navRestartButton.textContent = controls.restartLabel;
+  }
+}
+
+function setTrackedUiButtonHover(button, progress) {
+  button.style.setProperty("--finger-progress", `${progress}`);
+  button.classList.toggle("is-finger-hovered", progress > 0);
+}
+
+function getTrackedUiButtons() {
+  if (navControls.hidden) {
+    for (const button of trackedUiButtons) {
+      setTrackedUiButtonHover(button, 0);
+    }
+    return [];
+  }
+
+  return trackedUiButtons.flatMap((button) => {
+    if (button.hidden) {
+      setTrackedUiButtonHover(button, 0);
+      return [];
+    }
+
+    const rect = button.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) {
+      setTrackedUiButtonHover(button, 0);
+      return [];
+    }
+
+    return [
+      {
+        id: button.id,
+        button,
+        x: rect.left,
+        y: rect.top,
+        width: rect.width,
+        height: rect.height,
+      },
+    ];
+  });
+}
+
+function updateTrackedUiButtons(hands, nowMs) {
+  const buttons = getTrackedUiButtons();
+  const visibleIds = new Set(buttons.map((button) => button.id));
+
+  for (const [id] of game.uiButtonHover) {
+    if (!visibleIds.has(id)) {
+      game.uiButtonHover.delete(id);
+    }
+  }
+
+  for (const button of buttons) {
+    const hovering = hands.some(
+      (hand) =>
+        hand.x >= button.x &&
+        hand.x <= button.x + button.width &&
+        hand.y >= button.y &&
+        hand.y <= button.y + button.height
+    );
+
+    if (!hovering) {
+      game.uiButtonHover.delete(button.id);
+      setTrackedUiButtonHover(button.button, 0);
+      continue;
+    }
+
+    const hoverState = game.uiButtonHover.get(button.id) ?? {
+      startedAt: nowMs,
+      activated: false,
+    };
+    game.uiButtonHover.set(button.id, hoverState);
+
+    const progress = Math.min(1, (nowMs - hoverState.startedAt) / CONFIG.modeHoverMs);
+    setTrackedUiButtonHover(button.button, progress);
+
+    if (hoverState.activated || progress < 1) {
+      continue;
+    }
+
+    hoverState.activated = true;
+    button.button.click();
   }
 }
 
@@ -780,6 +863,7 @@ async function animate(nowMs) {
       game.segmentation = null;
     }
     trails.update(hands, nowMs);
+    updateTrackedUiButtons(hands, nowMs);
 
     if (game.state === STATES.OPENING) {
       if (hands.length > 0 && nowMs - game.stateSince > CONFIG.openingPromptMs) {
