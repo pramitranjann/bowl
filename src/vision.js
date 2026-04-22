@@ -20,6 +20,10 @@ function projectPoint(point, velocity, dtMs) {
   return point + velocity * (dtMs / 1000);
 }
 
+function pointDistance(a, b) {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
 function erodeAlphaMask(data, width, height, passes = 1) {
   if (passes <= 0 || width <= 2 || height <= 2) {
     return data;
@@ -66,6 +70,7 @@ export class HandTracker {
     this.lastSegmentationAtMs = 0;
     this.lastHands = [];
     this.smoothedHands = new Map();
+    this.nextHandId = 1;
     this.segmentation = null;
     this.segmentationLabels = [];
     this.personCategoryIndex = 1;
@@ -187,6 +192,30 @@ export class HandTracker {
     });
   }
 
+  resolveHandId(rawX, rawY, usedIds) {
+    let bestId = null;
+    let bestDistance = CONFIG.handMatchDistance ?? 180;
+    for (const [id, hand] of this.smoothedHands.entries()) {
+      if (usedIds.has(id)) {
+        continue;
+      }
+      const distance = pointDistance(
+        { x: rawX, y: rawY },
+        { x: hand.rawX, y: hand.rawY }
+      );
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        bestId = id;
+      }
+    }
+    if (bestId) {
+      return bestId;
+    }
+    const id = `hand-${this.nextHandId}`;
+    this.nextHandId += 1;
+    return id;
+  }
+
   smoothAlphaMask(nextMask) {
     const alphaMask = new Uint8Array(nextMask.length);
     const previousMask =
@@ -302,14 +331,13 @@ export class HandTracker {
       const result = this.handLandmarker.detectForVideo(this.video, nowMs);
       const landmarks = result.landmarks ?? [];
       const handedness = result.handedness ?? [];
+      const usedIds = new Set();
 
       const detectedHands = landmarks.map((points, index) => {
         const tip = points[8];
         const base = points[7];
         const label = handedness[index]?.[0]?.categoryName ?? `Hand ${index + 1}`;
         const color = CONFIG.handColors[label] ?? CONFIG.handColors.default;
-        const id = label;
-        const previous = this.smoothedHands.get(id);
         const frameX = cameraFrame?.x ?? 0;
         const frameY = cameraFrame?.y ?? 0;
         const frameWidth = cameraFrame?.width ?? this.video.videoWidth;
@@ -318,6 +346,9 @@ export class HandTracker {
         const rawY = frameY + tip.y * frameHeight;
         const rawBaseX = frameX + (1 - base.x) * frameWidth;
         const rawBaseY = frameY + base.y * frameHeight;
+        const id = this.resolveHandId(rawX, rawY, usedIds);
+        usedIds.add(id);
+        const previous = this.smoothedHands.get(id);
         const previousDetectedAt = previous?.detectedAt ?? nowMs - 16;
         const dtMs = Math.max(1, nowMs - previousDetectedAt);
         const rawVelocity =
