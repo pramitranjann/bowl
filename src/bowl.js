@@ -2,16 +2,32 @@ import { CONFIG } from "./config.js";
 
 const BOWL_COLORS = {
   cream: "rgba(244, 235, 217, 0.78)",
+  creamSoft: "rgba(244, 235, 217, 0.56)",
   shell: "#7f5636",
   shellShadow: "#58341d",
   shellHighlight: "rgba(244, 235, 217, 0.18)",
   ink: "#2a1f18",
   muted: "rgba(42, 31, 24, 0.58)",
   surface: "rgba(244, 235, 217, 0.92)",
+  pandan: "#c5d86d",
 };
 
 function easeOutCubic(value) {
   return 1 - Math.pow(1 - value, 3);
+}
+
+function drawRoundedRect(ctx, x, y, width, height, radius) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
 }
 
 export class BowlSystem {
@@ -69,7 +85,7 @@ export class BowlSystem {
     return this.composed;
   }
 
-  render(ctx, viewport, nowMs, gameOverAt, score) {
+  render(ctx, viewport, nowMs, gameOverAt, score, restartButton = null, restartProgress = 0) {
     const centerX = viewport.width * 0.5;
     const centerY = viewport.height * CONFIG.bowlCenterYRatio;
     const bowlRadius = CONFIG.bowlRadius;
@@ -79,8 +95,18 @@ export class BowlSystem {
     );
 
     ctx.save();
-    ctx.globalAlpha = bowlAlpha * 0.92;
-    ctx.fillStyle = BOWL_COLORS.cream;
+    ctx.globalAlpha = bowlAlpha * 0.94;
+    const wash = ctx.createRadialGradient(
+      centerX,
+      centerY - bowlRadius * 0.55,
+      bowlRadius * 0.2,
+      centerX,
+      centerY,
+      viewport.height * 0.72
+    );
+    wash.addColorStop(0, BOWL_COLORS.cream);
+    wash.addColorStop(1, "rgba(244, 235, 217, 0.92)");
+    ctx.fillStyle = wash;
     ctx.fillRect(0, 0, viewport.width, viewport.height);
 
     ctx.globalAlpha = bowlAlpha;
@@ -101,6 +127,11 @@ export class BowlSystem {
     ctx.fillStyle = BOWL_COLORS.shellHighlight;
     ctx.beginPath();
     ctx.ellipse(centerX, centerY - bowlRadius * 0.1, bowlRadius * 0.62, bowlRadius * 0.16, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = BOWL_COLORS.creamSoft;
+    ctx.beginPath();
+    ctx.ellipse(centerX, centerY + bowlRadius * 0.52, bowlRadius * 0.92, bowlRadius * 0.18, 0, 0, Math.PI * 2);
     ctx.fill();
 
     for (const fruit of this.composed) {
@@ -131,14 +162,51 @@ export class BowlSystem {
     ctx.fillStyle = BOWL_COLORS.ink;
     ctx.textBaseline = "top";
     ctx.textAlign = "center";
-    ctx.font = '400 92px "Reenie Beanie", cursive';
-    ctx.fillText(`${score}`, centerX, centerY - bowlRadius - 86);
+    ctx.font = '400 112px "Reenie Beanie", cursive';
+    ctx.fillText(`${score}`, centerX, centerY - bowlRadius - 110);
     ctx.font = '400 italic 22px "Fraunces", Georgia, serif';
     ctx.fillStyle = BOWL_COLORS.muted;
-    ctx.fillText("a bowl of fruit", centerX, centerY - bowlRadius - 18);
-    ctx.font = '400 56px "Reenie Beanie", cursive';
-    ctx.fillStyle = BOWL_COLORS.ink;
-    ctx.fillText("again?", centerX, centerY + bowlRadius + 36);
+    ctx.fillText("a bowl of fruit", centerX, centerY - bowlRadius - 28);
+    ctx.strokeStyle = BOWL_COLORS.pandan;
+    ctx.lineWidth = 6;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(centerX - 82, centerY - bowlRadius - 8);
+    ctx.quadraticCurveTo(centerX, centerY - bowlRadius + 18, centerX + 76, centerY - bowlRadius - 4);
+    ctx.stroke();
+    if (restartButton) {
+      ctx.save();
+      ctx.translate(
+        restartButton.x + restartButton.width / 2,
+        restartButton.y + restartButton.height / 2
+      );
+      ctx.rotate(-0.018);
+      const buttonFill = restartProgress > 0
+        ? `rgba(197, 216, 109, ${0.72 + restartProgress * 0.16})`
+        : BOWL_COLORS.surface;
+      ctx.fillStyle = buttonFill;
+      ctx.strokeStyle = "rgba(42, 31, 24, 0.08)";
+      ctx.lineWidth = 1;
+      drawRoundedRect(
+        ctx,
+        -restartButton.width / 2,
+        -restartButton.height / 2,
+        restartButton.width,
+        restartButton.height,
+        restartButton.height / 2
+      );
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.font = '400 56px "Reenie Beanie", cursive';
+      ctx.fillStyle = BOWL_COLORS.ink;
+      ctx.fillText(
+        "again?",
+        0,
+        -restartButton.height / 2 + 14
+      );
+      ctx.restore();
+    }
     ctx.restore();
   }
 }

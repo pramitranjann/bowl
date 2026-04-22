@@ -50,7 +50,7 @@ export const CONFIG = {
   fruitCullPadding: 180,
   fruitArcPeakVariance: 0.3,
   bowlGravity: 1200,
-  bowlCompositionPassDurationMs: 600,
+  bowlCompositionPassDurationMs: 950,
 
   particleGravity: 860,
   particleLifeMs: 800,
@@ -66,7 +66,7 @@ export const CONFIG = {
   overlayTextFont: "400 26px system-ui, sans-serif",
   overlayButtonFont: "700 34px system-ui, sans-serif",
   gameOverFadeMs: 700,
-  restartSwipeDelayMs: 900,
+  restartSwipeDelayMs: 1600,
   openingPromptMs: 1200,
   calibrationHoldMs: 2000,
   calibrationGraceMs: 280,

@@ -33,6 +33,22 @@ const bowl = new BowlSystem();
 const perf = new PerformanceMonitor();
 const environment = new EnvironmentSystem(environmentVideo);
 const compositor = new Compositor(webcam);
+const MODE_DESCRIPTIONS = {
+  [MODES.ENDLESS]: "slow and generous",
+  [MODES.TIMED]: "a bright little rush",
+  [MODES.SUNSET]: "the long golden hour",
+};
+const OVERLAY_COLORS = {
+  cream: "rgba(244, 235, 217, 0.82)",
+  surface: "rgba(244, 235, 217, 0.94)",
+  surfaceSoft: "rgba(244, 235, 217, 0.72)",
+  ink: "#2a1f18",
+  muted: "rgba(42, 31, 24, 0.62)",
+  pandan: "#c5d86d",
+  hibiscus: "#d94423",
+  border: "rgba(42, 31, 24, 0.08)",
+  shadow: "rgba(42, 31, 24, 0.16)",
+};
 
 const game = {
   state: STATES.LOADING,
@@ -47,6 +63,7 @@ const game = {
   flashStrength: 0,
   gameOverAt: 0,
   restartButton: null,
+  restartHoverStartedAt: 0,
   playStartedAt: 0,
   modeEndsAt: Infinity,
   calibrationStartedAt: 0,
@@ -334,6 +351,7 @@ function resetRound(nowMs, mode = game.currentMode) {
   game.flashStrength = 0;
   game.gameOverAt = 0;
   game.restartButton = null;
+  game.restartHoverStartedAt = 0;
   game.modeHover.clear();
   game.calibrationStartedAt = 0;
   game.calibrationMissingSince = 0;
@@ -416,6 +434,7 @@ function beginGameOver(nowMs) {
     return;
   }
   game.gameOverAt = nowMs;
+  game.restartHoverStartedAt = 0;
   bowl.compose(viewport);
   setState(STATES.GAMEOVER, nowMs, "again");
 }
@@ -633,16 +652,36 @@ function updateIdle(dtSeconds, nowMs) {
   }
 }
 
-function updateGameOver(dtSeconds, nowMs) {
+function updateGameOver(dtSeconds, nowMs, hands) {
   for (const particle of game.particles) {
     particle.update(dtSeconds);
   }
   game.particles = game.particles.filter((particle) => !particle.dead);
 
-  const swipeDetected = trails
-    .getSegments()
-    .some((segment) => segment.velocity >= CONFIG.sliceVelocityThreshold * 0.8);
-  if (swipeDetected) {
+  if (!game.restartButton || nowMs - game.gameOverAt < CONFIG.restartSwipeDelayMs) {
+    game.restartHoverStartedAt = 0;
+    return;
+  }
+
+  const hoveringRestart = hands.some(
+    (hand) =>
+      hand.x >= game.restartButton.x &&
+      hand.x <= game.restartButton.x + game.restartButton.width &&
+      hand.y >= game.restartButton.y &&
+      hand.y <= game.restartButton.y + game.restartButton.height
+  );
+
+  if (!hoveringRestart) {
+    game.restartHoverStartedAt = 0;
+    return;
+  }
+
+  if (!game.restartHoverStartedAt) {
+    game.restartHoverStartedAt = nowMs;
+    return;
+  }
+
+  if (nowMs - game.restartHoverStartedAt >= CONFIG.modeHoverMs) {
     restartIfAllowed(nowMs);
   }
 }
@@ -687,48 +726,100 @@ async function updateModeSelect(hands, nowMs) {
 
 function drawGameStatus(sceneCtx, text, subtext = "") {
   sceneCtx.save();
-  sceneCtx.fillStyle = "rgba(0,0,0,0.28)";
+  sceneCtx.fillStyle = OVERLAY_COLORS.cream;
   sceneCtx.fillRect(0, 0, viewport.width, viewport.height);
-  sceneCtx.fillStyle = "#ffffff";
+  const washWidth = Math.min(520, viewport.width - 100);
+  const washHeight = subtext ? 144 : 108;
+  const washX = viewport.width / 2;
+  const washY = viewport.height * 0.31;
+  sceneCtx.shadowColor = OVERLAY_COLORS.shadow;
+  sceneCtx.shadowBlur = 28;
+  sceneCtx.shadowOffsetY = 14;
+  sceneCtx.fillStyle = OVERLAY_COLORS.surfaceSoft;
+  sceneCtx.beginPath();
+  sceneCtx.ellipse(washX, washY, washWidth / 2, washHeight / 2, -0.02, 0, Math.PI * 2);
+  sceneCtx.fill();
+  sceneCtx.shadowColor = "transparent";
+  sceneCtx.fillStyle = OVERLAY_COLORS.ink;
   sceneCtx.textAlign = "center";
   sceneCtx.textBaseline = "middle";
-  sceneCtx.font = "700 54px system-ui, sans-serif";
-  sceneCtx.fillText(text, viewport.width / 2, viewport.height * 0.42);
+  sceneCtx.font = '400 88px "Reenie Beanie", cursive';
+  sceneCtx.fillText(text, viewport.width / 2, viewport.height * 0.29);
   if (subtext) {
-    sceneCtx.font = "400 22px system-ui, sans-serif";
-    sceneCtx.fillText(subtext, viewport.width / 2, viewport.height * 0.49);
+    sceneCtx.fillStyle = OVERLAY_COLORS.muted;
+    sceneCtx.font = '400 italic 22px "Fraunces", Georgia, serif';
+    sceneCtx.fillText(subtext, viewport.width / 2, viewport.height * 0.36);
   }
+  sceneCtx.strokeStyle = OVERLAY_COLORS.pandan;
+  sceneCtx.lineWidth = 6;
+  sceneCtx.lineCap = "round";
+  sceneCtx.beginPath();
+  sceneCtx.moveTo(viewport.width / 2 - 96, viewport.height * 0.337);
+  sceneCtx.quadraticCurveTo(
+    viewport.width / 2 - 8,
+    viewport.height * 0.365,
+    viewport.width / 2 + 94,
+    viewport.height * 0.332
+  );
+  sceneCtx.stroke();
+  sceneCtx.fillStyle = OVERLAY_COLORS.hibiscus;
+  sceneCtx.beginPath();
+  sceneCtx.arc(viewport.width / 2 + 126, viewport.height * 0.25, 4, 0, Math.PI * 2);
+  sceneCtx.fill();
   sceneCtx.restore();
 }
 
 function renderModeSelect(sceneCtx, hands) {
-  drawGameStatus(sceneCtx, "choose a mode", "hover over one to begin");
+  drawGameStatus(sceneCtx, "choose a mode", "rest your hand on one to begin");
   for (const button of getModeButtons()) {
     const activeStarted = game.modeHover.get(button.mode);
     const hoverProgress = activeStarted
       ? Math.min(1, (performance.now() - activeStarted) / CONFIG.modeHoverMs)
       : 0;
     sceneCtx.save();
-    sceneCtx.fillStyle = `rgba(255,255,255,${0.1 + hoverProgress * 0.18})`;
-    sceneCtx.strokeStyle = `rgba(255,255,255,${0.24 + hoverProgress * 0.4})`;
-    sceneCtx.lineWidth = 2;
-    sceneCtx.fillRect(button.x, button.y, button.width, button.height);
-    sceneCtx.strokeRect(button.x, button.y, button.width, button.height);
-    sceneCtx.fillStyle = "#ffffff";
+    sceneCtx.translate(button.x + button.width / 2, button.y + button.height / 2);
+    sceneCtx.rotate((button.mode === MODES.TIMED ? 0.01 : button.mode === MODES.SUNSET ? -0.014 : -0.02));
+    sceneCtx.shadowColor = OVERLAY_COLORS.shadow;
+    sceneCtx.shadowBlur = 22;
+    sceneCtx.shadowOffsetY = 12;
+    sceneCtx.fillStyle = hoverProgress > 0
+      ? `rgba(197, 216, 109, ${0.54 + hoverProgress * 0.22})`
+      : OVERLAY_COLORS.surfaceSoft;
+    sceneCtx.beginPath();
+    sceneCtx.ellipse(0, 0, button.width * 0.48, button.height * 0.46, 0, 0, Math.PI * 2);
+    sceneCtx.fill();
+    sceneCtx.shadowColor = "transparent";
+    sceneCtx.fillStyle = "rgba(255,255,255,0.24)";
+    sceneCtx.globalAlpha = 0.4;
+    sceneCtx.beginPath();
+    sceneCtx.ellipse(-button.width * 0.06, -button.height * 0.06, button.width * 0.18, button.height * 0.12, 0, 0, Math.PI * 2);
+    sceneCtx.fill();
+    sceneCtx.globalAlpha = 1;
+    sceneCtx.fillStyle = OVERLAY_COLORS.ink;
     sceneCtx.textAlign = "center";
     sceneCtx.textBaseline = "middle";
-    sceneCtx.font = "700 30px system-ui, sans-serif";
+    sceneCtx.font = '400 58px "Reenie Beanie", cursive';
     sceneCtx.fillText(
       MODE_META[button.mode].label,
-      button.x + button.width / 2,
-      button.y + button.height / 2 - 10
+      0,
+      -10
     );
-    sceneCtx.font = "400 16px system-ui, sans-serif";
+    sceneCtx.font = '400 italic 18px "Fraunces", Georgia, serif';
+    sceneCtx.fillStyle = OVERLAY_COLORS.muted;
     sceneCtx.fillText(
-      MODE_META[button.mode].subtitle,
-      button.x + button.width / 2,
-      button.y + button.height / 2 + 18
+      MODE_DESCRIPTIONS[button.mode],
+      0,
+      26
     );
+    if (hoverProgress > 0) {
+      sceneCtx.strokeStyle = OVERLAY_COLORS.pandan;
+      sceneCtx.lineWidth = 6;
+      sceneCtx.lineCap = "round";
+      sceneCtx.beginPath();
+      sceneCtx.moveTo(-56, 12);
+      sceneCtx.quadraticCurveTo(0, 28, 54, 10);
+      sceneCtx.stroke();
+    }
     sceneCtx.restore();
   }
 }
@@ -863,16 +954,27 @@ function renderScene(nowMs, hands, frame, segmentation) {
     drawGameStatus(sceneCtx, "resting", "move to continue");
   } else if (game.state === STATES.GAMEOVER) {
     sceneCtx.save();
-    sceneCtx.fillStyle = "rgba(0,0,0,0.34)";
+    sceneCtx.fillStyle = "rgba(42,31,24,0.1)";
     sceneCtx.fillRect(0, 0, viewport.width, viewport.height);
     sceneCtx.restore();
-    bowl.render(sceneCtx, viewport, nowMs, game.gameOverAt, game.score);
     game.restartButton = {
-      x: viewport.width / 2 - 110,
+      x: viewport.width / 2 - 118,
       y: viewport.height * CONFIG.bowlCenterYRatio + CONFIG.bowlRadius + 28,
-      width: 220,
-      height: 60,
+      width: 236,
+      height: 66,
     };
+    const restartProgress = game.restartHoverStartedAt
+      ? Math.min(1, (nowMs - game.restartHoverStartedAt) / CONFIG.modeHoverMs)
+      : 0;
+    bowl.render(
+      sceneCtx,
+      viewport,
+      nowMs,
+      game.gameOverAt,
+      game.score,
+      game.restartButton,
+      restartProgress
+    );
   } else if (game.state === STATES.ERROR || game.state === STATES.LOADING) {
     drawGameStatus(sceneCtx, game.statusText);
   }
@@ -926,7 +1028,7 @@ async function animate(nowMs) {
     } else if (game.state === STATES.IDLE) {
       updateIdle(dtSeconds, nowMs);
     } else if (game.state === STATES.GAMEOVER) {
-      updateGameOver(dtSeconds, nowMs);
+      updateGameOver(dtSeconds, nowMs, hands);
     }
 
     audio.setAmbientTarget(
