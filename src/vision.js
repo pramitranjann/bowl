@@ -332,91 +332,149 @@ export class HandTracker {
       const landmarks = result.landmarks ?? [];
       const handedness = result.handedness ?? [];
       const usedIds = new Set();
+      const acceptedHandAnchors = [];
 
-      const detectedHands = landmarks.map((points, index) => {
-        const tip = points[8];
-        const base = points[7];
-        const label = handedness[index]?.[0]?.categoryName ?? `Hand ${index + 1}`;
-        const color = CONFIG.handColors[label] ?? CONFIG.handColors.default;
-        const frameX = cameraFrame?.x ?? 0;
-        const frameY = cameraFrame?.y ?? 0;
-        const frameWidth = cameraFrame?.width ?? this.video.videoWidth;
-        const frameHeight = cameraFrame?.height ?? this.video.videoHeight;
-        const rawX = frameX + (1 - tip.x) * frameWidth;
-        const rawY = frameY + tip.y * frameHeight;
-        const rawBaseX = frameX + (1 - base.x) * frameWidth;
-        const rawBaseY = frameY + base.y * frameHeight;
-        const id = this.resolveHandId(rawX, rawY, usedIds);
-        usedIds.add(id);
-        const previous = this.smoothedHands.get(id);
-        const previousDetectedAt = previous?.detectedAt ?? nowMs - 16;
-        const dtMs = Math.max(1, nowMs - previousDetectedAt);
-        const rawVelocity =
-          previous
-            ? (Math.hypot(rawX - previous.rawX, rawY - previous.rawY) / dtMs) * 1000
-            : CONFIG.handFastVelocity ?? 900;
-        const fastMotion = clamp01(rawVelocity / Math.max(1, CONFIG.handFastVelocity ?? 900));
-        const smoothing = previous
-          ? lerp(
-              CONFIG.handSmoothing ?? 0.42,
-              CONFIG.handFastSmoothing ?? 0.78,
-              fastMotion
+      const detectedHands = landmarks
+        .map((points, index) => {
+          const tip = points[8];
+          const base = points[7];
+          const label =
+            handedness[index]?.[0]?.categoryName ?? `Hand ${index + 1}`;
+          const color = CONFIG.handColors[label] ?? CONFIG.handColors.default;
+          const frameX = cameraFrame?.x ?? 0;
+          const frameY = cameraFrame?.y ?? 0;
+          const frameWidth = cameraFrame?.width ?? this.video.videoWidth;
+          const frameHeight = cameraFrame?.height ?? this.video.videoHeight;
+          const rawX = frameX + (1 - tip.x) * frameWidth;
+          const rawY = frameY + tip.y * frameHeight;
+          const rawBaseX = frameX + (1 - base.x) * frameWidth;
+          const rawBaseY = frameY + base.y * frameHeight;
+          const confidence =
+            handedness[index]?.[0]?.score ??
+            handedness[index]?.[0]?.confidence ??
+            0;
+          return {
+            points,
+            label,
+            color,
+            rawX,
+            rawY,
+            rawBaseX,
+            rawBaseY,
+            confidence,
+          };
+        })
+        .sort((a, b) => b.confidence - a.confidence)
+        .flatMap((candidate) => {
+          if (
+            acceptedHandAnchors.some(
+              (anchor) =>
+                pointDistance(
+                  { x: candidate.rawX, y: candidate.rawY },
+                  anchor
+                ) < (CONFIG.minHandSeparation ?? 110)
             )
-          : 1;
-        const x = previous ? previous.x + (rawX - previous.x) * smoothing : rawX;
-        const y = previous ? previous.y + (rawY - previous.y) * smoothing : rawY;
-        const baseX = previous
-          ? previous.baseX + (rawBaseX - previous.baseX) * smoothing
-          : rawBaseX;
-        const baseY = previous
-          ? previous.baseY + (rawBaseY - previous.baseY) * smoothing
-          : rawBaseY;
-        const rawDirection = normalizeVector(rawX - rawBaseX, rawY - rawBaseY);
-        const direction = normalizeVector(x - baseX, y - baseY);
-        const rawNormal = { x: -rawDirection.y, y: rawDirection.x };
-        const normal = { x: -direction.y, y: direction.x };
-        const rawBladeCenterX = rawX - rawDirection.x * CONFIG.sliceBladeBackOffset;
-        const rawBladeCenterY = rawY - rawDirection.y * CONFIG.sliceBladeBackOffset;
-        const bladeCenterX = x - direction.x * CONFIG.sliceBladeBackOffset;
-        const bladeCenterY = y - direction.y * CONFIG.sliceBladeBackOffset;
-        const velocityX = previous ? (rawX - previous.rawX) / (dtMs / 1000) : 0;
-        const velocityY = previous ? (rawY - previous.rawY) / (dtMs / 1000) : 0;
-        const baseVelocityX = previous ? (rawBaseX - previous.rawBaseX) / (dtMs / 1000) : 0;
-        const baseVelocityY = previous ? (rawBaseY - previous.rawBaseY) / (dtMs / 1000) : 0;
-        const hand = {
-          id,
-          label,
-          color,
-          x,
-          y,
-          baseX,
-          baseY,
-          rawX,
-          rawY,
-          rawBaseX,
-          rawBaseY,
-          bladeStartX: bladeCenterX - normal.x * CONFIG.sliceBladeHalfWidth,
-          bladeStartY: bladeCenterY - normal.y * CONFIG.sliceBladeHalfWidth,
-          bladeEndX: bladeCenterX + normal.x * CONFIG.sliceBladeHalfWidth,
-          bladeEndY: bladeCenterY + normal.y * CONFIG.sliceBladeHalfWidth,
-          rawBladeStartX:
-            rawBladeCenterX - rawNormal.x * CONFIG.sliceBladeHalfWidth,
-          rawBladeStartY:
-            rawBladeCenterY - rawNormal.y * CONFIG.sliceBladeHalfWidth,
-          rawBladeEndX:
-            rawBladeCenterX + rawNormal.x * CONFIG.sliceBladeHalfWidth,
-          rawBladeEndY:
-            rawBladeCenterY + rawNormal.y * CONFIG.sliceBladeHalfWidth,
-          velocityX,
-          velocityY,
-          baseVelocityX,
-          baseVelocityY,
-          z: tip.z,
-          detectedAt: nowMs,
-        };
-        this.smoothedHands.set(id, hand);
-        return hand;
-      });
+          ) {
+            return [];
+          }
+          acceptedHandAnchors.push({ x: candidate.rawX, y: candidate.rawY });
+
+          const tip = candidate.points[8];
+          const id = this.resolveHandId(candidate.rawX, candidate.rawY, usedIds);
+          usedIds.add(id);
+          const previous = this.smoothedHands.get(id);
+          const previousDetectedAt = previous?.detectedAt ?? nowMs - 16;
+          const dtMs = Math.max(1, nowMs - previousDetectedAt);
+          const rawVelocity =
+            previous
+              ? (Math.hypot(
+                  candidate.rawX - previous.rawX,
+                  candidate.rawY - previous.rawY
+                ) /
+                  dtMs) *
+                1000
+              : CONFIG.handFastVelocity ?? 900;
+          const fastMotion = clamp01(
+            rawVelocity / Math.max(1, CONFIG.handFastVelocity ?? 900)
+          );
+          const smoothing = previous
+            ? lerp(
+                CONFIG.handSmoothing ?? 0.42,
+                CONFIG.handFastSmoothing ?? 0.78,
+                fastMotion
+              )
+            : 1;
+          const x = previous
+            ? previous.x + (candidate.rawX - previous.x) * smoothing
+            : candidate.rawX;
+          const y = previous
+            ? previous.y + (candidate.rawY - previous.y) * smoothing
+            : candidate.rawY;
+          const baseX = previous
+            ? previous.baseX + (candidate.rawBaseX - previous.baseX) * smoothing
+            : candidate.rawBaseX;
+          const baseY = previous
+            ? previous.baseY + (candidate.rawBaseY - previous.baseY) * smoothing
+            : candidate.rawBaseY;
+          const rawDirection = normalizeVector(
+            candidate.rawX - candidate.rawBaseX,
+            candidate.rawY - candidate.rawBaseY
+          );
+          const direction = normalizeVector(x - baseX, y - baseY);
+          const rawNormal = { x: -rawDirection.y, y: rawDirection.x };
+          const normal = { x: -direction.y, y: direction.x };
+          const rawBladeCenterX =
+            candidate.rawX - rawDirection.x * CONFIG.sliceBladeBackOffset;
+          const rawBladeCenterY =
+            candidate.rawY - rawDirection.y * CONFIG.sliceBladeBackOffset;
+          const bladeCenterX = x - direction.x * CONFIG.sliceBladeBackOffset;
+          const bladeCenterY = y - direction.y * CONFIG.sliceBladeBackOffset;
+          const velocityX = previous
+            ? (candidate.rawX - previous.rawX) / (dtMs / 1000)
+            : 0;
+          const velocityY = previous
+            ? (candidate.rawY - previous.rawY) / (dtMs / 1000)
+            : 0;
+          const baseVelocityX = previous
+            ? (candidate.rawBaseX - previous.rawBaseX) / (dtMs / 1000)
+            : 0;
+          const baseVelocityY = previous
+            ? (candidate.rawBaseY - previous.rawBaseY) / (dtMs / 1000)
+            : 0;
+          const hand = {
+            id,
+            label: candidate.label,
+            color: candidate.color,
+            x,
+            y,
+            baseX,
+            baseY,
+            rawX: candidate.rawX,
+            rawY: candidate.rawY,
+            rawBaseX: candidate.rawBaseX,
+            rawBaseY: candidate.rawBaseY,
+            bladeStartX: bladeCenterX - normal.x * CONFIG.sliceBladeHalfWidth,
+            bladeStartY: bladeCenterY - normal.y * CONFIG.sliceBladeHalfWidth,
+            bladeEndX: bladeCenterX + normal.x * CONFIG.sliceBladeHalfWidth,
+            bladeEndY: bladeCenterY + normal.y * CONFIG.sliceBladeHalfWidth,
+            rawBladeStartX:
+              rawBladeCenterX - rawNormal.x * CONFIG.sliceBladeHalfWidth,
+            rawBladeStartY:
+              rawBladeCenterY - rawNormal.y * CONFIG.sliceBladeHalfWidth,
+            rawBladeEndX:
+              rawBladeCenterX + rawNormal.x * CONFIG.sliceBladeHalfWidth,
+            rawBladeEndY:
+              rawBladeCenterY + rawNormal.y * CONFIG.sliceBladeHalfWidth,
+            velocityX,
+            velocityY,
+            baseVelocityX,
+            baseVelocityY,
+            z: tip.z,
+            detectedAt: nowMs,
+          };
+          this.smoothedHands.set(id, hand);
+          return [hand];
+        });
 
       for (const [id, previous] of this.smoothedHands.entries()) {
         if (detectedHands.some((hand) => hand.id === id)) {

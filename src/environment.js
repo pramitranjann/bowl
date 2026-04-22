@@ -140,6 +140,17 @@ export class EnvironmentSystem {
   }
 
   update(nowMs, dtSeconds, { idle, mode, sunsetProgress, liteMode }) {
+    if (mode === MODES.SUNSET) {
+      if (this.video.paused && !this.video.ended) {
+        this.requestPlayback(true);
+      } else if (
+        this.hasVideoFrame() &&
+        nowMs - this.lastVideoAdvanceAt > CONFIG.environmentPlaybackStallMs
+      ) {
+        this.requestPlayback(true);
+      }
+    }
+
     if (
       this.video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
       Math.abs(this.video.currentTime - this.lastVideoTime) >=
