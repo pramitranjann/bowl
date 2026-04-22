@@ -69,6 +69,7 @@ export const CONFIG = {
   restartSwipeDelayMs: 900,
   openingPromptMs: 1200,
   calibrationHoldMs: 2000,
+  calibrationGraceMs: 280,
   modeHoverMs: 900,
   endlessLives: 3,
   timedDurationMs: 90_000,

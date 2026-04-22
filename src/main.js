@@ -50,6 +50,8 @@ const game = {
   playStartedAt: 0,
   modeEndsAt: Infinity,
   calibrationStartedAt: 0,
+  calibrationMissingSince: 0,
+  calibrationProgressMs: 0,
   modeHover: new Map(),
   uiButtonHover: new Map(),
   lastMovementAt: performance.now(),
@@ -288,6 +290,8 @@ function goBack(nowMs) {
     trails.clear();
     game.modeHover.clear();
     game.calibrationStartedAt = 0;
+    game.calibrationMissingSince = 0;
+    game.calibrationProgressMs = 0;
     setState(STATES.OPENING, nowMs, "raise your hands");
   }
 }
@@ -331,6 +335,9 @@ function resetRound(nowMs, mode = game.currentMode) {
   game.gameOverAt = 0;
   game.restartButton = null;
   game.modeHover.clear();
+  game.calibrationStartedAt = 0;
+  game.calibrationMissingSince = 0;
+  game.calibrationProgressMs = 0;
   game.lastHandSnapshot.clear();
   game.lastMovementAt = nowMs;
   game.slowMotionUntil = 0;
@@ -351,7 +358,41 @@ function resetRound(nowMs, mode = game.currentMode) {
 function beginCalibration(nowMs) {
   setState(STATES.CALIBRATION, nowMs, "raise your hand");
   game.calibrationStartedAt = 0;
+  game.calibrationMissingSince = 0;
+  game.calibrationProgressMs = 0;
   game.modeHover.clear();
+}
+
+function updateCalibration(nowMs, hands) {
+  if (hands.length > 0) {
+    game.calibrationMissingSince = 0;
+    if (!game.calibrationStartedAt) {
+      game.calibrationStartedAt = nowMs;
+    }
+    game.calibrationProgressMs = Math.min(
+      CONFIG.calibrationHoldMs,
+      nowMs - game.calibrationStartedAt
+    );
+    if (game.calibrationProgressMs >= CONFIG.calibrationHoldMs) {
+      game.modeHover.clear();
+      setState(STATES.MODE_SELECT, nowMs, "");
+    }
+    return;
+  }
+
+  if (!game.calibrationMissingSince) {
+    game.calibrationMissingSince = nowMs;
+    return;
+  }
+
+  const missingForMs = nowMs - game.calibrationMissingSince;
+  if (missingForMs <= CONFIG.calibrationGraceMs) {
+    return;
+  }
+
+  game.calibrationStartedAt = 0;
+  game.calibrationMissingSince = 0;
+  game.calibrationProgressMs = 0;
 }
 
 async function startMode(mode, nowMs) {
@@ -808,7 +849,14 @@ function renderScene(nowMs, hands, frame, segmentation) {
   if (game.state === STATES.OPENING) {
     drawGameStatus(sceneCtx, "raise your hands", "enter the frame");
   } else if (game.state === STATES.CALIBRATION) {
-    drawGameStatus(sceneCtx, "hold steady", "calibrating");
+    const percent = Math.round(
+      (game.calibrationProgressMs / CONFIG.calibrationHoldMs) * 100
+    );
+    drawGameStatus(
+      sceneCtx,
+      "hold steady",
+      percent > 0 ? `calibrating ${percent}%` : "calibrating"
+    );
   } else if (game.state === STATES.MODE_SELECT) {
     renderModeSelect(sceneCtx, hands);
   } else if (game.state === STATES.IDLE) {
@@ -870,17 +918,7 @@ async function animate(nowMs) {
         beginCalibration(nowMs);
       }
     } else if (game.state === STATES.CALIBRATION) {
-      if (hands.length === 0) {
-        game.calibrationStartedAt = 0;
-      } else {
-        if (!game.calibrationStartedAt) {
-          game.calibrationStartedAt = nowMs;
-        }
-        if (nowMs - game.calibrationStartedAt >= CONFIG.calibrationHoldMs) {
-          game.modeHover.clear();
-          setState(STATES.MODE_SELECT, nowMs, "");
-        }
-      }
+      updateCalibration(nowMs, hands);
     } else if (game.state === STATES.MODE_SELECT) {
       await updateModeSelect(hands, nowMs);
     } else if (game.state === STATES.PLAY) {
