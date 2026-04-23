@@ -15,6 +15,9 @@ export class AudioEngine {
     this.durianOscillators = [];
     this.durianNoiseSource = null;
     this.durianFilter = null;
+    this.muted = false;
+    this.ambientTarget = 0.0001;
+    this.durianWarningActive = false;
   }
 
   ensureContext() {
@@ -34,7 +37,7 @@ export class AudioEngine {
       this.compressor.release.value = 0.28;
 
       this.master = this.context.createGain();
-      this.master.gain.value = 0.82;
+      this.master.gain.value = 0.96;
 
       this.masterFilter = this.context.createBiquadFilter();
       this.masterFilter.type = "lowpass";
@@ -114,7 +117,7 @@ export class AudioEngine {
       osc.detune.value = index === 2 ? 6 : index === 0 ? -4 : 0;
 
       toneShape.gain.value = index === 1 ? 0.22 : 1;
-      voiceGain.gain.value = [0.021, 0.011, 0.008][index];
+      voiceGain.gain.value = [0.048, 0.026, 0.018][index];
 
       filter.type = "lowpass";
       filter.frequency.value = 720 - index * 120;
@@ -130,7 +133,7 @@ export class AudioEngine {
       const lfoDepth = ctx.createGain();
       lfo.type = "sine";
       lfo.frequency.value = 0.045 + index * 0.018;
-      lfoDepth.gain.value = 0.004 + index * 0.0016;
+      lfoDepth.gain.value = 0.008 + index * 0.0024;
       lfo.connect(lfoDepth);
       lfoDepth.connect(voiceGain.gain);
       lfo.start();
@@ -145,7 +148,7 @@ export class AudioEngine {
     surfFilter.Q.value = 0.4;
 
     const surfGain = ctx.createGain();
-    surfGain.gain.value = 0.013;
+    surfGain.gain.value = 0.028;
     surfFilter.connect(surfGain);
     surfGain.connect(this.ambientGain);
 
@@ -204,7 +207,7 @@ export class AudioEngine {
 
   playSlice(intensity = 1) {
     const ctx = this.ensureContext();
-    if (!ctx) {
+    if (!ctx || this.muted) {
       return;
     }
 
@@ -278,7 +281,8 @@ export class AudioEngine {
 
     this.ensureAmbient();
     const now = ctx.currentTime;
-    const nextLevel = Math.max(0.0001, level);
+    this.ambientTarget = Math.max(0.0001, level);
+    const nextLevel = this.muted ? 0.0001 : this.ambientTarget;
 
     this.ambientGain.gain.cancelScheduledValues(now);
     this.ambientGain.gain.setValueAtTime(this.ambientGain.gain.value, now);
@@ -287,7 +291,7 @@ export class AudioEngine {
     this.master.gain.cancelScheduledValues(now);
     this.master.gain.setValueAtTime(this.master.gain.value, now);
     this.master.gain.linearRampToValueAtTime(
-      Math.min(0.9, 0.78 + nextLevel * 0.7),
+      this.muted ? 0.0001 : Math.min(0.9, 0.78 + nextLevel * 0.7),
       now + 0.42
     );
   }
@@ -300,21 +304,29 @@ export class AudioEngine {
 
     this.ensureAmbient();
     const now = ctx.currentTime;
+    this.durianWarningActive = active;
+    const warningLevel = !this.muted && active;
 
     this.durianGain.gain.cancelScheduledValues(now);
     this.durianGain.gain.setValueAtTime(this.durianGain.gain.value, now);
     this.durianGain.gain.linearRampToValueAtTime(
-      active ? 0.05 : 0.0001,
-      now + (active ? 0.12 : 0.2)
+      warningLevel ? 0.05 : 0.0001,
+      now + (warningLevel ? 0.12 : 0.2)
     );
 
     if (this.durianFilter) {
       this.durianFilter.frequency.cancelScheduledValues(now);
       this.durianFilter.frequency.setValueAtTime(this.durianFilter.frequency.value, now);
       this.durianFilter.frequency.linearRampToValueAtTime(
-        active ? 420 : 320,
+        warningLevel ? 420 : 320,
         now + 0.18
       );
     }
+  }
+
+  setMuted(muted) {
+    this.muted = muted;
+    this.setAmbientTarget(this.ambientTarget);
+    this.setDurianWarning(this.durianWarningActive);
   }
 }

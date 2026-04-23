@@ -7,7 +7,6 @@ import { EnvironmentSystem } from "./environment.js";
 import { createDurianBurst, createJuiceBurst } from "./particles.js";
 import { splitFruit } from "./entities.js";
 import { applyHaze } from "./haze.js";
-import { renderHud } from "./hud.js";
 import { PerformanceMonitor } from "./perf.js";
 import { updateBody, isBodyOffscreen } from "./physics.js";
 import { detectSlices } from "./slice.js";
@@ -21,10 +20,45 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const webcam = document.getElementById("webcam");
 const environmentVideo = document.getElementById("environment");
-const navControls = document.getElementById("nav-controls");
-const navBackButton = document.getElementById("nav-back");
-const navRestartButton = document.getElementById("nav-restart");
-const trackedUiButtons = [navBackButton, navRestartButton];
+const ui = {
+  root: document.getElementById("ui-root"),
+  brandButton: document.getElementById("ui-brand-button"),
+  homeButton: document.getElementById("ui-home"),
+  settingsButton: document.getElementById("ui-settings"),
+  soundButton: document.getElementById("ui-sound"),
+  menuToggleButton: document.getElementById("ui-menu-toggle"),
+  openingScreen: document.getElementById("screen-opening"),
+  calibrationScreen: document.getElementById("screen-calibration"),
+  modeSelectScreen: document.getElementById("screen-mode-select"),
+  countdownScreen: document.getElementById("screen-countdown"),
+  idleScreen: document.getElementById("screen-idle"),
+  errorScreen: document.getElementById("screen-error"),
+  statusLine: document.getElementById("ui-status-line"),
+  statusDetail: document.getElementById("ui-status-detail"),
+  errorMessage: document.getElementById("ui-error-message"),
+  playHud: document.getElementById("play-hud"),
+  scoreValue: document.getElementById("ui-score-value"),
+  timerPill: document.getElementById("ui-timer-pill"),
+  timerValue: document.getElementById("ui-timer-value"),
+  modeValue: document.getElementById("ui-mode-value"),
+  durianValue: document.getElementById("ui-durian-value"),
+  countdownValue: document.getElementById("ui-countdown-value"),
+  gameoverActions: document.getElementById("gameover-actions"),
+  idleRestartButton: document.getElementById("ui-idle-restart"),
+  errorRetryButton: document.getElementById("ui-error-retry"),
+  gameoverRestartButton: document.getElementById("ui-gameover-restart"),
+  gameoverShareButton: document.getElementById("ui-gameover-share"),
+  shareModal: document.getElementById("share-modal"),
+  sharePreview: document.getElementById("ui-share-preview"),
+  shareCloseX: document.getElementById("ui-share-close-x"),
+  shareCloseButton: document.getElementById("ui-share-close"),
+  shareDownloadButton: document.getElementById("ui-share-download"),
+  modeButtons: [...document.querySelectorAll("#mode-panel-modes [data-mode]")],
+  worldButtons: [...document.querySelectorAll("[data-world]")],
+  worldsPanel: document.getElementById("mode-panel-worlds"),
+  modesPanel: document.getElementById("mode-panel-modes"),
+  worldNote: document.getElementById("ui-world-note"),
+};
 
 const audio = new AudioEngine();
 const tracker = new HandTracker(webcam);
@@ -78,6 +112,11 @@ const game = {
   segmentation: null,
   liteMode: false,
   forceLiteMode: false,
+  soundMuted: false,
+  sharePreviewUrl: "",
+  menuPanel: "modes",
+  currentWorld: "sunset",
+  countdownEndsAt: 0,
 };
 
 const metrics = {
@@ -91,8 +130,66 @@ const viewport = {
   dpr: Math.min(window.devicePixelRatio || 1, 2),
 };
 
+const WORLD_META = {
+  sunset: {
+    label: "Sunset",
+    note: "sunset is the signature ritual",
+  },
+  "two-player": {
+    label: "2 Player",
+    note: "two hands, shared bowl, same slice field",
+  },
+  beach: {
+    label: "Beach",
+    note: "the beach world keeps the room airy and bright",
+  },
+};
+
+const LOADING_STEPS = [
+  {
+    line: "sharpening your blade....",
+    detail: "letting the camera find the light",
+  },
+  {
+    line: "cooling the coconuts....",
+    detail: "steadying the shoreline behind you",
+  },
+  {
+    line: "setting out the bowl....",
+    detail: "waking the fruit one by one",
+  },
+  {
+    line: "warming the tide....",
+    detail: "making room for your hands",
+  },
+];
+
+const STARTUP_LOADING_MS = 4200;
+const LOADING_STEP_MS = 1050;
+const COUNTDOWN_DURATION_MS = 4000;
+
 let lastFrameMs = performance.now();
 let startupComplete = false;
+
+function formatRemaining(ms) {
+  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = `${totalSeconds % 60}`.padStart(2, "0");
+  return `${minutes}:${seconds}`;
+}
+
+function getLoadingCopy(nowMs = performance.now()) {
+  const index = Math.min(
+    LOADING_STEPS.length - 1,
+    Math.floor(Math.max(0, nowMs - game.stateSince) / LOADING_STEP_MS)
+  );
+  return LOADING_STEPS[index];
+}
+
+function getCountdownValue(nowMs = performance.now()) {
+  const remainingMs = Math.max(0, game.countdownEndsAt - nowMs);
+  return Math.max(0, Math.ceil(remainingMs / 1000) - 1);
+}
 
 function normalizeSafariLoopbackOrigin() {
   const isSafari =
@@ -165,67 +262,130 @@ function setState(state, nowMs, statusText = game.statusText) {
   game.state = state;
   game.stateSince = nowMs;
   game.statusText = statusText;
-  updateNavControls();
+  if (state !== STATES.GAMEOVER) {
+    closeShareModal();
+  }
+  updateUiState(nowMs);
 }
 
-function getNavControlState() {
-  switch (game.state) {
-    case STATES.CALIBRATION:
-      return {
-        visible: true,
-        backLabel: "intro",
-        showBack: true,
-        restartLabel: "restart",
-        showRestart: true,
-      };
-    case STATES.MODE_SELECT:
-      return {
-        visible: true,
-        backLabel: "camera",
-        showBack: true,
-        restartLabel: "",
-        showRestart: false,
-      };
-    case STATES.PLAY:
-    case STATES.IDLE:
-    case STATES.GAMEOVER:
-      return {
-        visible: true,
-        backLabel: "modes",
-        showBack: true,
-        restartLabel: "restart",
-        showRestart: true,
-      };
-    case STATES.ERROR:
-      return {
-        visible: true,
-        backLabel: "intro",
-        showBack: true,
-        restartLabel: "retry",
-        showRestart: true,
-      };
-    default:
-      return {
-        visible: false,
-        backLabel: "",
-        showBack: false,
-        restartLabel: "",
-        showRestart: false,
-      };
-  }
+function updateMenuPanel() {
+  const showingWorlds = game.menuPanel === "worlds";
+  ui.root.dataset.menuPanel = game.menuPanel;
+  ui.modesPanel.hidden = showingWorlds;
+  ui.worldsPanel.hidden = !showingWorlds;
+  ui.menuToggleButton.textContent = showingWorlds ? "Modes" : "Worlds";
 }
 
-function updateNavControls() {
-  const controls = getNavControlState();
-  navControls.hidden = !controls.visible;
-  navBackButton.hidden = !controls.showBack;
-  navRestartButton.hidden = !controls.showRestart;
-  if (controls.showBack) {
-    navBackButton.textContent = controls.backLabel;
+function updateWorldSelectionUi() {
+  for (const button of ui.worldButtons) {
+    button.classList.toggle("is-active", button.dataset.world === game.currentWorld);
   }
-  if (controls.showRestart) {
-    navRestartButton.textContent = controls.restartLabel;
+  ui.worldNote.textContent = WORLD_META[game.currentWorld]?.note ?? "";
+}
+
+function openShareModal() {
+  try {
+    game.sharePreviewUrl = canvas.toDataURL("image/png");
+    ui.sharePreview.style.backgroundImage = `url("${game.sharePreviewUrl}")`;
+  } catch (error) {
+    console.warn("Unable to snapshot share preview", error);
+    game.sharePreviewUrl = "";
+    ui.sharePreview.style.backgroundImage = "";
   }
+  ui.shareModal.hidden = false;
+  resetAllTrackedUiButtons();
+}
+
+function closeShareModal() {
+  ui.shareModal.hidden = true;
+  resetAllTrackedUiButtons();
+}
+
+function downloadSharePreview() {
+  if (!game.sharePreviewUrl) {
+    openShareModal();
+  }
+  if (!game.sharePreviewUrl) {
+    return;
+  }
+  const anchor = document.createElement("a");
+  anchor.href = game.sharePreviewUrl;
+  anchor.download = `bowl-${Date.now()}.png`;
+  anchor.click();
+}
+
+function setSoundMuted(muted) {
+  game.soundMuted = muted;
+  audio.setMuted(muted);
+  ui.soundButton.classList.toggle("is-muted", muted);
+  ui.soundButton.setAttribute("aria-label", muted ? "Unmute sound" : "Mute sound");
+}
+
+function updateUiState(nowMs = performance.now()) {
+  const sceneMap = {
+    [STATES.OPENING]: "opening",
+    [STATES.CALIBRATION]: "calibration",
+    [STATES.MODE_SELECT]: "mode-select",
+    [STATES.COUNTDOWN]: "countdown",
+    [STATES.PLAY]: "play",
+    [STATES.IDLE]: "idle",
+    [STATES.GAMEOVER]: "gameover",
+    [STATES.ERROR]: "error",
+    [STATES.LOADING]: "loading",
+  };
+
+  ui.root.dataset.scene = sceneMap[game.state] ?? "play";
+  ui.openingScreen.hidden = game.state !== STATES.OPENING;
+  ui.calibrationScreen.hidden =
+    game.state !== STATES.CALIBRATION && game.state !== STATES.LOADING;
+  ui.modeSelectScreen.hidden = game.state !== STATES.MODE_SELECT;
+  ui.countdownScreen.hidden = game.state !== STATES.COUNTDOWN;
+  ui.idleScreen.hidden = game.state !== STATES.IDLE;
+  ui.errorScreen.hidden = game.state !== STATES.ERROR;
+  ui.playHud.hidden = game.state !== STATES.PLAY;
+  ui.gameoverActions.hidden = game.state !== STATES.GAMEOVER;
+  ui.brandButton.hidden =
+    game.state === STATES.CALIBRATION || game.state === STATES.LOADING;
+  ui.homeButton.hidden = !(
+    game.state === STATES.PLAY ||
+    game.state === STATES.IDLE ||
+    game.state === STATES.GAMEOVER
+  );
+  ui.settingsButton.hidden = game.state !== STATES.MODE_SELECT;
+  ui.soundButton.hidden = !(
+    game.state === STATES.MODE_SELECT ||
+    game.state === STATES.COUNTDOWN ||
+    game.state === STATES.PLAY ||
+    game.state === STATES.IDLE ||
+    game.state === STATES.GAMEOVER
+  );
+  ui.menuToggleButton.hidden = game.state !== STATES.MODE_SELECT;
+
+  if (game.state === STATES.LOADING) {
+    const loadingCopy = getLoadingCopy(nowMs);
+    ui.statusLine.textContent = loadingCopy.line;
+    ui.statusDetail.textContent = loadingCopy.detail;
+  } else if (game.state === STATES.CALIBRATION) {
+    ui.statusLine.textContent = "sharpening your blade....";
+    ui.statusDetail.textContent = game.calibrationProgressMs > 0
+      ? `steady... ${Math.round(
+          (game.calibrationProgressMs / CONFIG.calibrationHoldMs) * 100
+        )}%`
+      : "finding your hand";
+  } else {
+    ui.statusLine.textContent = "sharpening your blade....";
+    ui.statusDetail.textContent = game.statusText;
+  }
+  ui.errorMessage.textContent = game.statusText;
+  ui.scoreValue.textContent = `${game.score}`;
+  ui.modeValue.textContent = MODE_META[game.currentMode]?.label ?? "Mode";
+  ui.durianValue.textContent = `${Math.max(0, CONFIG.maxDurianHits - game.livesLost)}`;
+  ui.countdownValue.textContent = `${getCountdownValue(nowMs)}`;
+  ui.timerPill.hidden =
+    game.currentMode !== MODES.TIMED || game.state !== STATES.PLAY;
+  ui.timerValue.textContent = formatRemaining(getModeRemaining(nowMs));
+  updateMenuPanel();
+  updateWorldSelectionUi();
 }
 
 function setTrackedUiButtonHover(button, progress) {
@@ -233,16 +393,24 @@ function setTrackedUiButtonHover(button, progress) {
   button.classList.toggle("is-finger-hovered", progress > 0);
 }
 
-function getTrackedUiButtons() {
-  if (navControls.hidden) {
-    for (const button of trackedUiButtons) {
-      setTrackedUiButtonHover(button, 0);
-    }
-    return [];
+function resetAllTrackedUiButtons() {
+  for (const button of document.querySelectorAll(".hand-target")) {
+    setTrackedUiButtonHover(button, 0);
   }
+  game.uiButtonHover.clear();
+}
 
-  return trackedUiButtons.flatMap((button) => {
-    if (button.hidden) {
+function getTrackedUiButtons() {
+  const buttons = ui.shareModal.hidden
+    ? [...document.querySelectorAll(".hand-target")]
+    : [...ui.shareModal.querySelectorAll(".hand-target")];
+
+  return buttons.flatMap((button) => {
+    if (
+      button.hidden ||
+      button.disabled ||
+      button.getAttribute("aria-disabled") === "true"
+    ) {
       setTrackedUiButtonHover(button, 0);
       return [];
     }
@@ -309,30 +477,53 @@ function updateTrackedUiButtons(hands, nowMs) {
   }
 }
 
-function goBack(nowMs) {
-  if (game.state === STATES.PLAY || game.state === STATES.IDLE || game.state === STATES.GAMEOVER) {
+function goToPlaySelect(nowMs) {
+  game.menuPanel = "modes";
+  if (
+    game.state === STATES.PLAY ||
+    game.state === STATES.IDLE ||
+    game.state === STATES.GAMEOVER ||
+    game.state === STATES.COUNTDOWN
+  ) {
     resetRound(nowMs, game.currentMode);
     setState(STATES.MODE_SELECT, nowMs, "");
     return;
   }
 
   if (game.state === STATES.MODE_SELECT) {
-    beginCalibration(nowMs);
+    updateUiState(nowMs);
     return;
   }
 
-  if (game.state === STATES.CALIBRATION || game.state === STATES.ERROR) {
-    trails.clear();
-    game.modeHover.clear();
-    game.calibrationStartedAt = 0;
-    game.calibrationMissingSince = 0;
-    game.calibrationProgressMs = 0;
-    setState(STATES.OPENING, nowMs, "raise your hands");
+  if (game.state !== STATES.LOADING) {
+    setState(STATES.MODE_SELECT, nowMs, "");
   }
 }
 
+function recalibrate(nowMs) {
+  game.menuPanel = "modes";
+  closeShareModal();
+
+  if (
+    game.state === STATES.PLAY ||
+    game.state === STATES.IDLE ||
+    game.state === STATES.GAMEOVER ||
+    game.state === STATES.COUNTDOWN
+  ) {
+    resetRound(nowMs, game.currentMode);
+  }
+
+  beginCalibration(nowMs);
+}
+
 async function restartFlow(nowMs) {
-  if (game.state === STATES.PLAY || game.state === STATES.IDLE || game.state === STATES.GAMEOVER) {
+  closeShareModal();
+  if (
+    game.state === STATES.PLAY ||
+    game.state === STATES.IDLE ||
+    game.state === STATES.GAMEOVER ||
+    game.state === STATES.COUNTDOWN
+  ) {
     await startMode(game.currentMode, nowMs);
     return;
   }
@@ -378,24 +569,33 @@ function resetRound(nowMs, mode = game.currentMode) {
   game.lastMovementAt = nowMs;
   game.slowMotionUntil = 0;
   game.segmentation = null;
-  game.playStartedAt = nowMs;
-  game.modeEndsAt =
-    mode === MODES.TIMED
-      ? nowMs + CONFIG.timedDurationMs
-      : mode === MODES.SUNSET
-        ? nowMs + CONFIG.sunsetDurationMs
-        : Infinity;
+  game.playStartedAt = 0;
+  game.modeEndsAt = Infinity;
+  game.countdownEndsAt = 0;
   bowl.reset();
   trails.clear();
   spawner.reset(nowMs, mode);
   environment.reset(nowMs);
+  updateUiState(nowMs);
+}
+
+function armModeTimer(nowMs) {
+  game.playStartedAt = nowMs;
+  game.modeEndsAt =
+    game.currentMode === MODES.TIMED
+      ? nowMs + CONFIG.timedDurationMs
+      : game.currentMode === MODES.SUNSET
+        ? nowMs + CONFIG.sunsetDurationMs
+        : Infinity;
 }
 
 function beginCalibration(nowMs) {
+  game.menuPanel = "modes";
   setState(STATES.CALIBRATION, nowMs, "raise your hand");
   game.calibrationStartedAt = 0;
   game.calibrationMissingSince = 0;
   game.calibrationProgressMs = 0;
+  game.countdownEndsAt = 0;
   game.modeHover.clear();
 }
 
@@ -432,6 +632,7 @@ function updateCalibration(nowMs, hands) {
 }
 
 async function startMode(mode, nowMs) {
+  game.menuPanel = "modes";
   resetRound(nowMs, mode);
   if (mode === MODES.SUNSET) {
     game.statusText = "loading sunset mask…";
@@ -444,7 +645,33 @@ async function startMode(mode, nowMs) {
     environmentVideo.currentTime = 0;
     environment.requestPlayback(true);
   }
-  setState(STATES.PLAY, nowMs, "");
+  beginCountdown(performance.now());
+}
+
+async function startSelectedWorld(nowMs) {
+  if (game.currentWorld === "sunset") {
+    await startMode(MODES.SUNSET, nowMs);
+    return;
+  }
+
+  if (game.currentWorld === "two-player") {
+    await startMode(MODES.ENDLESS, nowMs);
+    return;
+  }
+
+  await startMode(MODES.TIMED, nowMs);
+}
+
+function beginCountdown(nowMs) {
+  game.countdownEndsAt = nowMs + COUNTDOWN_DURATION_MS;
+  setState(STATES.COUNTDOWN, nowMs, "counting in");
+}
+
+function updateCountdown(nowMs) {
+  if (nowMs >= game.countdownEndsAt) {
+    armModeTimer(nowMs);
+    setState(STATES.PLAY, nowMs, "");
+  }
 }
 
 function beginGameOver(nowMs) {
@@ -670,38 +897,11 @@ function updateIdle(dtSeconds, nowMs) {
   }
 }
 
-function updateGameOver(dtSeconds, nowMs, hands) {
+function updateGameOver(dtSeconds) {
   for (const particle of game.particles) {
     particle.update(dtSeconds);
   }
   game.particles = game.particles.filter((particle) => !particle.dead);
-
-  if (!game.restartButton || nowMs - game.gameOverAt < CONFIG.restartSwipeDelayMs) {
-    game.restartHoverStartedAt = 0;
-    return;
-  }
-
-  const hoveringRestart = hands.some(
-    (hand) =>
-      hand.x >= game.restartButton.x &&
-      hand.x <= game.restartButton.x + game.restartButton.width &&
-      hand.y >= game.restartButton.y &&
-      hand.y <= game.restartButton.y + game.restartButton.height
-  );
-
-  if (!hoveringRestart) {
-    game.restartHoverStartedAt = 0;
-    return;
-  }
-
-  if (!game.restartHoverStartedAt) {
-    game.restartHoverStartedAt = nowMs;
-    return;
-  }
-
-  if (nowMs - game.restartHoverStartedAt >= CONFIG.modeHoverMs) {
-    restartIfAllowed(nowMs);
-  }
 }
 
 function getModeButtons() {
@@ -720,26 +920,8 @@ function getModeButtons() {
   }));
 }
 
-async function updateModeSelect(hands, nowMs) {
-  for (const button of getModeButtons()) {
-    const hovering = hands.some(
-      (hand) =>
-        hand.x >= button.x &&
-        hand.x <= button.x + button.width &&
-        hand.y >= button.y &&
-        hand.y <= button.y + button.height
-    );
-    if (!hovering) {
-      game.modeHover.delete(button.mode);
-      continue;
-    }
-    const started = game.modeHover.get(button.mode) ?? nowMs;
-    game.modeHover.set(button.mode, started);
-    if (nowMs - started >= CONFIG.modeHoverMs) {
-      await startMode(button.mode, nowMs);
-      return;
-    }
-  }
+async function updateModeSelect() {
+  return Promise.resolve();
 }
 
 function drawGameStatus(sceneCtx, text, subtext = "") {
@@ -765,7 +947,7 @@ function drawGameStatus(sceneCtx, text, subtext = "") {
   sceneCtx.fillText(text, viewport.width / 2, viewport.height * 0.29);
   if (subtext) {
     sceneCtx.fillStyle = OVERLAY_COLORS.muted;
-    sceneCtx.font = '400 italic 22px "Fraunces", Georgia, serif';
+    sceneCtx.font = '400 32px "Reenie Beanie", cursive';
     sceneCtx.fillText(subtext, viewport.width / 2, viewport.height * 0.36);
   }
   sceneCtx.strokeStyle = OVERLAY_COLORS.pandan;
@@ -822,7 +1004,7 @@ function renderModeSelect(sceneCtx, hands) {
       0,
       -10
     );
-    sceneCtx.font = '400 italic 18px "Fraunces", Georgia, serif';
+    sceneCtx.font = '400 28px "Reenie Beanie", cursive';
     sceneCtx.fillStyle = OVERLAY_COLORS.muted;
     sceneCtx.fillText(
       MODE_DESCRIPTIONS[button.mode],
@@ -938,16 +1120,6 @@ function renderScene(nowMs, hands, frame, segmentation) {
   trails.render(sceneCtx, nowMs);
   renderHandMarkers(sceneCtx, hands);
 
-  if (game.state === STATES.PLAY || game.state === STATES.IDLE) {
-    renderHud(sceneCtx, {
-      score: game.score,
-      livesLost: game.livesLost,
-      width: viewport.width,
-      mode: game.currentMode,
-      remainingMs: getModeRemaining(nowMs),
-    });
-  }
-
   if (game.flashStrength > 0) {
     sceneCtx.save();
     sceneCtx.fillStyle = `rgba(197, 197, 51, ${game.flashStrength * 0.25})`;
@@ -955,46 +1127,12 @@ function renderScene(nowMs, hands, frame, segmentation) {
     sceneCtx.restore();
   }
 
-  if (game.state === STATES.OPENING) {
-    drawGameStatus(sceneCtx, "raise your hands", "enter the frame");
-  } else if (game.state === STATES.CALIBRATION) {
-    const percent = Math.round(
-      (game.calibrationProgressMs / CONFIG.calibrationHoldMs) * 100
-    );
-    drawGameStatus(
-      sceneCtx,
-      "hold steady",
-      percent > 0 ? `calibrating ${percent}%` : "calibrating"
-    );
-  } else if (game.state === STATES.MODE_SELECT) {
-    renderModeSelect(sceneCtx, hands);
-  } else if (game.state === STATES.IDLE) {
-    drawGameStatus(sceneCtx, "resting", "move to continue");
-  } else if (game.state === STATES.GAMEOVER) {
+  if (game.state === STATES.GAMEOVER) {
     sceneCtx.save();
     sceneCtx.fillStyle = "rgba(42,31,24,0.1)";
     sceneCtx.fillRect(0, 0, viewport.width, viewport.height);
     sceneCtx.restore();
-    game.restartButton = {
-      x: viewport.width / 2 - 118,
-      y: viewport.height * CONFIG.bowlCenterYRatio + CONFIG.bowlRadius + 28,
-      width: 236,
-      height: 66,
-    };
-    const restartProgress = game.restartHoverStartedAt
-      ? Math.min(1, (nowMs - game.restartHoverStartedAt) / CONFIG.modeHoverMs)
-      : 0;
-    bowl.render(
-      sceneCtx,
-      viewport,
-      nowMs,
-      game.gameOverAt,
-      game.score,
-      game.restartButton,
-      restartProgress
-    );
-  } else if (game.state === STATES.ERROR || game.state === STATES.LOADING) {
-    drawGameStatus(sceneCtx, game.statusText);
+    bowl.render(sceneCtx, viewport, nowMs, game.gameOverAt, game.score);
   }
 }
 
@@ -1033,7 +1171,11 @@ async function animate(nowMs) {
     trails.update(hands, nowMs);
     updateTrackedUiButtons(hands, nowMs);
 
-    if (game.state === STATES.OPENING) {
+    if (game.state === STATES.LOADING) {
+      if (startupComplete && nowMs - game.stateSince >= STARTUP_LOADING_MS) {
+        setState(STATES.OPENING, nowMs, "raise your hands");
+      }
+    } else if (game.state === STATES.OPENING) {
       if (hands.length > 0 && nowMs - game.stateSince > CONFIG.openingPromptMs) {
         beginCalibration(nowMs);
       }
@@ -1041,6 +1183,8 @@ async function animate(nowMs) {
       updateCalibration(nowMs, hands);
     } else if (game.state === STATES.MODE_SELECT) {
       await updateModeSelect(hands, nowMs);
+    } else if (game.state === STATES.COUNTDOWN) {
+      updateCountdown(nowMs);
     } else if (game.state === STATES.PLAY) {
       updatePlay(dtSeconds, nowMs, hands);
     } else if (game.state === STATES.IDLE) {
@@ -1051,12 +1195,12 @@ async function animate(nowMs) {
 
     audio.setAmbientTarget(
       game.state === STATES.GAMEOVER
-        ? 0.09
+        ? 0.14
         : game.state === STATES.IDLE
-          ? 0.1
+          ? 0.16
           : game.state === STATES.PLAY
-            ? 0.06
-            : 0.035
+            ? 0.11
+            : 0.09
     );
     audio.setDurianWarning(game.entities.some((entity) => entity.kind === "durian"));
 
@@ -1069,6 +1213,7 @@ async function animate(nowMs) {
     });
     environment.setVisible(useSunsetComposite && environment.hasVideoFrame());
     webcam.style.opacity = shouldShowLiveWebcamLayer() ? "1" : "0";
+    updateUiState(nowMs);
 
     renderScene(nowMs, hands, frame, game.segmentation);
     ctx.clearRect(0, 0, viewport.width, viewport.height);
@@ -1107,36 +1252,83 @@ async function init() {
     { passive: true }
   );
 
-  navBackButton.addEventListener("click", () => {
-    goBack(performance.now());
+  ui.homeButton.addEventListener("click", () => {
+    audio.unlock();
+    goToPlaySelect(performance.now());
   });
 
-  navRestartButton.addEventListener("click", async () => {
+  ui.brandButton.addEventListener("click", () => {
+    audio.unlock();
+    goToPlaySelect(performance.now());
+  });
+
+  ui.settingsButton.addEventListener("click", () => {
+    audio.unlock();
+    recalibrate(performance.now());
+  });
+
+  ui.menuToggleButton.addEventListener("click", () => {
+    audio.unlock();
+    game.menuPanel = game.menuPanel === "modes" ? "worlds" : "modes";
+    updateMenuPanel();
+  });
+
+  ui.soundButton.addEventListener("click", () => {
+    audio.unlock();
+    setSoundMuted(!game.soundMuted);
+  });
+
+  const restartHandler = async () => {
+    audio.unlock();
     try {
       await restartFlow(performance.now());
     } catch (error) {
       handleFatalError(error, game.currentMode === MODES.SUNSET ? "sunset" : "runtime");
     }
-  });
+  };
 
-  canvas.addEventListener("pointerdown", (event) => {
-    audio.unlock();
-    if (game.state !== STATES.GAMEOVER || !game.restartButton) {
-      return;
-    }
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    const button = game.restartButton;
-    const inside =
-      x >= button.x &&
-      x <= button.x + button.width &&
-      y >= button.y &&
-      y <= button.y + button.height;
-    if (inside) {
-      restartIfAllowed(performance.now());
-    }
+  ui.idleRestartButton.addEventListener("click", restartHandler);
+  ui.errorRetryButton.addEventListener("click", restartHandler);
+  ui.gameoverRestartButton.addEventListener("click", restartHandler);
+
+  ui.gameoverShareButton.addEventListener("click", () => {
+    openShareModal();
   });
+  ui.shareCloseX.addEventListener("click", closeShareModal);
+  ui.shareCloseButton.addEventListener("click", closeShareModal);
+  ui.shareDownloadButton.addEventListener("click", downloadSharePreview);
+
+  for (const button of ui.modeButtons) {
+    button.addEventListener("click", async () => {
+      audio.unlock();
+      const mode = button.dataset.mode;
+      if (!mode) {
+        return;
+      }
+      try {
+        await startMode(mode, performance.now());
+      } catch (error) {
+        handleFatalError(error, mode === MODES.SUNSET ? "sunset" : "runtime");
+      }
+    });
+  }
+
+  for (const button of ui.worldButtons) {
+    button.addEventListener("click", async () => {
+      audio.unlock();
+      const world = button.dataset.world;
+      if (!world) {
+        return;
+      }
+      game.currentWorld = world;
+      updateWorldSelectionUi();
+      try {
+        await startSelectedWorld(performance.now());
+      } catch (error) {
+        handleFatalError(error, world === "sunset" ? "sunset" : "runtime");
+      }
+    });
+  }
 
   window.addEventListener("error", (event) => {
     handleFatalError(
@@ -1162,8 +1354,8 @@ async function init() {
       environment.start(),
     ]);
     startupComplete = true;
-    setState(STATES.OPENING, performance.now(), "raise your hands");
-    updateNavControls();
+    setState(STATES.LOADING, performance.now(), LOADING_STEPS[0].detail);
+    updateUiState();
   } catch (error) {
     handleFatalError(error, "startup");
   }

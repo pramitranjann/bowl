@@ -2,6 +2,7 @@ export const STATES = {
   OPENING: "opening",
   CALIBRATION: "calibration",
   MODE_SELECT: "mode-select",
+  COUNTDOWN: "countdown",
   PLAY: "play",
   IDLE: "idle",
   GAMEOVER: "gameover",

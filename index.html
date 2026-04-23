@@ -13,9 +13,211 @@
     <video id="webcam" autoplay playsinline muted></video>
     <video id="environment" autoplay playsinline muted loop></video>
     <canvas id="game" aria-label="bowl phase 2 mechanics"></canvas>
-    <div id="nav-controls" aria-label="Game navigation">
-      <button id="nav-back" type="button">back</button>
-      <button id="nav-restart" type="button">restart</button>
+    <div id="ui-root" data-scene="loading" data-menu-panel="modes">
+      <button
+        id="ui-brand-button"
+        class="ui-brand hand-target"
+        type="button"
+        aria-label="Back to play select"
+      >
+        bowl
+      </button>
+
+      <button
+        id="ui-home"
+        class="ui-icon-button hand-target"
+        type="button"
+        aria-label="Back to mode select"
+        hidden
+      >
+        <img src="./assets/ui/icons/iconHomeBold.svg" alt="" aria-hidden="true">
+      </button>
+
+      <button
+        id="ui-settings"
+        class="ui-icon-button hand-target"
+        type="button"
+        aria-label="Recalibrate hands"
+        hidden
+      >
+        <img src="./assets/ui/icons/iconSettingsBold.svg" alt="" aria-hidden="true">
+      </button>
+
+      <button
+        id="ui-sound"
+        class="ui-icon-button ui-icon-button--sound hand-target"
+        type="button"
+        aria-label="Mute sound"
+        hidden
+      >
+        <img src="./assets/ui/icons/sound on.svg" alt="" aria-hidden="true">
+      </button>
+
+      <section id="screen-opening" class="ui-screen ui-screen--opening" aria-live="polite" hidden>
+        <div class="ui-copy-stack ui-copy-stack--hero">
+          <h1 class="ui-title">Hold your finger up</h1>
+          <p class="ui-subtitle">looking at your finger very closely</p>
+        </div>
+      </section>
+
+      <section id="screen-calibration" class="ui-screen ui-screen--calibration" aria-live="polite">
+        <div class="ui-copy-stack ui-copy-stack--centered">
+          <div class="ui-brand-lockup">bowl</div>
+          <p id="ui-status-line" class="ui-status-line">sharpening your blade....</p>
+          <p id="ui-status-detail" class="ui-status-detail">finding your hand</p>
+        </div>
+      </section>
+
+      <section id="screen-mode-select" class="ui-screen ui-screen--mode-select" aria-live="polite" hidden>
+        <button
+          id="ui-menu-toggle"
+          class="ui-pill-button hand-target"
+          type="button"
+          aria-label="Switch between modes and worlds"
+        >
+          Modes
+        </button>
+
+        <div id="mode-panel-modes" class="ui-panel ui-panel--mode-grid">
+          <div class="ui-choice-row">
+            <button
+              id="mode-endless"
+              class="ui-scribble-button hand-target"
+              type="button"
+              data-mode="endless"
+            >
+              Endless
+            </button>
+            <button
+              id="mode-timed"
+              class="ui-scribble-button hand-target"
+              type="button"
+              data-mode="timed"
+            >
+              Timed
+            </button>
+            <button
+              id="mode-sunset"
+              class="ui-scribble-button hand-target"
+              type="button"
+              data-mode="sunset"
+            >
+              Sunset
+            </button>
+          </div>
+        </div>
+
+        <div id="mode-panel-worlds" class="ui-panel ui-panel--worlds" hidden>
+          <div class="ui-choice-row">
+            <button
+              id="world-sunset"
+              class="ui-scribble-button ui-scribble-button--icon hand-target"
+              type="button"
+              data-world="sunset"
+            >
+              <img src="./assets/ui/icons/Frame 1.svg" alt="" aria-hidden="true">
+              <span>Sunset</span>
+            </button>
+            <button
+              id="world-two-player"
+              class="ui-scribble-button ui-scribble-button--icon hand-target"
+              type="button"
+              data-world="two-player"
+            >
+              <img src="./assets/ui/icons/2 player icon.svg" alt="" aria-hidden="true">
+              <span>2 Player</span>
+            </button>
+            <button
+              id="world-beach"
+              class="ui-scribble-button ui-scribble-button--icon hand-target"
+              type="button"
+              data-world="beach"
+            >
+              <img src="./assets/ui/icons/iconIslandBold.svg" alt="" aria-hidden="true">
+              <span>Beach</span>
+            </button>
+          </div>
+          <p id="ui-world-note" class="ui-panel-note">sunset is the signature ritual</p>
+        </div>
+      </section>
+
+      <section id="screen-countdown" class="ui-screen ui-screen--countdown" aria-live="polite" hidden>
+        <div class="ui-copy-stack ui-copy-stack--hero">
+          <p class="ui-countdown-kicker">watch for durian</p>
+          <h2 id="ui-countdown-value" class="ui-countdown-value">3</h2>
+          <p class="ui-subtitle">slice clean, keep your hands light</p>
+        </div>
+      </section>
+
+      <section id="screen-idle" class="ui-screen ui-screen--idle" aria-live="polite" hidden>
+        <div class="ui-copy-stack ui-copy-stack--hero">
+          <h2 class="ui-title">Are you not hungry?</h2>
+          <p class="ui-subtitle">what else could you be doing other than making a bowl fruits</p>
+          <button id="ui-idle-restart" class="ui-scribble-button hand-target" type="button">
+            Restart
+          </button>
+        </div>
+      </section>
+
+      <section id="screen-error" class="ui-screen ui-screen--error" aria-live="assertive" hidden>
+        <div class="ui-error-card">
+          <img src="./assets/ui/icons/iconErrorBold.svg" alt="" aria-hidden="true">
+          <h2 class="ui-error-title">Something slipped</h2>
+          <p id="ui-error-message" class="ui-error-message">camera or model setup failed</p>
+          <button id="ui-error-retry" class="ui-scribble-button hand-target" type="button">
+            Retry
+          </button>
+        </div>
+      </section>
+
+      <section id="play-hud" aria-live="polite" hidden>
+        <div class="ui-score-card">
+          <span class="ui-score-label">Score</span>
+          <span id="ui-score-value" class="ui-score-value">0</span>
+        </div>
+        <div id="ui-timer-pill" class="ui-pill-chip" hidden>
+          <span class="ui-pill-label">Time</span>
+          <span id="ui-timer-value" class="ui-pill-value">1:30</span>
+        </div>
+        <div class="ui-pill-chip ui-pill-chip--mode">
+          <span class="ui-pill-label">Mode</span>
+          <span id="ui-mode-value" class="ui-pill-value">Endless</span>
+        </div>
+        <div id="ui-durian-pill" class="ui-pill-chip ui-pill-chip--durian">
+          <span class="ui-pill-label">Durian</span>
+          <span id="ui-durian-value" class="ui-pill-value">3</span>
+          <span class="ui-pill-meta">watch out for them</span>
+        </div>
+      </section>
+
+      <section id="gameover-actions" aria-live="polite" hidden>
+        <button id="ui-gameover-restart" class="ui-scribble-button hand-target" type="button">
+          Again
+        </button>
+        <button id="ui-gameover-share" class="ui-scribble-button hand-target" type="button">
+          Share
+        </button>
+      </section>
+
+      <section id="share-modal" class="ui-modal" hidden aria-live="polite">
+        <div class="ui-modal-backdrop"></div>
+        <div class="ui-share-sheet">
+          <button id="ui-share-close-x" class="ui-share-close hand-target" type="button" aria-label="Close share sheet">
+            ×
+          </button>
+          <h2 class="ui-share-title">Share your bowl!</h2>
+          <p class="ui-share-copy">a bowl of fruits should never be eaten alone</p>
+          <div id="ui-share-preview" class="ui-share-preview" aria-hidden="true"></div>
+          <div class="ui-share-actions">
+            <button id="ui-share-close" class="ui-action-swatch ui-action-swatch--warm hand-target" type="button" aria-label="Close share sheet">
+              <img src="./assets/ui/icons/iconClickBold.svg" alt="" aria-hidden="true">
+            </button>
+            <button id="ui-share-download" class="ui-action-swatch ui-action-swatch--brand hand-target" type="button" aria-label="Download bowl image">
+              <img src="./assets/ui/icons/iconImageBold.svg" alt="" aria-hidden="true">
+            </button>
+          </div>
+        </div>
+      </section>
     </div>
     <button id="dev-toggle" type="button" aria-expanded="false">tune</button>
     <aside id="dev-panel" hidden aria-label="Mechanics tuning panel"></aside>

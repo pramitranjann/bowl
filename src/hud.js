@@ -80,21 +80,21 @@ export function renderHud(ctx, { score, livesLost, width, mode, remainingMs }) {
   ctx.stroke();
   ctx.fillStyle = HUD_COLORS.muted;
   ctx.textAlign = "left";
-  ctx.font = '500 15px "Fraunces", Georgia, serif';
+  ctx.font = '400 28px "Reenie Beanie", cursive';
   ctx.fillText("score", scoreX, scoreY - 18);
   ctx.fillStyle = HUD_COLORS.ink;
   ctx.font = '400 70px "Reenie Beanie", cursive';
   ctx.fillText(`${score}`, scoreX, scoreY + 12);
 
-  ctx.font = '500 20px "Fraunces", Georgia, serif';
+  ctx.font = '400 28px "Reenie Beanie", cursive';
   if (mode === MODES.TIMED && Number.isFinite(remainingMs)) {
     drawPaperSwash(ctx, timedRect.x, timedRect.y, timedRect.width, timedRect.height, HUD_COLORS.creamSoft, 0.015);
     ctx.textAlign = "center";
     ctx.fillStyle = HUD_COLORS.muted;
-    ctx.font = '500 14px "Fraunces", Georgia, serif';
+    ctx.font = '400 24px "Reenie Beanie", cursive';
     ctx.fillText("time", width / 2, timedRect.y + 16);
     ctx.fillStyle = HUD_COLORS.ink;
-    ctx.font = '500 24px "Fraunces", Georgia, serif';
+    ctx.font = '400 34px "Reenie Beanie", cursive';
     ctx.fillText(formatRemaining(remainingMs), width / 2, timedRect.y + 34);
   } else if (mode === MODES.SUNSET) {
     ctx.restore();
@@ -103,7 +103,7 @@ export function renderHud(ctx, { score, livesLost, width, mode, remainingMs }) {
     drawPaperSwash(ctx, livesRect.x, livesRect.y, livesRect.width, livesRect.height, HUD_COLORS.creamSoft, -0.02);
     ctx.textAlign = "center";
     ctx.fillStyle = HUD_COLORS.muted;
-    ctx.font = '500 13px "Fraunces", Georgia, serif';
+    ctx.font = '400 22px "Reenie Beanie", cursive';
     ctx.fillText("durian", livesRect.x + livesRect.width / 2, livesRect.y + 14);
     const dotSpacing = 18;
     const totalDotsWidth = dotSpacing * (CONFIG.maxDurianHits - 1);

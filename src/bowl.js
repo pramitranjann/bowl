@@ -185,7 +185,7 @@ export class BowlSystem {
     ctx.textAlign = "center";
     ctx.font = '400 112px "Reenie Beanie", cursive';
     ctx.fillText(`${score}`, centerX, centerY - bowlRadius - 110);
-    ctx.font = '400 italic 22px "Fraunces", Georgia, serif';
+    ctx.font = '400 36px "Reenie Beanie", cursive';
     ctx.fillStyle = BOWL_COLORS.muted;
     ctx.fillText("a bowl of fruit", centerX, centerY - bowlRadius - 28);
     ctx.strokeStyle = BOWL_COLORS.pandan;
