@@ -337,10 +337,14 @@ textarea {
 
 .ui-pill-button,
 .ui-pill-chip,
+.ui-score-card,
 .ui-scribble-button,
+.ui-error-card,
+.ui-share-sheet,
 .ui-action-swatch {
-  border-radius: 34px 29px 39px 27px / 24px 35px 26px 38px;
-  box-shadow: var(--shadow-soft);
+  position: relative;
+  isolation: isolate;
+  box-shadow: none;
 }
 
 .ui-pill-button,
@@ -349,13 +353,29 @@ textarea {
 .ui-share-close {
   --finger-progress: 0;
   pointer-events: auto;
-  backdrop-filter: blur(8px);
   transition:
     transform 220ms var(--ui-ease),
     background-color 180ms var(--ui-ease),
     box-shadow 180ms var(--ui-ease),
     opacity 180ms var(--ui-ease),
     filter 180ms var(--ui-ease);
+}
+
+.ui-pill-button::before,
+.ui-scribble-button::before,
+.ui-pill-chip::before,
+.ui-score-card::before,
+.ui-error-card::before,
+.ui-share-sheet::before,
+.ui-action-swatch::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  filter: drop-shadow(0 18px 30px rgba(42, 31, 24, 0.16));
 }
 
 .ui-pill-button:hover,
@@ -378,14 +398,17 @@ textarea {
   min-height: 72px;
   padding: 8px 28px 12px;
   border: 0;
-  background: rgba(197, 216, 109, 0.84);
+  background: transparent;
   color: var(--color-coconut-brown);
   font-family: var(--font-display);
   font-size: clamp(2.1rem, 3vw, 3rem);
   line-height: 1;
   text-align: center;
   cursor: pointer;
-  box-shadow: var(--shadow-soft), var(--shadow-ink-soft);
+}
+
+.ui-pill-button::before {
+  background-image: url("./assets/ui/shapes/small-green-blob.svg");
 }
 
 .ui-panel {
@@ -415,23 +438,21 @@ textarea {
   min-height: 112px;
   padding: 20px 30px 24px;
   border: 0;
-  background: rgba(197, 216, 109, 0.82);
+  background: transparent;
   color: var(--color-coconut-brown);
   font-family: var(--font-display);
   font-size: clamp(2.7rem, 4vw, 4.6rem);
   line-height: 0.94;
   text-align: center;
   cursor: pointer;
-  border-radius: 36px 28px 34px 30px / 18px 34px 24px 38px;
-  box-shadow: var(--shadow-soft), var(--shadow-ink-soft);
+}
+
+.ui-scribble-button::before {
+  background-image: url("./assets/ui/shapes/large-green-blob.svg");
 }
 
 .ui-scribble-button.is-active {
-  background: rgba(215, 233, 134, 0.9);
-  box-shadow:
-    0 28px 56px rgba(42, 31, 24, 0.2),
-    0 0 0 2px rgba(96, 70, 53, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  filter: saturate(1.08) brightness(1.03);
 }
 
 .ui-scribble-button--icon {
@@ -459,10 +480,14 @@ textarea {
   justify-items: center;
   gap: 14px;
   padding: 28px 26px 26px;
-  background: rgba(244, 235, 217, 0.9);
-  border-radius: 44px 38px 54px 40px / 30px 36px 46px 58px;
-  box-shadow: var(--shadow-float);
-  backdrop-filter: blur(10px);
+  background: transparent;
+  box-shadow: none;
+}
+
+.ui-error-card::before,
+.ui-share-sheet::before {
+  background-image: url("./assets/ui/shapes/cream-card-blob.svg");
+  filter: drop-shadow(0 28px 54px rgba(0, 0, 0, 0.26));
 }
 
 .ui-error-card img {
@@ -499,18 +524,22 @@ textarea {
   min-width: 112px;
   min-height: 102px;
   padding: 14px 18px;
-  background: rgba(197, 216, 109, 0.82);
+  background: transparent;
   color: var(--color-coconut-brown);
-  box-shadow: var(--shadow-soft), var(--shadow-ink-soft);
-  backdrop-filter: blur(8px);
+  box-shadow: none;
 }
 
 .ui-score-card {
   left: max(42px, env(safe-area-inset-left));
   top: 18vh;
-  min-width: 108px;
-  min-height: 118px;
-  border-radius: 24px 18px 28px 20px / 18px 28px 22px 30px;
+  width: 133px;
+  min-width: 133px;
+  min-height: 126px;
+  padding: 18px 16px 20px;
+}
+
+.ui-score-card::before {
+  background-image: url("./assets/ui/shapes/score-blob-green.svg");
 }
 
 .ui-score-label,
@@ -531,7 +560,10 @@ textarea {
   min-width: 138px;
   min-height: 72px;
   padding: 10px 18px 14px;
-  border-radius: 28px 22px 30px 20px / 18px 28px 20px 30px;
+}
+
+.ui-pill-chip::before {
+  background-image: url("./assets/ui/shapes/small-green-blob.svg");
 }
 
 #ui-timer-pill {
@@ -546,10 +578,19 @@ textarea {
 
 .ui-pill-chip--durian {
   right: max(92px, env(safe-area-inset-right) + 56px);
-  min-width: 172px;
-  min-height: 84px;
-  background: rgba(96, 70, 53, 0.82);
+  width: 133px;
+  min-width: 133px;
+  min-height: 126px;
+  padding: 18px 14px 18px;
+  justify-items: center;
+  align-content: start;
+  gap: 0;
   color: var(--color-coconut-cream);
+}
+
+.ui-pill-chip--durian::before {
+  background-image: url("./assets/ui/shapes/score-blob-dark.svg");
+  filter: drop-shadow(0 18px 30px rgba(42, 31, 24, 0.2));
 }
 
 .ui-pill-value {
@@ -560,11 +601,15 @@ textarea {
 
 .ui-pill-chip--durian .ui-pill-value {
   color: #d7df68;
+  margin-top: 2px;
 }
 
 .ui-pill-meta {
   font-size: clamp(1.05rem, 1.5vw, 1.5rem);
   color: rgba(244, 235, 217, 0.72);
+  text-align: center;
+  line-height: 0.9;
+  max-width: 9ch;
 }
 
 #gameover-actions {
@@ -653,8 +698,7 @@ textarea {
   height: 84px;
   border: 0;
   cursor: pointer;
-  border-radius: 28px 20px 26px 18px / 16px 24px 18px 28px;
-  box-shadow: var(--shadow-soft), var(--shadow-ink-soft);
+  background: transparent;
 }
 
 .ui-action-swatch img {
@@ -663,11 +707,21 @@ textarea {
 }
 
 .ui-action-swatch--warm {
-  background: rgba(237, 174, 89, 0.84);
+  color: var(--color-coconut-brown);
 }
 
 .ui-action-swatch--brand {
-  background: rgba(197, 216, 109, 0.84);
+  color: var(--color-coconut-brown);
+}
+
+.ui-action-swatch--warm::before {
+  background-image: url("./assets/ui/shapes/small-green-blob.svg");
+  background-color: rgba(237, 174, 89, 0.9);
+  background-blend-mode: multiply;
+}
+
+.ui-action-swatch--brand::before {
+  background-image: url("./assets/ui/shapes/small-green-blob.svg");
 }
 
 #dev-toggle,
@@ -881,6 +935,14 @@ textarea {
     min-width: 88px;
     min-height: 64px;
     padding: 10px 12px;
+  }
+
+  .ui-score-card,
+  .ui-pill-chip--durian {
+    width: 104px;
+    min-width: 104px;
+    min-height: 98px;
+    padding: 12px 10px 14px;
   }
 
   .ui-score-value,
