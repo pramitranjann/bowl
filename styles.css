@@ -15,6 +15,9 @@
   --shadow-float:
     0 34px 80px rgba(0, 0, 0, 0.34),
     0 0 0 1px rgba(42, 31, 24, 0.06);
+  --shadow-ink-soft:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 18px 34px rgba(42, 31, 24, 0.14);
   --font-display: "Reenie Beanie", cursive;
   --ui-ease: cubic-bezier(0.2, 0, 0, 1);
 }
@@ -336,7 +339,7 @@ textarea {
 .ui-pill-chip,
 .ui-scribble-button,
 .ui-action-swatch {
-  border-radius: 28px;
+  border-radius: 34px 29px 39px 27px / 24px 35px 26px 38px;
   box-shadow: var(--shadow-soft);
 }
 
@@ -346,6 +349,7 @@ textarea {
 .ui-share-close {
   --finger-progress: 0;
   pointer-events: auto;
+  backdrop-filter: blur(8px);
   transition:
     transform 220ms var(--ui-ease),
     background-color 180ms var(--ui-ease),
@@ -370,17 +374,18 @@ textarea {
   top: max(28px, env(safe-area-inset-top));
   left: 50%;
   transform: translateX(-50%);
-  min-width: 172px;
-  min-height: 74px;
-  padding: 10px 28px;
+  min-width: 184px;
+  min-height: 72px;
+  padding: 8px 28px 12px;
   border: 0;
-  background: var(--color-pandan);
+  background: rgba(197, 216, 109, 0.84);
   color: var(--color-coconut-brown);
   font-family: var(--font-display);
   font-size: clamp(2.1rem, 3vw, 3rem);
   line-height: 1;
   text-align: center;
   cursor: pointer;
+  box-shadow: var(--shadow-soft), var(--shadow-ink-soft);
 }
 
 .ui-panel {
@@ -407,23 +412,26 @@ textarea {
 }
 
 .ui-scribble-button {
-  min-height: 116px;
-  padding: 24px 28px;
+  min-height: 112px;
+  padding: 20px 30px 24px;
   border: 0;
-  background: var(--color-pandan);
+  background: rgba(197, 216, 109, 0.82);
   color: var(--color-coconut-brown);
   font-family: var(--font-display);
   font-size: clamp(2.7rem, 4vw, 4.6rem);
   line-height: 0.94;
   text-align: center;
   cursor: pointer;
+  border-radius: 36px 28px 34px 30px / 18px 34px 24px 38px;
+  box-shadow: var(--shadow-soft), var(--shadow-ink-soft);
 }
 
 .ui-scribble-button.is-active {
-  background: #d7e986;
+  background: rgba(215, 233, 134, 0.9);
   box-shadow:
     0 28px 56px rgba(42, 31, 24, 0.2),
-    0 0 0 2px rgba(96, 70, 53, 0.18);
+    0 0 0 2px rgba(96, 70, 53, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
 .ui-scribble-button--icon {
@@ -451,9 +459,10 @@ textarea {
   justify-items: center;
   gap: 14px;
   padding: 28px 26px 26px;
-  background: rgba(244, 235, 217, 0.97);
-  border-radius: 42px;
+  background: rgba(244, 235, 217, 0.9);
+  border-radius: 44px 38px 54px 40px / 30px 36px 46px 58px;
   box-shadow: var(--shadow-float);
+  backdrop-filter: blur(10px);
 }
 
 .ui-error-card img {
@@ -490,14 +499,18 @@ textarea {
   min-width: 112px;
   min-height: 102px;
   padding: 14px 18px;
-  background: rgba(197, 216, 109, 0.96);
+  background: rgba(197, 216, 109, 0.82);
   color: var(--color-coconut-brown);
+  box-shadow: var(--shadow-soft), var(--shadow-ink-soft);
+  backdrop-filter: blur(8px);
 }
 
 .ui-score-card {
   left: max(42px, env(safe-area-inset-left));
   top: 18vh;
-  border-radius: 24px;
+  min-width: 108px;
+  min-height: 118px;
+  border-radius: 24px 18px 28px 20px / 18px 28px 22px 30px;
 }
 
 .ui-score-label,
@@ -517,24 +530,25 @@ textarea {
   top: max(28px, env(safe-area-inset-top));
   min-width: 138px;
   min-height: 72px;
-  padding: 12px 20px;
-  border-radius: 22px;
+  padding: 10px 18px 14px;
+  border-radius: 28px 22px 30px 20px / 18px 28px 20px 30px;
 }
 
 #ui-timer-pill {
   left: 50%;
-  transform: translateX(-60%);
+  transform: translateX(-58%);
 }
 
 .ui-pill-chip--mode {
-  left: min(54vw, calc(50% + 150px));
+  left: min(55vw, calc(50% + 170px));
   transform: translateX(-50%);
 }
 
 .ui-pill-chip--durian {
-  right: max(90px, env(safe-area-inset-right) + 58px);
-  min-width: 154px;
-  background: rgba(96, 70, 53, 0.92);
+  right: max(92px, env(safe-area-inset-right) + 56px);
+  min-width: 172px;
+  min-height: 84px;
+  background: rgba(96, 70, 53, 0.82);
   color: var(--color-coconut-cream);
 }
 
@@ -617,9 +631,9 @@ textarea {
   width: 136px;
   height: 136px;
   margin: 12px 0 8px;
-  border-radius: 999px;
+  border-radius: 50% 47% 49% 51% / 45% 52% 48% 55%;
   background:
-    rgba(201, 202, 206, 0.9)
+    rgba(201, 202, 206, 0.78)
     center / cover
     no-repeat;
   box-shadow:
@@ -639,6 +653,8 @@ textarea {
   height: 84px;
   border: 0;
   cursor: pointer;
+  border-radius: 28px 20px 26px 18px / 16px 24px 18px 28px;
+  box-shadow: var(--shadow-soft), var(--shadow-ink-soft);
 }
 
 .ui-action-swatch img {
@@ -647,11 +663,11 @@ textarea {
 }
 
 .ui-action-swatch--warm {
-  background: #edae59;
+  background: rgba(237, 174, 89, 0.84);
 }
 
 .ui-action-swatch--brand {
-  background: var(--color-pandan);
+  background: rgba(197, 216, 109, 0.84);
 }
 
 #dev-toggle,
@@ -789,7 +805,7 @@ textarea {
   }
 
   .ui-scribble-button {
-    min-height: 92px;
+    min-height: 96px;
     font-size: clamp(2.4rem, 7vw, 3.6rem);
   }
 
