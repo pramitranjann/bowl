@@ -501,7 +501,7 @@ Claude Code does not decide these — they are fixed.
 | Role | Name | Hex | Rules |
 |---|---|---|---|
 | Base | Coconut cream | `#f4ebd9` | Primary field for quiet moments (bowl reveal, mode select, game over). Never used as a small accent. |
-| Ink | Coconut brown | `#2a1f18` | All type. Hairlines. Never pure black. |
+| Ink | Coconut brown | `#604635` | All type. Hairlines. Never pure black. |
 | Hero accent | Pandan green | `#c5d86d` | The signature color. Selected state, active mode, key affordances. This is "the brand." |
 | Hot accent | Hibiscus red | `#d94423` | One use per screen maximum. The most important thing. |
 | Warm secondary | Evening amber | `#e6a85c` | Sunset mode progression only. Do not scatter elsewhere. |
