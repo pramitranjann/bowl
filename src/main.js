@@ -335,6 +335,7 @@ function updateUiState(nowMs = performance.now()) {
   };
 
   ui.root.dataset.scene = sceneMap[game.state] ?? "play";
+  ui.root.dataset.cameraVisible = shouldShowLiveWebcamLayer() ? "true" : "false";
   ui.openingScreen.hidden = game.state !== STATES.OPENING;
   ui.calibrationScreen.hidden =
     game.state !== STATES.CALIBRATION && game.state !== STATES.LOADING;

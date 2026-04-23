@@ -18,6 +18,15 @@ export function createDevPanel({
 }) {
   const toggle = document.getElementById("dev-toggle");
   const panel = document.getElementById("dev-panel");
+  const devEnabled = new URLSearchParams(window.location.search).has("dev");
+
+  if (!devEnabled) {
+    toggle.hidden = true;
+    panel.hidden = true;
+    return {
+      update() {},
+    };
+  }
 
   const controls = [
     {
