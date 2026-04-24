@@ -184,6 +184,7 @@ textarea {
     transform 220ms var(--ui-ease),
     filter 180ms var(--ui-ease),
     opacity 180ms var(--ui-ease);
+  animation: brand-breathe 5s ease-in-out infinite;
 }
 
 .ui-brand::before {
@@ -1329,6 +1330,21 @@ textarea {
     transform: none;
     filter: blur(0);
   }
+}
+
+@keyframes brand-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.008); }
+}
+
+@keyframes score-bloom {
+  0% { filter: none; }
+  30% { filter: brightness(1.2) saturate(1.1); }
+  100% { filter: none; }
+}
+
+.ui-score-card.is-blooming::before {
+  animation: score-bloom 600ms var(--ui-ease) both;
 }
 
 @keyframes ui-fade {

@@ -12,6 +12,9 @@ const HUD_COLORS = {
   border: "rgba(42, 31, 24, 0.08)",
 };
 
+let _lastScore = undefined;
+let _scoreBloomUntil = 0;
+
 function formatRemaining(ms) {
   const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
   const minutes = Math.floor(totalSeconds / 60);
@@ -85,6 +88,18 @@ function drawDurianIcon(ctx, cx, cy, size, active) {
 }
 
 export function renderHud(ctx, { score, livesLost, width, mode, remainingMs }) {
+  if (score !== _lastScore && _lastScore !== undefined) {
+    _scoreBloomUntil = performance.now() + 600;
+    const card = document.querySelector('.ui-score-card');
+    if (card) {
+      card.classList.remove('is-blooming');
+      void card.offsetWidth;
+      card.classList.add('is-blooming');
+      card.addEventListener('animationend', () => card.classList.remove('is-blooming'), { once: true });
+    }
+  }
+  _lastScore = score;
+
   const padding = CONFIG.hudPadding;
   const modeLabel = MODE_META[mode]?.label ?? mode;
   const modeRect = { x: padding - 10, y: padding - 2, width: 138, height: 48 };
@@ -113,9 +128,16 @@ export function renderHud(ctx, { score, livesLost, width, mode, remainingMs }) {
   ctx.textAlign = "left";
   ctx.font = '400 28px "Reenie Beanie", cursive';
   ctx.fillText("score", scoreX, scoreY - 18);
+  const blooming = performance.now() < _scoreBloomUntil;
+  if (blooming) {
+    ctx.save();
+    ctx.shadowColor = HUD_COLORS.pandan;
+    ctx.shadowBlur = 16;
+  }
   ctx.fillStyle = HUD_COLORS.ink;
   ctx.font = '400 70px "Reenie Beanie", cursive';
   ctx.fillText(`${score}`, scoreX, scoreY + 12);
+  if (blooming) ctx.restore();
 
   ctx.font = '400 28px "Reenie Beanie", cursive';
   if (mode === MODES.TIMED && Number.isFinite(remainingMs)) {
