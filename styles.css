@@ -836,6 +836,20 @@ textarea {
   font-size: clamp(2.6rem, 3.2vw, 3.8rem);
 }
 
+.ui-gameover-caption {
+  position: absolute;
+  left: 50%;
+  bottom: calc(max(132px, env(safe-area-inset-bottom) + 86px) + 116px);
+  transform: translateX(-50%);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 2.4vw, 2.6rem);
+  line-height: 1;
+  color: var(--color-hibiscus);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 .ui-modal {
   inset: 0;
   display: grid;
@@ -1304,8 +1318,9 @@ textarea {
 #screen-mode-select:not([hidden]) .ui-choice-row > *:nth-child(3) { animation: ui-enter 360ms var(--ui-ease) 240ms both; }
 
 /* Gameover action buttons stagger */
-#gameover-actions:not([hidden]) > *:nth-child(1) { animation: ui-enter 360ms var(--ui-ease) 60ms both; }
-#gameover-actions:not([hidden]) > *:nth-child(2) { animation: ui-enter 360ms var(--ui-ease) 140ms both; }
+#gameover-actions:not([hidden]) .ui-gameover-caption { animation: ui-enter 360ms var(--ui-ease) 20ms both; }
+#gameover-actions:not([hidden]) > *:nth-child(2) { animation: ui-enter 360ms var(--ui-ease) 60ms both; }
+#gameover-actions:not([hidden]) > *:nth-child(3) { animation: ui-enter 360ms var(--ui-ease) 140ms both; }
 
 /* Play HUD stagger */
 #play-hud:not([hidden]) > *:nth-child(1) { animation: ui-enter 300ms var(--ui-ease) 60ms both; }
