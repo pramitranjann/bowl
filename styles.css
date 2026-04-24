@@ -444,14 +444,18 @@ textarea {
 
 .ui-pill-button:hover,
 .ui-pill-button.is-finger-hovered,
-.ui-scribble-button:hover,
-.ui-scribble-button.is-finger-hovered,
 .ui-action-swatch:hover,
 .ui-action-swatch.is-finger-hovered,
 .ui-share-close:hover,
 .ui-share-close.is-finger-hovered {
   transform: translateY(calc(var(--finger-progress) * -2px))
     scale(calc(1 + var(--finger-progress) * 0.04));
+}
+
+.ui-scribble-button:hover,
+.ui-scribble-button.is-finger-hovered {
+  transform: scale(1.02) rotate(1.5deg);
+  filter: brightness(1.06);
 }
 
 .ui-pill-button {
