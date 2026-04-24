@@ -64,16 +64,17 @@
         <div class="ui-copy-stack ui-copy-stack--centered">
           <div class="ui-brand-lockup">bowl</div>
           <p id="ui-status-line" class="ui-status-line">sharpening your blade....</p>
-          <p id="ui-status-detail" class="ui-status-detail">finding your hand</p>
+          <p id="ui-status-detail" class="ui-status-detail"></p>
         </div>
       </section>
 
       <section id="screen-mode-select" class="ui-screen ui-screen--mode-select" aria-live="polite" hidden>
         <button
           id="ui-menu-toggle"
-          class="ui-pill-button hand-target"
+          class="ui-pill-button ui-pill-button--static"
           type="button"
-          aria-label="Switch between modes and worlds"
+          aria-hidden="true"
+          tabindex="-1"
         >
           Modes
         </button>
@@ -97,12 +98,11 @@
               Timed
             </button>
             <button
-              id="mode-sunset"
+              id="mode-worlds"
               class="ui-scribble-button hand-target"
               type="button"
-              data-mode="sunset"
             >
-              Sunset
+              Worlds
             </button>
           </div>
         </div>
@@ -137,7 +137,6 @@
               <span>Beach</span>
             </button>
           </div>
-          <p id="ui-world-note" class="ui-panel-note">sunset is the signature ritual</p>
         </div>
       </section>
 

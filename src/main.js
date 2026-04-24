@@ -27,6 +27,7 @@ const ui = {
   settingsButton: document.getElementById("ui-settings"),
   soundButton: document.getElementById("ui-sound"),
   menuToggleButton: document.getElementById("ui-menu-toggle"),
+  modeWorldsButton: document.getElementById("mode-worlds"),
   openingScreen: document.getElementById("screen-opening"),
   calibrationScreen: document.getElementById("screen-calibration"),
   modeSelectScreen: document.getElementById("screen-mode-select"),
@@ -57,7 +58,6 @@ const ui = {
   worldButtons: [...document.querySelectorAll("[data-world]")],
   worldsPanel: document.getElementById("mode-panel-worlds"),
   modesPanel: document.getElementById("mode-panel-modes"),
-  worldNote: document.getElementById("ui-world-note"),
 };
 
 const audio = new AudioEngine();
@@ -130,38 +130,11 @@ const viewport = {
   dpr: Math.min(window.devicePixelRatio || 1, 2),
 };
 
-const WORLD_META = {
-  sunset: {
-    label: "Sunset",
-    note: "sunset is the signature ritual",
-  },
-  "two-player": {
-    label: "2 Player",
-    note: "two hands, shared bowl, same slice field",
-  },
-  beach: {
-    label: "Beach",
-    note: "the beach world keeps the room airy and bright",
-  },
-};
-
 const LOADING_STEPS = [
-  {
-    line: "sharpening your blade....",
-    detail: "letting the camera find the light",
-  },
-  {
-    line: "cooling the coconuts....",
-    detail: "steadying the shoreline behind you",
-  },
-  {
-    line: "setting out the bowl....",
-    detail: "waking the fruit one by one",
-  },
-  {
-    line: "warming the tide....",
-    detail: "making room for your hands",
-  },
+  "sharpening your blade....",
+  "cooling the coconuts....",
+  "setting out the bowl....",
+  "warming the tide....",
 ];
 
 const STARTUP_LOADING_MS = 4200;
@@ -273,14 +246,23 @@ function updateMenuPanel() {
   ui.root.dataset.menuPanel = game.menuPanel;
   ui.modesPanel.hidden = showingWorlds;
   ui.worldsPanel.hidden = !showingWorlds;
-  ui.menuToggleButton.textContent = showingWorlds ? "Modes" : "Worlds";
+  ui.menuToggleButton.hidden = game.state !== STATES.MODE_SELECT;
+  ui.menuToggleButton.textContent = showingWorlds ? "← Modes" : "Modes";
+  ui.menuToggleButton.classList.toggle("ui-pill-button--static", !showingWorlds);
+  ui.menuToggleButton.classList.toggle("hand-target", showingWorlds);
+  if (showingWorlds) {
+    ui.menuToggleButton.removeAttribute("aria-hidden");
+    ui.menuToggleButton.setAttribute("tabindex", "0");
+  } else {
+    ui.menuToggleButton.setAttribute("aria-hidden", "true");
+    ui.menuToggleButton.setAttribute("tabindex", "-1");
+  }
 }
 
 function updateWorldSelectionUi() {
   for (const button of ui.worldButtons) {
     button.classList.toggle("is-active", button.dataset.world === game.currentWorld);
   }
-  ui.worldNote.textContent = WORLD_META[game.currentWorld]?.note ?? "";
 }
 
 function openShareModal() {
@@ -360,19 +342,13 @@ function updateUiState(nowMs = performance.now()) {
     game.state === STATES.IDLE ||
     game.state === STATES.GAMEOVER
   );
-  ui.menuToggleButton.hidden = game.state !== STATES.MODE_SELECT;
 
   if (game.state === STATES.LOADING) {
-    const loadingCopy = getLoadingCopy(nowMs);
-    ui.statusLine.textContent = loadingCopy.line;
-    ui.statusDetail.textContent = loadingCopy.detail;
+    ui.statusLine.textContent = getLoadingCopy(nowMs);
+    ui.statusDetail.textContent = "";
   } else if (game.state === STATES.CALIBRATION) {
     ui.statusLine.textContent = "sharpening your blade....";
-    ui.statusDetail.textContent = game.calibrationProgressMs > 0
-      ? `steady... ${Math.round(
-          (game.calibrationProgressMs / CONFIG.calibrationHoldMs) * 100
-        )}%`
-      : "finding your hand";
+    ui.statusDetail.textContent = "";
   } else {
     ui.statusLine.textContent = "sharpening your blade....";
     ui.statusDetail.textContent = game.statusText;
@@ -385,6 +361,7 @@ function updateUiState(nowMs = performance.now()) {
   ui.timerPill.hidden =
     game.currentMode !== MODES.TIMED || game.state !== STATES.PLAY;
   ui.timerValue.textContent = formatRemaining(getModeRemaining(nowMs));
+  ui.playHud.dataset.timerVisible = ui.timerPill.hidden ? "false" : "true";
   updateMenuPanel();
   updateWorldSelectionUi();
 }
@@ -422,14 +399,26 @@ function getTrackedUiButtons() {
       return [];
     }
 
+    const hitSlop = button.classList.contains("ui-icon-button")
+      ? 18
+      : button.id === "ui-brand-button"
+        ? 12
+        : button.closest("#gameover-actions")
+          ? 24
+          : button.closest("#screen-mode-select")
+            ? 14
+            : button.closest(".ui-share-actions")
+              ? 14
+              : 8;
+
     return [
       {
         id: button.id,
         button,
-        x: rect.left,
-        y: rect.top,
-        width: rect.width,
-        height: rect.height,
+        x: rect.left - hitSlop,
+        y: rect.top - hitSlop,
+        width: rect.width + hitSlop * 2,
+        height: rect.height + hitSlop * 2,
       },
     ];
   });
@@ -499,6 +488,11 @@ function goToPlaySelect(nowMs) {
   if (game.state !== STATES.LOADING) {
     setState(STATES.MODE_SELECT, nowMs, "");
   }
+}
+
+function showWorldPanel(nowMs) {
+  game.menuPanel = "worlds";
+  updateUiState(nowMs);
 }
 
 function recalibrate(nowMs) {
@@ -1268,12 +1262,6 @@ async function init() {
     recalibrate(performance.now());
   });
 
-  ui.menuToggleButton.addEventListener("click", () => {
-    audio.unlock();
-    game.menuPanel = game.menuPanel === "modes" ? "worlds" : "modes";
-    updateMenuPanel();
-  });
-
   ui.soundButton.addEventListener("click", () => {
     audio.unlock();
     setSoundMuted(!game.soundMuted);
@@ -1313,6 +1301,19 @@ async function init() {
       }
     });
   }
+
+  ui.modeWorldsButton.addEventListener("click", () => {
+    audio.unlock();
+    showWorldPanel(performance.now());
+  });
+
+  ui.menuToggleButton.addEventListener("click", () => {
+    if (game.menuPanel === "worlds") {
+      audio.unlock();
+      game.menuPanel = "modes";
+      updateUiState(performance.now());
+    }
+  });
 
   for (const button of ui.worldButtons) {
     button.addEventListener("click", async () => {
@@ -1355,7 +1356,7 @@ async function init() {
       environment.start(),
     ]);
     startupComplete = true;
-    setState(STATES.LOADING, performance.now(), LOADING_STEPS[0].detail);
+    setState(STATES.LOADING, performance.now(), "");
     updateUiState();
   } catch (error) {
     handleFatalError(error, "startup");
