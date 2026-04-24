@@ -165,14 +165,19 @@ textarea {
 .ui-brand {
   top: max(34px, env(safe-area-inset-top) + 12px);
   left: max(34px, env(safe-area-inset-left) + 12px);
-  padding: 12px 22px 14px;
+  min-width: 116px;
+  min-height: 58px;
+  padding: 10px 18px 12px;
   border: 0;
   background: transparent;
   pointer-events: auto;
   cursor: pointer;
   isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-family: var(--font-display);
-  font-size: clamp(2.6rem, 3.8vw, 4.2rem);
+  font-size: clamp(2.35rem, 3.4vw, 3.7rem);
   line-height: 0.92;
   color: var(--color-coconut-brown);
   opacity: 0.98;
@@ -194,7 +199,7 @@ textarea {
   background-position: center;
   background-repeat: no-repeat;
   background-size: 100% 100%;
-  filter: drop-shadow(0 18px 34px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 18px 34px rgba(0, 0, 0, 0.16));
 }
 
 .ui-brand:hover,
@@ -238,7 +243,7 @@ textarea {
   background-position: center;
   background-repeat: no-repeat;
   background-size: 100% 100%;
-  filter: drop-shadow(0 18px 34px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 18px 34px rgba(0, 0, 0, 0.16));
 }
 
 .ui-icon-button img {
@@ -605,17 +610,17 @@ textarea {
 .ui-error-card,
 .ui-share-sheet {
   position: relative;
-  width: min(500px, calc(100vw - 56px));
+  width: min(432px, calc(100vw - 56px));
   display: grid;
   justify-items: center;
-  gap: 12px;
-  padding: 34px 30px 34px;
+  gap: 8px;
+  padding: 28px 24px 26px;
   background: transparent;
   box-shadow: none;
 }
 
 .ui-error-card {
-  min-height: 620px;
+  min-height: 588px;
   grid-template-rows: auto auto auto 1fr auto;
 }
 
@@ -626,36 +631,37 @@ textarea {
 }
 
 .ui-error-card img {
-  width: 54px;
-  height: 54px;
-  margin-top: 12px;
+  width: 48px;
+  height: 48px;
+  margin-top: 10px;
 }
 
 .ui-error-title {
   margin: 0;
   font-family: var(--font-display);
-  max-width: 8.2ch;
-  font-size: clamp(2.8rem, 4.4vw, 4rem);
-  line-height: 0.88;
+  max-width: 6.4ch;
+  font-size: clamp(2.35rem, 3.7vw, 3.25rem);
+  line-height: 0.9;
   color: var(--color-coconut-brown);
   text-align: center;
 }
 
 .ui-error-message {
-  max-width: 11ch;
-  font-size: clamp(1.55rem, 2.2vw, 2.15rem);
+  max-width: 12ch;
+  font-size: clamp(1.35rem, 1.95vw, 1.85rem);
   line-height: 0.96;
   color: rgba(96, 70, 53, 0.84);
   text-align: center;
 }
 
 #screen-error .ui-scribble-button {
-  width: min(360px, calc(100% - 34px));
+  width: min(312px, calc(100% - 56px));
   min-width: 0;
-  min-height: 118px;
-  padding: 16px 28px 22px;
-  font-size: clamp(2.7rem, 4vw, 4rem);
+  min-height: 104px;
+  padding: 14px 24px 18px;
+  font-size: clamp(2.45rem, 3.5vw, 3.35rem);
   align-self: end;
+  margin-bottom: 14px;
 }
 
 #screen-idle .ui-copy-stack--hero {
@@ -1148,6 +1154,10 @@ textarea {
 }
 
 @media (max-width: 720px), (max-height: 720px) {
+  #screen-error {
+    padding: 16px;
+  }
+
   .ui-brand {
     top: max(20px, env(safe-area-inset-top) + 8px);
     left: max(20px, env(safe-area-inset-left) + 8px);
@@ -1196,6 +1206,37 @@ textarea {
 
   .ui-title {
     max-width: 9.5ch;
+  }
+
+  .ui-error-card {
+    width: min(322px, calc(100vw - 28px));
+    min-height: 430px;
+    gap: 6px;
+    padding: 18px 18px 18px;
+  }
+
+  .ui-error-card img {
+    width: 42px;
+    height: 42px;
+    margin-top: 6px;
+  }
+
+  .ui-error-title {
+    max-width: 6.2ch;
+    font-size: clamp(2rem, 7vw, 2.7rem);
+  }
+
+  .ui-error-message {
+    max-width: 11.5ch;
+    font-size: clamp(1.1rem, 4.6vw, 1.45rem);
+  }
+
+  #screen-error .ui-scribble-button {
+    width: min(238px, calc(100% - 40px));
+    min-height: 82px;
+    padding: 12px 18px 16px;
+    font-size: clamp(2rem, 7vw, 2.7rem);
+    margin-bottom: 6px;
   }
 
   .ui-score-card,
