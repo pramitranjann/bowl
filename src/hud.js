@@ -53,6 +53,37 @@ function drawPaperSwash(ctx, x, y, width, height, color, rotation = 0) {
   ctx.restore();
 }
 
+function drawDurianIcon(ctx, cx, cy, size, active) {
+  ctx.save();
+  ctx.globalAlpha = active ? 1.0 : 0.22;
+  ctx.fillStyle = active ? HUD_COLORS.pandan : HUD_COLORS.muted;
+
+  // Body oval
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + size * 0.06, size * 0.38, size * 0.32, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Spikes: [tipX, tipY, base1X, base1Y, base2X, base2Y] as multiples of size
+  const spikes = [
+    [0, -0.5, -0.12, -0.16, 0.12, -0.16],
+    [0.48, -0.3, 0.16, -0.06, 0.34, 0.14],
+    [0.46, 0.24, 0.12, 0.1, 0.26, 0.36],
+    [-0.46, 0.24, -0.12, 0.1, -0.26, 0.36],
+    [-0.48, -0.3, -0.16, -0.06, -0.34, 0.14],
+  ];
+
+  for (const [tx, ty, b1x, b1y, b2x, b2y] of spikes) {
+    ctx.beginPath();
+    ctx.moveTo(cx + tx * size, cy + ty * size);
+    ctx.lineTo(cx + b1x * size, cy + b1y * size);
+    ctx.lineTo(cx + b2x * size, cy + b2y * size);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
 export function renderHud(ctx, { score, livesLost, width, mode, remainingMs }) {
   const padding = CONFIG.hudPadding;
   const modeLabel = MODE_META[mode]?.label ?? mode;
@@ -105,17 +136,15 @@ export function renderHud(ctx, { score, livesLost, width, mode, remainingMs }) {
     ctx.fillStyle = HUD_COLORS.muted;
     ctx.font = '400 22px "Reenie Beanie", cursive';
     ctx.fillText("durian", livesRect.x + livesRect.width / 2, livesRect.y + 14);
-    const dotSpacing = 18;
-    const totalDotsWidth = dotSpacing * (CONFIG.maxDurianHits - 1);
-    const dotsStartX = livesRect.x + livesRect.width / 2 - totalDotsWidth / 2;
-    const dotsY = livesRect.y + 30;
+    const iconSize = 20;
+    const iconSpacing = 30;
+    const totalIconsWidth = iconSpacing * (CONFIG.maxDurianHits - 1);
+    const iconsStartX = livesRect.x + livesRect.width / 2 - totalIconsWidth / 2;
+    const iconsY = livesRect.y + 32;
 
     for (let index = 0; index < CONFIG.maxDurianHits; index += 1) {
       const active = index < CONFIG.maxDurianHits - livesLost;
-      ctx.beginPath();
-      ctx.fillStyle = active ? HUD_COLORS.pandan : HUD_COLORS.muted;
-      ctx.arc(dotsStartX + index * dotSpacing, dotsY, 6, 0, Math.PI * 2);
-      ctx.fill();
+      drawDurianIcon(ctx, iconsStartX + index * iconSpacing, iconsY, iconSize, active);
     }
   }
 
