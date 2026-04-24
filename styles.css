@@ -190,12 +190,11 @@ textarea {
   position: absolute;
   inset: 0;
   z-index: -1;
-  border-radius: 18px;
-  background: rgba(244, 235, 217, 0.68);
-  box-shadow:
-    0 18px 34px rgba(0, 0, 0, 0.2),
-    inset 0 0 0 1px rgba(244, 235, 217, 0.22);
-  backdrop-filter: blur(10px);
+  background-image: url("./assets/ui/shapes/small-cream-blob.svg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  filter: drop-shadow(0 18px 34px rgba(0, 0, 0, 0.2));
 }
 
 .ui-brand:hover,
@@ -235,12 +234,11 @@ textarea {
   position: absolute;
   inset: 0;
   z-index: -1;
-  border-radius: 18px;
-  background: rgba(244, 235, 217, 0.68);
-  box-shadow:
-    0 18px 34px rgba(0, 0, 0, 0.2),
-    inset 0 0 0 1px rgba(244, 235, 217, 0.22);
-  backdrop-filter: blur(10px);
+  background-image: url("./assets/ui/shapes/icon-cream-blob.svg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  filter: drop-shadow(0 18px 34px rgba(0, 0, 0, 0.2));
 }
 
 .ui-icon-button img {
@@ -503,12 +501,12 @@ textarea {
 }
 
 .ui-panel--mode-grid {
-  top: 52.6%;
+  top: 44.5%;
   width: auto;
 }
 
 .ui-panel--worlds {
-  top: 52.6%;
+  top: 44.5%;
   width: auto;
 }
 
@@ -598,13 +596,18 @@ textarea {
 .ui-error-card,
 .ui-share-sheet {
   position: relative;
-  width: min(460px, calc(100vw - 40px));
+  width: min(500px, calc(100vw - 56px));
   display: grid;
   justify-items: center;
-  gap: 14px;
-  padding: 28px 26px 26px;
+  gap: 12px;
+  padding: 34px 30px 34px;
   background: transparent;
   box-shadow: none;
+}
+
+.ui-error-card {
+  min-height: 620px;
+  grid-template-rows: auto auto auto 1fr auto;
 }
 
 .ui-error-card::before,
@@ -614,22 +617,36 @@ textarea {
 }
 
 .ui-error-card img {
-  width: 38px;
-  height: 38px;
+  width: 54px;
+  height: 54px;
+  margin-top: 12px;
 }
 
 .ui-error-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(3rem, 5vw, 4.6rem);
-  line-height: 0.94;
+  max-width: 8.2ch;
+  font-size: clamp(2.8rem, 4.4vw, 4rem);
+  line-height: 0.88;
   color: var(--color-coconut-brown);
+  text-align: center;
 }
 
 .ui-error-message {
-  font-size: clamp(1.4rem, 2.4vw, 2rem);
+  max-width: 11ch;
+  font-size: clamp(1.55rem, 2.2vw, 2.15rem);
+  line-height: 0.96;
   color: rgba(96, 70, 53, 0.84);
   text-align: center;
+}
+
+#screen-error .ui-scribble-button {
+  width: min(360px, calc(100% - 34px));
+  min-width: 0;
+  min-height: 118px;
+  padding: 16px 28px 22px;
+  font-size: clamp(2.7rem, 4vw, 4rem);
+  align-self: end;
 }
 
 #play-hud {
