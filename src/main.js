@@ -137,8 +137,8 @@ const LOADING_STEPS = [
   "warming the tide....",
 ];
 
-const STARTUP_LOADING_MS = 4200;
-const LOADING_STEP_MS = 1050;
+const STARTUP_LOADING_MS = 2100;
+const LOADING_STEP_MS = 525;
 const COUNTDOWN_DURATION_MS = 4000;
 
 let lastFrameMs = performance.now();
