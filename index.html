@@ -61,7 +61,11 @@
       </section>
 
       <section id="screen-calibration" class="ui-screen ui-screen--calibration" aria-live="polite">
-        <div class="ui-copy-stack ui-copy-stack--centered">
+        <div id="calibration-slide-stage" class="calibration-slide-stage">
+          <div id="calibration-slide-content" class="calibration-slide-content"></div>
+        </div>
+        <!-- Status elements preserved for states.js — not visible to user -->
+        <div aria-hidden="true" style="position:absolute;opacity:0;pointer-events:none">
           <div class="ui-brand-lockup">bowl</div>
           <p id="ui-status-line" class="ui-status-line">sharpening your blade....</p>
           <p id="ui-status-detail" class="ui-status-detail"></p>
@@ -219,5 +223,6 @@
     <button id="dev-toggle" type="button" aria-expanded="false">tune</button>
     <aside id="dev-panel" hidden aria-label="Mechanics tuning panel"></aside>
     <script type="module" src="./src/main.js"></script>
+    <script type="module" src="./src/ui-slides.js"></script>
   </body>
 </html>
