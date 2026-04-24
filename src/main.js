@@ -246,17 +246,14 @@ function updateMenuPanel() {
   ui.root.dataset.menuPanel = game.menuPanel;
   ui.modesPanel.hidden = showingWorlds;
   ui.worldsPanel.hidden = !showingWorlds;
-  ui.menuToggleButton.hidden = game.state !== STATES.MODE_SELECT;
-  ui.menuToggleButton.textContent = showingWorlds ? "← Modes" : "Modes";
-  ui.menuToggleButton.classList.toggle("ui-pill-button--static", !showingWorlds);
-  ui.menuToggleButton.classList.toggle("hand-target", showingWorlds);
-  if (showingWorlds) {
-    ui.menuToggleButton.removeAttribute("aria-hidden");
-    ui.menuToggleButton.setAttribute("tabindex", "0");
-  } else {
-    ui.menuToggleButton.setAttribute("aria-hidden", "true");
-    ui.menuToggleButton.setAttribute("tabindex", "-1");
-  }
+  // Pill only shows in worlds panel as a static "Modes" breadcrumb label
+  ui.menuToggleButton.hidden =
+    game.state !== STATES.MODE_SELECT || !showingWorlds;
+  ui.menuToggleButton.textContent = "Modes";
+  ui.menuToggleButton.classList.add("ui-pill-button--static");
+  ui.menuToggleButton.classList.remove("hand-target");
+  ui.menuToggleButton.setAttribute("aria-hidden", "true");
+  ui.menuToggleButton.setAttribute("tabindex", "-1");
 }
 
 function updateWorldSelectionUi() {
@@ -488,11 +485,6 @@ function goToPlaySelect(nowMs) {
   if (game.state !== STATES.LOADING) {
     setState(STATES.MODE_SELECT, nowMs, "");
   }
-}
-
-function showWorldPanel(nowMs) {
-  game.menuPanel = "worlds";
-  updateUiState(nowMs);
 }
 
 function recalibrate(nowMs) {
@@ -1304,15 +1296,8 @@ async function init() {
 
   ui.modeWorldsButton.addEventListener("click", () => {
     audio.unlock();
-    showWorldPanel(performance.now());
-  });
-
-  ui.menuToggleButton.addEventListener("click", () => {
-    if (game.menuPanel === "worlds") {
-      audio.unlock();
-      game.menuPanel = "modes";
-      updateUiState(performance.now());
-    }
+    game.menuPanel = "worlds";
+    updateUiState(performance.now());
   });
 
   for (const button of ui.worldButtons) {

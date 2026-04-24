@@ -574,6 +574,15 @@ textarea {
   filter: drop-shadow(0 18px 30px rgba(42, 31, 24, 0.16));
 }
 
+.ui-panel--worlds .ui-scribble-button--icon {
+  gap: 0;
+  align-content: center;
+}
+
+.ui-panel--worlds .ui-scribble-button--icon img {
+  display: none;
+}
+
 .ui-scribble-button--icon {
   display: grid;
   justify-items: center;
@@ -647,6 +656,30 @@ textarea {
   padding: 16px 28px 22px;
   font-size: clamp(2.7rem, 4vw, 4rem);
   align-self: end;
+}
+
+#screen-idle .ui-copy-stack--hero {
+  gap: 42px;
+  margin-top: 7vh;
+}
+
+#screen-idle .ui-title {
+  max-width: 12ch;
+  font-size: clamp(4.8rem, 8vw, 9rem);
+  color: var(--color-evening-amber);
+}
+
+#screen-idle .ui-subtitle {
+  max-width: 38ch;
+  font-size: clamp(1.95rem, 2.5vw, 3rem);
+  color: rgba(96, 70, 53, 0.84);
+}
+
+#screen-idle .ui-scribble-button {
+  width: 278px;
+  min-height: 122px;
+  padding: 18px 28px 24px;
+  font-size: clamp(2.7rem, 3.8vw, 4.2rem);
 }
 
 #play-hud {
@@ -829,8 +862,11 @@ textarea {
 
 .ui-share-sheet {
   z-index: 1;
-  gap: 12px;
-  padding-top: 30px;
+  width: min(458px, calc(100vw - 48px));
+  min-height: 620px;
+  gap: 10px;
+  padding: 24px 26px 28px;
+  grid-template-rows: auto auto auto 1fr auto;
 }
 
 .ui-share-close {
@@ -849,21 +885,25 @@ textarea {
 }
 
 .ui-share-title {
-  font-size: clamp(3rem, 4vw, 4.4rem);
+  max-width: 7ch;
+  text-align: center;
+  font-size: clamp(3.4rem, 4.7vw, 4.9rem);
+  line-height: 0.9;
   color: var(--color-coconut-brown);
 }
 
 .ui-share-copy {
-  max-width: 12ch;
+  max-width: 13ch;
   text-align: center;
-  font-size: clamp(1.5rem, 2vw, 2rem);
+  font-size: clamp(1.55rem, 2vw, 2.05rem);
+  line-height: 0.96;
   color: rgba(96, 70, 53, 0.84);
 }
 
 .ui-share-preview {
-  width: 136px;
-  height: 136px;
-  margin: 12px 0 8px;
+  width: 168px;
+  height: 168px;
+  margin: 36px 0 0;
   border-radius: 50% 47% 49% 51% / 45% 52% 48% 55%;
   background:
     rgba(201, 202, 206, 0.78)
@@ -876,14 +916,15 @@ textarea {
 
 .ui-share-actions {
   display: flex;
-  gap: 18px;
+  gap: 28px;
   width: 100%;
   justify-content: center;
+  align-self: end;
 }
 
 .ui-action-swatch {
-  width: 96px;
-  height: 84px;
+  width: 208px;
+  height: 88px;
   border: 0;
   cursor: pointer;
   background: transparent;
