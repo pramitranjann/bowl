@@ -673,6 +673,8 @@ function beginGameOver(nowMs) {
   game.restartHoverStartedAt = 0;
   bowl.compose(viewport);
   setState(STATES.GAMEOVER, nowMs, "again");
+  // Auto-open share modal after bowl renders to canvas (needs one frame)
+  requestAnimationFrame(() => openShareModal());
 }
 
 function restartIfAllowed(nowMs) {
@@ -1279,8 +1281,16 @@ async function init() {
   ui.gameoverShareButton.addEventListener("click", () => {
     openShareModal();
   });
-  ui.shareCloseX.addEventListener("click", closeShareModal);
-  ui.shareCloseButton.addEventListener("click", closeShareModal);
+
+  function dismissShareModal() {
+    closeShareModal();
+    if (game.state === STATES.GAMEOVER) {
+      restartHandler();
+    }
+  }
+
+  ui.shareCloseX.addEventListener("click", dismissShareModal);
+  ui.shareCloseButton.addEventListener("click", dismissShareModal);
   ui.shareDownloadButton.addEventListener("click", downloadSharePreview);
 
   for (const button of ui.modeButtons) {
