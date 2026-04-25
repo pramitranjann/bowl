@@ -32,6 +32,7 @@ body {
   color: var(--color-coconut-brown);
   font-family: var(--font-display);
   -webkit-font-smoothing: antialiased;
+  cursor: url('./pointer.svg') 5 2, auto;
   text-rendering: optimizeLegibility;
 }
 
@@ -57,7 +58,7 @@ textarea {
   height: 100vh;
   z-index: 2;
   touch-action: none;
-  cursor: crosshair;
+  cursor: url('./pointer.svg') 5 2, crosshair;
   background: transparent;
 }
 
@@ -351,7 +352,10 @@ textarea {
 
 #screen-opening .ui-subtitle,
 #screen-idle .ui-subtitle {
-  color: rgba(244, 235, 217, 0.88);
+  color: rgba(244, 235, 217, 0.96);
+  text-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.6),
+    0 4px 22px rgba(0, 0, 0, 0.44);
 }
 
 .ui-brand-lockup {
@@ -746,22 +750,23 @@ textarea {
 .ui-score-card {
   left: max(46px, env(safe-area-inset-left) + 4px);
   top: 17.5vh;
-  width: 112px;
-  min-width: 112px;
-  min-height: 98px;
-  padding: 10px 12px 14px;
+  width: 88px;
+  min-width: 88px;
+  min-height: 78px;
+  padding: 7px 9px 9px;
   align-content: start;
-  gap: 3px;
+  gap: 2px;
 }
 
 .ui-score-card::before {
   background-image: url("./assets/ui/shapes/score-blob-green.svg");
+  filter: saturate(1.4) brightness(0.86);
 }
 
 .ui-score-label,
 .ui-pill-label {
   font-family: var(--font-display);
-  font-size: clamp(1.55rem, 1.95vw, 2.2rem);
+  font-size: clamp(1.2rem, 1.5vw, 1.7rem);
   line-height: 0.96;
 }
 
@@ -771,7 +776,7 @@ textarea {
 
 .ui-score-value {
   font-family: var(--font-display);
-  font-size: clamp(2.6rem, 3.4vw, 3.8rem);
+  font-size: clamp(2rem, 2.6vw, 3rem);
   line-height: 0.92;
   font-variant-numeric: normal;
   font-feature-settings: "tnum" 0, "lnum" 0;
@@ -788,18 +793,23 @@ textarea {
 
 .ui-pill-chip::before {
   background-image: url("./assets/ui/shapes/small-green-blob.svg");
+  filter: saturate(1.4) brightness(0.86);
+}
+
+.ui-pill-chip--durian::before {
+  filter: none;
 }
 
 #ui-timer-pill {
-  left: 42.5vw;
-  width: 166px;
-  transform: translateX(-50%);
+  left: calc(50% - 8px);
+  width: 144px;
+  transform: translateX(-100%);
 }
 
 .ui-pill-chip--mode {
-  left: 57.8vw;
-  width: 166px;
-  transform: translateX(-50%);
+  left: calc(50% + 8px);
+  width: 144px;
+  transform: none;
 }
 
 #play-hud[data-timer-visible="false"] .ui-pill-chip--mode {
@@ -809,13 +819,13 @@ textarea {
 .ui-pill-chip--durian {
   right: max(44px, env(safe-area-inset-right) + 6px);
   top: 17.5vh;
-  width: 112px;
-  min-width: 112px;
-  min-height: 98px;
-  padding: 10px 10px 14px;
+  width: 88px;
+  min-width: 88px;
+  min-height: 78px;
+  padding: 7px 9px 9px;
   justify-items: center;
   align-content: start;
-  gap: 3px;
+  gap: 2px;
   color: var(--color-coconut-cream);
 }
 
@@ -845,12 +855,12 @@ textarea {
 }
 
 .durian-life {
-  width: 12px;
-  height: 12px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   background: #d7df68;
   flex-shrink: 0;
-  box-shadow: 0 0 6px rgba(215, 223, 104, 0.32);
+  box-shadow: 0 0 5px rgba(215, 223, 104, 0.32);
 }
 
 .durian-life--lost {
@@ -937,9 +947,9 @@ textarea {
 }
 
 .ui-share-title {
-  max-width: 7ch;
+  max-width: 16ch;
   text-align: center;
-  font-size: clamp(3.4rem, 4.7vw, 4.9rem);
+  font-size: clamp(2.4rem, 3.2vw, 3.8rem);
   line-height: 0.9;
   color: var(--color-coconut-brown);
 }
@@ -1294,10 +1304,10 @@ textarea {
 
   .ui-score-card,
   .ui-pill-chip--durian {
-    width: 88px;
-    min-width: 88px;
-    min-height: 80px;
-    padding: 8px 8px 10px;
+    width: 74px;
+    min-width: 74px;
+    min-height: 66px;
+    padding: 6px 7px 8px;
   }
 
   .ui-score-value,
@@ -1336,7 +1346,7 @@ textarea {
 .calibration-slide-content {
   display: grid;
   justify-items: center;
-  gap: 14px;
+  gap: 20px;
   text-align: center;
   max-width: min(560px, 80vw);
 }
