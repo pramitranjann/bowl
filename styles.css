@@ -1179,17 +1179,6 @@ textarea {
     top: max(28px, env(safe-area-inset-top));
   }
 
-  #ui-timer-pill {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .ui-pill-chip--mode {
-    left: auto;
-    right: max(176px, env(safe-area-inset-right) + 140px);
-    transform: none;
-  }
-
   .ui-pill-chip--durian {
     right: max(28px, env(safe-area-inset-right));
   }
