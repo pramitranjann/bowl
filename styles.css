@@ -32,11 +32,7 @@ body {
   color: var(--color-coconut-brown);
   font-family: var(--font-display);
   -webkit-font-smoothing: antialiased;
-  cursor: none !important;
   text-rendering: optimizeLegibility;
-}
-*, *::before, *::after {
-  cursor: none !important;
 }
 body {
   position: relative;
@@ -353,6 +349,11 @@ textarea {
   display: none;
 }
 
+#screen-opening .ui-subtitle,
+#screen-idle .ui-subtitle {
+  color: rgba(244, 235, 217, 0.92);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 4px 18px rgba(0, 0, 0, 0.36);
+}
 
 .ui-brand-lockup {
   font-size: clamp(5rem, 9vw, 8rem);
