@@ -353,7 +353,11 @@ function updateUiState(nowMs = performance.now()) {
   ui.errorMessage.textContent = game.statusText;
   ui.scoreValue.textContent = `${game.score}`;
   ui.modeValue.textContent = MODE_META[game.currentMode]?.label ?? "Mode";
-  ui.durianValue.textContent = `${Math.max(0, CONFIG.maxDurianHits - game.livesLost)}`;
+  const livesLeft = Math.max(0, CONFIG.maxDurianHits - game.livesLost);
+  ui.durianValue.innerHTML = Array.from(
+    { length: CONFIG.maxDurianHits },
+    (_, i) => `<span class="durian-life${i < livesLeft ? '' : ' durian-life--lost'}"></span>`
+  ).join('');
   ui.countdownValue.textContent = `${getCountdownValue(nowMs)}`;
   ui.timerPill.hidden =
     game.currentMode !== MODES.TIMED || game.state !== STATES.PLAY;
