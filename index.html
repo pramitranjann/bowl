@@ -231,20 +231,7 @@
     </div>
     <button id="dev-toggle" type="button" aria-expanded="false">tune</button>
     <aside id="dev-panel" hidden aria-label="Mechanics tuning panel"></aside>
-    <div id="custom-cursor" aria-hidden="true"><img src="./pointer.svg" alt=""></div>
     <script type="module" src="./src/main.js"></script>
     <script type="module" src="./src/ui-slides.js"></script>
-    <script>
-      (function () {
-        var el = document.getElementById('custom-cursor');
-        if (!el) return;
-        document.addEventListener('mousemove', function (e) {
-          el.style.transform = 'translate(' + (e.clientX - 5) + 'px,' + (e.clientY - 2) + 'px)';
-        });
-        document.addEventListener('mouseleave', function () {
-          el.style.transform = 'translate(-100px,-100px)';
-        });
-      })();
-    </script>
   </body>
 </html>
