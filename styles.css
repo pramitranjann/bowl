@@ -805,7 +805,7 @@ textarea {
 .ui-pill-chip--mode {
   left: calc(50% + 8px);
   width: 144px;
-  transform: translateX(0);
+  transform: none;
 }
 
 #play-hud[data-timer-visible="false"] .ui-pill-chip--mode {
@@ -1373,12 +1373,12 @@ textarea {
 @keyframes ui-enter {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    translate: 0 10px;
     filter: blur(4px);
   }
   to {
     opacity: 1;
-    transform: none;
+    translate: 0 0;
     filter: blur(0);
   }
 }
