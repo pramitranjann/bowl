@@ -56,7 +56,6 @@ textarea {
   height: 100vh;
   z-index: 2;
   touch-action: none;
-  cursor: none;
   background: transparent;
 }
 
@@ -712,7 +711,6 @@ textarea {
 #screen-idle .ui-subtitle {
   max-width: 38ch;
   font-size: clamp(1.95rem, 2.5vw, 3rem);
-  color: rgba(96, 70, 53, 0.84);
 }
 
 #screen-idle .ui-scribble-button {
