@@ -157,17 +157,7 @@ textarea {
 
 #ui-root[data-scene="calibration"]::before,
 #ui-root[data-scene="loading"]::before {
-  opacity: 1;
-  background:
-    radial-gradient(circle at top, rgba(230, 168, 92, 0.04), transparent 34%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.96));
-}
-
-#ui-root[data-camera-visible="true"][data-scene="calibration"]::before,
-#ui-root[data-camera-visible="true"][data-scene="loading"]::before {
-  background:
-    radial-gradient(circle at 50% 18%, rgba(230, 168, 92, 0.08), transparent 36%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0.24));
+  opacity: 0;
 }
 
 #ui-root[data-scene="gameover"]::before {
