@@ -73,12 +73,13 @@
         <div id="calibration-slide-stage" class="calibration-slide-stage">
           <div id="calibration-slide-content" class="calibration-slide-content"></div>
         </div>
-        <!-- Status elements preserved for states.js — not visible to user -->
-        <div aria-hidden="true" style="position:absolute;opacity:0;pointer-events:none">
-          <div class="ui-brand-lockup">bowl</div>
-          <p id="ui-status-line" class="ui-status-line">sharpening your blade....</p>
-          <p id="ui-status-detail" class="ui-status-detail"></p>
+        <div class="calibration-callout">
+          <div class="ui-copy-stack ui-copy-stack--hero">
+            <h2 class="ui-title">raise a finger</h2>
+            <p id="ui-status-line" class="ui-subtitle">sharpening your blade....</p>
+          </div>
         </div>
+        <p id="ui-status-detail" class="ui-status-detail" style="position:absolute;opacity:0;pointer-events:none"></p>
       </section>
 
       <section id="screen-mode-select" class="ui-screen ui-screen--mode-select" aria-live="polite" hidden>
@@ -231,7 +232,20 @@
     </div>
     <button id="dev-toggle" type="button" aria-expanded="false">tune</button>
     <aside id="dev-panel" hidden aria-label="Mechanics tuning panel"></aside>
+    <div id="custom-cursor" aria-hidden="true"><img src="./pointer.svg" alt=""></div>
     <script type="module" src="./src/main.js"></script>
     <script type="module" src="./src/ui-slides.js"></script>
+    <script>
+      (function () {
+        var el = document.getElementById('custom-cursor');
+        if (!el) return;
+        document.addEventListener('mousemove', function (e) {
+          el.style.transform = 'translate(' + (e.clientX - 5) + 'px,' + (e.clientY - 2) + 'px)';
+        });
+        document.addEventListener('mouseleave', function () {
+          el.style.transform = 'translate(-100px,-100px)';
+        });
+      })();
+    </script>
   </body>
 </html>

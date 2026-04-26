@@ -8,7 +8,7 @@ const SUPPORT_LINES = [
 
 const CYCLE_MS = 2800;
 const FADE_MS = 320;
-const ACTIVE_SCENES = new Set(['loading', 'calibration']);
+const ACTIVE_SCENES = new Set(['loading']);
 
 let supportIndex = 0;
 let cycleTimer = null;

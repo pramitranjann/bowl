@@ -33,9 +33,31 @@ body {
   font-family: var(--font-display);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  cursor: none;
+}
+button, a, * {
+  cursor: none !important;
 }
 body {
   position: relative;
+}
+
+#custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+  z-index: 99999;
+  will-change: transform;
+  transform: translate(-100px, -100px);
+}
+
+#custom-cursor img {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 button,
@@ -137,14 +159,15 @@ textarea {
 #ui-root[data-scene="loading"]::before {
   opacity: 1;
   background:
-    radial-gradient(circle at top, rgba(255, 255, 255, 0.32), transparent 36%),
-    linear-gradient(180deg, rgba(244, 235, 217, 0.98), rgba(244, 235, 217, 1));
+    radial-gradient(circle at top, rgba(230, 168, 92, 0.04), transparent 34%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.96));
 }
 
-#ui-root[data-camera-visible="true"][data-scene="calibration"]::before {
+#ui-root[data-camera-visible="true"][data-scene="calibration"]::before,
+#ui-root[data-camera-visible="true"][data-scene="loading"]::before {
   background:
-    radial-gradient(circle at 50% 18%, rgba(244, 235, 217, 0.12), transparent 38%),
-    linear-gradient(180deg, rgba(244, 235, 217, 0.18), rgba(244, 235, 217, 0.28));
+    radial-gradient(circle at 50% 18%, rgba(230, 168, 92, 0.08), transparent 36%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0.24));
 }
 
 #ui-root[data-scene="gameover"]::before {
@@ -1319,6 +1342,32 @@ textarea {
   }
 }
 
+.calibration-callout {
+  display: none;
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+#ui-root[data-scene="calibration"] .calibration-callout {
+  display: flex;
+}
+
+#ui-root[data-scene="calibration"] .calibration-slide-stage {
+  display: none;
+}
+
+.calibration-callout .ui-title {
+  color: rgba(244, 235, 217, 0.96);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5), 0 6px 28px rgba(0, 0, 0, 0.36);
+}
+
+.calibration-callout .ui-subtitle {
+  color: rgba(244, 235, 217, 0.72);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
 .calibration-slide-stage {
   display: flex;
   align-items: center;
@@ -1340,17 +1389,15 @@ textarea {
   font-family: var(--font-display);
   font-size: clamp(1.8rem, 2.8vw, 3rem);
   line-height: 1;
-  color: rgba(76, 49, 37, 0.62);
+  color: rgba(244, 235, 217, 0.62);
   animation: ui-enter 360ms var(--ui-ease) both;
-
   text-shadow: none;
   filter: none;
 }
 
 .calibration-slide-line--hero {
   font-size: clamp(3.4rem, 6vw, 5.5rem);
-  color: var(--color-coconut-brown);
-
+  color: rgba(244, 235, 217, 0.96);
   text-shadow: none;
   filter: none;
 }
