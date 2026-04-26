@@ -780,7 +780,7 @@ textarea {
 .ui-score-label,
 .ui-pill-label {
   font-family: var(--font-display);
-  font-size: clamp(1.2rem, 1.5vw, 1.7rem);
+  font-size: clamp(1.4rem, 1.8vw, 2rem);
   line-height: 0.96;
 }
 
@@ -790,7 +790,7 @@ textarea {
 
 .ui-score-value {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 2.6vw, 3rem);
+  font-size: clamp(2.6rem, 3.4vw, 4rem);
   line-height: 0.92;
   font-variant-numeric: normal;
   font-feature-settings: "tnum" 0, "lnum" 0;
@@ -853,7 +853,7 @@ textarea {
 
 .ui-pill-value {
   font-family: var(--font-display);
-  font-size: clamp(2.05rem, 2.6vw, 3rem);
+  font-size: clamp(2.6rem, 3.4vw, 4rem);
   line-height: 0.92;
   font-variant-numeric: normal;
   font-feature-settings: "tnum" 0, "lnum" 0;
@@ -869,8 +869,8 @@ textarea {
 }
 
 .durian-life {
-  width: 9px;
-  height: 9px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
   background: #d7df68;
   flex-shrink: 0;
@@ -1315,7 +1315,7 @@ textarea {
 
   .ui-score-value,
   .ui-pill-value {
-    font-size: clamp(2rem, 7vw, 3rem);
+    font-size: clamp(2.4rem, 7vw, 3.4rem);
   }
 
   .ui-pill-meta,
