@@ -1166,10 +1166,6 @@ async function animate(nowMs) {
 
     if (game.state === STATES.LOADING) {
       if (startupComplete && nowMs - game.stateSince >= STARTUP_LOADING_MS) {
-        setState(STATES.OPENING, nowMs, "raise your hands");
-      }
-    } else if (game.state === STATES.OPENING) {
-      if (hands.length > 0 && nowMs - game.stateSince > CONFIG.openingPromptMs) {
         beginCalibration(nowMs);
       }
     } else if (game.state === STATES.CALIBRATION) {
