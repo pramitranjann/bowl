@@ -27,7 +27,7 @@
   --ui-top-gap: clamp(8px, 1vw, 16px);
   --ui-action-gap: clamp(14px, 2vw, 28px);
   --ui-center-width: min(44rem, calc(100vw - (var(--ui-edge-pad) * 2)));
-  --ui-hud-top-offset: clamp(74px, 10vw, 102px);
+  --ui-hud-top-offset: 8px;
   --ui-hud-side-width: clamp(64px, 18vw, 108px);
   --ui-hud-chip-width: clamp(98px, 28vw, 148px);
   --ui-hud-side-height: clamp(70px, 9vw, 96px);
@@ -144,7 +144,7 @@ textarea {
 #ui-root[data-scene="mode-select"]::before,
 #ui-root[data-scene="idle"]::before,
 #ui-root[data-scene="error"]::before {
-  opacity: 0.92;
+  opacity: 0.52;
 }
 
 #ui-root[data-scene="opening"]::before,
@@ -153,8 +153,8 @@ textarea {
 #ui-root[data-scene="idle"]::before,
 #ui-root[data-scene="error"]::before {
   background:
-    radial-gradient(circle at 50% 14%, rgba(230, 168, 92, 0.06), transparent 34%),
-    linear-gradient(180deg, rgba(6, 4, 3, 0.14), rgba(6, 4, 3, 0.2));
+    radial-gradient(circle at 50% 14%, rgba(230, 168, 92, 0.04), transparent 34%),
+    linear-gradient(180deg, rgba(6, 4, 3, 0.06), rgba(6, 4, 3, 0.12));
 }
 
 #ui-root[data-camera-visible="true"][data-scene="opening"]::before,
@@ -163,8 +163,8 @@ textarea {
 #ui-root[data-camera-visible="true"][data-scene="idle"]::before,
 #ui-root[data-camera-visible="true"][data-scene="error"]::before {
   background:
-    radial-gradient(circle at 50% 18%, rgba(230, 168, 92, 0.06), transparent 36%),
-    linear-gradient(180deg, rgba(6, 4, 3, 0.08), rgba(6, 4, 3, 0.16));
+    radial-gradient(circle at 50% 18%, rgba(230, 168, 92, 0.04), transparent 36%),
+    linear-gradient(180deg, rgba(6, 4, 3, 0.03), rgba(6, 4, 3, 0.08));
 }
 
 #ui-root[data-scene="calibration"]::before {
@@ -474,6 +474,7 @@ textarea {
   position: absolute;
   inset: 0;
   z-index: -1;
+  opacity: 0.88;
   background-position: center;
   background-repeat: no-repeat;
   background-size: 100% 100%;
@@ -782,6 +783,11 @@ textarea {
 }
 
 .ui-score-card,
+.ui-pill-chip--durian {
+  margin-top: clamp(68px, 6vw, 84px);
+}
+
+.ui-score-card,
 .ui-pill-chip {
   box-sizing: border-box;
   display: grid;
@@ -811,6 +817,7 @@ textarea {
 .ui-score-card::before {
   background-image: url("./assets/ui/shapes/score-blob-green.svg");
   filter: saturate(1.4) brightness(0.86);
+  opacity: 0.84;
 }
 
 .ui-score-label,
@@ -846,10 +853,12 @@ textarea {
 .ui-pill-chip::before {
   background-image: url("./assets/ui/shapes/small-green-blob.svg");
   filter: saturate(1.4) brightness(0.86);
+  opacity: 0.82;
 }
 
 .ui-pill-chip--durian::before {
   filter: none;
+  opacity: 0.9;
 }
 
 #ui-timer-pill {
@@ -984,7 +993,7 @@ textarea {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 50% 34%, rgba(42, 31, 24, 0.08), rgba(42, 31, 24, 0.16));
+    radial-gradient(circle at 50% 34%, rgba(42, 31, 24, 0.05), rgba(42, 31, 24, 0.1));
 }
 
 .ui-share-sheet {
@@ -1332,6 +1341,7 @@ textarea {
     grid-column: 1;
     grid-row: 1;
     align-self: start;
+    margin-top: 0;
   }
 
   #ui-timer-pill {
@@ -1355,6 +1365,7 @@ textarea {
     grid-column: 4;
     grid-row: 1;
     align-self: start;
+    margin-top: 0;
   }
 
   .ui-subtitle,

@@ -140,6 +140,10 @@ const LOADING_STEPS = [
 const STARTUP_LOADING_MS = 2100;
 const LOADING_STEP_MS = 525;
 const COUNTDOWN_DURATION_MS = 4000;
+const debugUiParams = new URLSearchParams(window.location.search);
+const debugUiState = debugUiParams.get("debug-ui");
+const debugUiMode = debugUiParams.get("debug-mode");
+let debugUiApplied = false;
 
 let lastFrameMs = performance.now();
 let startupComplete = false;
@@ -162,6 +166,34 @@ function getLoadingCopy(nowMs = performance.now()) {
 function getCountdownValue(nowMs = performance.now()) {
   const remainingMs = Math.max(0, game.countdownEndsAt - nowMs);
   return Math.max(0, Math.ceil(remainingMs / 1000) - 1);
+}
+
+function applyDebugUiState(nowMs = performance.now()) {
+  if (!debugUiState || debugUiApplied) {
+    return;
+  }
+
+  debugUiApplied = true;
+  game.currentMode =
+    debugUiMode && Object.values(MODES).includes(debugUiMode)
+      ? debugUiMode
+      : MODES.TIMED;
+  game.currentWorld = game.currentMode === MODES.SUNSET ? "sunset" : "beach";
+  game.score = 184;
+  game.livesLost = 1;
+  game.modeEndsAt = nowMs + 38_000;
+  game.lastMovementAt = nowMs + 60_000;
+
+  if (debugUiState === "play") {
+    setState(STATES.PLAY, nowMs, "");
+    return;
+  }
+
+  setState(STATES.GAMEOVER, nowMs, "again");
+
+  if (debugUiState === "share") {
+    requestAnimationFrame(() => openShareModal());
+  }
 }
 
 function normalizeSafariLoopbackOrigin() {
@@ -272,11 +304,17 @@ function openShareModal() {
     ui.sharePreview.style.backgroundImage = "";
   }
   ui.shareModal.hidden = false;
+  if (game.state === STATES.GAMEOVER) {
+    ui.gameoverActions.hidden = true;
+  }
   resetAllTrackedUiButtons();
 }
 
 function closeShareModal() {
   ui.shareModal.hidden = true;
+  if (game.state === STATES.GAMEOVER) {
+    ui.gameoverActions.hidden = false;
+  }
   resetAllTrackedUiButtons();
 }
 
@@ -323,7 +361,8 @@ function updateUiState(nowMs = performance.now()) {
   ui.idleScreen.hidden = game.state !== STATES.IDLE;
   ui.errorScreen.hidden = game.state !== STATES.ERROR;
   ui.playHud.hidden = game.state !== STATES.PLAY;
-  ui.gameoverActions.hidden = game.state !== STATES.GAMEOVER;
+  ui.gameoverActions.hidden =
+    game.state !== STATES.GAMEOVER || !ui.shareModal.hidden;
   ui.brandButton.hidden =
     game.state === STATES.CALIBRATION || game.state === STATES.LOADING;
   ui.homeButton.hidden = !(
@@ -673,8 +712,6 @@ function beginGameOver(nowMs) {
   game.restartHoverStartedAt = 0;
   bowl.compose(viewport);
   setState(STATES.GAMEOVER, nowMs, "again");
-  // Auto-open share modal after bowl renders to canvas (needs one frame)
-  requestAnimationFrame(() => openShareModal());
 }
 
 function restartIfAllowed(nowMs) {
@@ -1203,6 +1240,15 @@ async function animate(nowMs) {
     environment.setVisible(useSunsetComposite && environment.hasVideoFrame());
     webcam.style.opacity = shouldShowLiveWebcamLayer() ? "1" : "0";
     updateUiState(nowMs);
+    if (
+      !debugUiApplied &&
+      debugUiState &&
+      game.state !== STATES.ERROR &&
+      game.state !== STATES.LOADING
+    ) {
+      applyDebugUiState(nowMs);
+      updateUiState(nowMs);
+    }
 
     renderScene(nowMs, hands, frame, game.segmentation);
     ctx.clearRect(0, 0, viewport.width, viewport.height);
@@ -1343,6 +1389,14 @@ async function init() {
 
   requestAnimationFrame(animate);
 
+  if (debugUiState) {
+    startupComplete = true;
+    setState(STATES.LOADING, performance.now(), "");
+    updateUiState();
+    applyDebugUiState(performance.now());
+    return;
+  }
+
   try {
     await Promise.all([
       tracker.start((statusText) => {
@@ -1353,6 +1407,7 @@ async function init() {
     startupComplete = true;
     setState(STATES.LOADING, performance.now(), "");
     updateUiState();
+    applyDebugUiState(performance.now());
   } catch (error) {
     handleFatalError(error, "startup");
   }

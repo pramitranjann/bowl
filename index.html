@@ -239,12 +239,25 @@
       (function () {
         var el = document.getElementById('custom-cursor');
         if (!el) return;
-        document.addEventListener('mousemove', function (e) {
-          el.style.transform = 'translate(' + (e.clientX - 5) + 'px,' + (e.clientY - 2) + 'px)';
-        });
+        var hiddenTransform = 'translate3d(-100px,-100px,0)';
+
+        function setCursorPosition(x, y) {
+          el.style.transform = 'translate3d(' + (x - 5) + 'px,' + (y - 2) + 'px,0)';
+        }
+
+        function handlePointerMove(e) {
+          if (e.pointerType === 'touch') return;
+          setCursorPosition(e.clientX, e.clientY);
+        }
+
+        document.addEventListener('pointermove', handlePointerMove, { passive: true });
+        document.addEventListener('pointerrawupdate', handlePointerMove, { passive: true });
+        document.addEventListener('pointerleave', function () {
+          el.style.transform = hiddenTransform;
+        }, { passive: true });
         document.addEventListener('mouseleave', function () {
-          el.style.transform = 'translate(-100px,-100px)';
-        });
+          el.style.transform = hiddenTransform;
+        }, { passive: true });
       })();
     </script>
   </body>
