@@ -1,11 +1,11 @@
 import { CONFIG } from "./config.js";
 import { AudioEngine } from "./audio.js";
-import { BowlSystem } from "./bowl.js";
+import { BowlSystem } from "./bowl.js?v=3";
 import { Compositor } from "./compositor.js";
 import { createDevPanel } from "./dev-panel.js";
 import { EnvironmentSystem } from "./environment.js";
 import { createDurianBurst, createJuiceBurst } from "./particles.js";
-import { splitFruit } from "./entities.js";
+import { splitFruit } from "./entities.js?v=3";
 import { applyHaze } from "./haze.js";
 import { PerformanceMonitor } from "./perf.js";
 import { updateBody, isBodyOffscreen } from "./physics.js";
@@ -13,7 +13,7 @@ import { detectSlices } from "./slice.js";
 import { WaveSpawner } from "./spawner.js";
 import { MODE_META, MODES, STATES } from "./states.js";
 import { TrailSystem } from "./trail.js";
-import { preloadVectorArt } from "./vector-art.js";
+import { preloadVectorArt } from "./vector-art.js?v=3";
 import { HandTracker } from "./vision.js";
 
 const canvas = document.getElementById("game");
@@ -27,7 +27,6 @@ const ui = {
   settingsButton: document.getElementById("ui-settings"),
   soundButton: document.getElementById("ui-sound"),
   menuToggleButton: document.getElementById("ui-menu-toggle"),
-  modeWorldsButton: document.getElementById("mode-worlds"),
   openingScreen: document.getElementById("screen-opening"),
   calibrationScreen: document.getElementById("screen-calibration"),
   modeSelectScreen: document.getElementById("screen-mode-select"),
@@ -55,8 +54,6 @@ const ui = {
   shareCloseButton: document.getElementById("ui-share-close"),
   shareDownloadButton: document.getElementById("ui-share-download"),
   modeButtons: [...document.querySelectorAll("#mode-panel-modes [data-mode]")],
-  worldButtons: [...document.querySelectorAll("[data-world]")],
-  worldsPanel: document.getElementById("mode-panel-worlds"),
   modesPanel: document.getElementById("mode-panel-modes"),
 };
 
@@ -117,6 +114,7 @@ const game = {
   menuPanel: "modes",
   currentWorld: "sunset",
   countdownEndsAt: 0,
+  modeSelectButtonsArmed: false,
 };
 
 const metrics = {
@@ -270,17 +268,17 @@ function setState(state, nowMs, statusText = game.statusText) {
   if (state !== STATES.GAMEOVER) {
     closeShareModal();
   }
+  if (state === STATES.MODE_SELECT) {
+    game.modeSelectButtonsArmed = false;
+    resetAllTrackedUiButtons();
+  }
   updateUiState(nowMs);
 }
 
 function updateMenuPanel() {
-  const showingWorlds = game.menuPanel === "worlds";
   ui.root.dataset.menuPanel = game.menuPanel;
-  ui.modesPanel.hidden = showingWorlds;
-  ui.worldsPanel.hidden = !showingWorlds;
-  // Pill only shows in worlds panel as a static "Modes" breadcrumb label
-  ui.menuToggleButton.hidden =
-    game.state !== STATES.MODE_SELECT || !showingWorlds;
+  ui.modesPanel.hidden = false;
+  ui.menuToggleButton.hidden = true;
   ui.menuToggleButton.textContent = "Modes";
   ui.menuToggleButton.classList.add("ui-pill-button--static");
   ui.menuToggleButton.classList.remove("hand-target");
@@ -289,9 +287,7 @@ function updateMenuPanel() {
 }
 
 function updateWorldSelectionUi() {
-  for (const button of ui.worldButtons) {
-    button.classList.toggle("is-active", button.dataset.world === game.currentWorld);
-  }
+  return;
 }
 
 function openShareModal() {
@@ -411,6 +407,20 @@ function setTrackedUiButtonHover(button, progress) {
   button.classList.toggle("is-finger-hovered", progress > 0);
 }
 
+function getTrackedUiButtonHoverMs(button) {
+  if (button.closest("#screen-mode-select")) {
+    return CONFIG.modeSelectHoverMs;
+  }
+  return CONFIG.modeHoverMs;
+}
+
+function isTrackedUiButtonArmed(button) {
+  if (game.state === STATES.MODE_SELECT && button.closest("#screen-mode-select")) {
+    return game.modeSelectButtonsArmed;
+  }
+  return true;
+}
+
 function resetAllTrackedUiButtons() {
   for (const button of document.querySelectorAll(".hand-target")) {
     setTrackedUiButtonHover(button, 0);
@@ -446,7 +456,7 @@ function getTrackedUiButtons() {
         : button.closest("#gameover-actions")
           ? 24
           : button.closest("#screen-mode-select")
-            ? 14
+            ? 8
             : button.closest(".ui-share-actions")
               ? 14
               : 8;
@@ -467,6 +477,25 @@ function getTrackedUiButtons() {
 function updateTrackedUiButtons(hands, nowMs) {
   const buttons = getTrackedUiButtons();
   const visibleIds = new Set(buttons.map((button) => button.id));
+  const modeSelectButtons = buttons.filter((button) =>
+    button.button.closest("#screen-mode-select")
+  );
+
+  if (game.state === STATES.MODE_SELECT && !game.modeSelectButtonsArmed) {
+    const hoveringModeSelectButton = modeSelectButtons.some((button) =>
+      hands.some(
+        (hand) =>
+          hand.x >= button.x &&
+          hand.x <= button.x + button.width &&
+          hand.y >= button.y &&
+          hand.y <= button.y + button.height
+      )
+    );
+
+    if (!hoveringModeSelectButton) {
+      game.modeSelectButtonsArmed = true;
+    }
+  }
 
   for (const [id] of game.uiButtonHover) {
     if (!visibleIds.has(id)) {
@@ -475,6 +504,12 @@ function updateTrackedUiButtons(hands, nowMs) {
   }
 
   for (const button of buttons) {
+    if (!isTrackedUiButtonArmed(button.button)) {
+      game.uiButtonHover.delete(button.id);
+      setTrackedUiButtonHover(button.button, 0);
+      continue;
+    }
+
     const hovering = hands.some(
       (hand) =>
         hand.x >= button.x &&
@@ -495,7 +530,10 @@ function updateTrackedUiButtons(hands, nowMs) {
     };
     game.uiButtonHover.set(button.id, hoverState);
 
-    const progress = Math.min(1, (nowMs - hoverState.startedAt) / CONFIG.modeHoverMs);
+    const progress = Math.min(
+      1,
+      (nowMs - hoverState.startedAt) / getTrackedUiButtonHoverMs(button.button)
+    );
     setTrackedUiButtonHover(button.button, progress);
 
     if (hoverState.activated || progress < 1) {
@@ -676,20 +714,6 @@ async function startMode(mode, nowMs) {
     environment.requestPlayback(true);
   }
   beginCountdown(performance.now());
-}
-
-async function startSelectedWorld(nowMs) {
-  if (game.currentWorld === "sunset") {
-    await startMode(MODES.SUNSET, nowMs);
-    return;
-  }
-
-  if (game.currentWorld === "two-player") {
-    await startMode(MODES.ENDLESS, nowMs);
-    return;
-  }
-
-  await startMode(MODES.TIMED, nowMs);
 }
 
 function beginCountdown(nowMs) {
@@ -1346,29 +1370,6 @@ async function init() {
         await startMode(mode, performance.now());
       } catch (error) {
         handleFatalError(error, mode === MODES.SUNSET ? "sunset" : "runtime");
-      }
-    });
-  }
-
-  ui.modeWorldsButton.addEventListener("click", () => {
-    audio.unlock();
-    game.menuPanel = "worlds";
-    updateUiState(performance.now());
-  });
-
-  for (const button of ui.worldButtons) {
-    button.addEventListener("click", async () => {
-      audio.unlock();
-      const world = button.dataset.world;
-      if (!world) {
-        return;
-      }
-      game.currentWorld = world;
-      updateWorldSelectionUi();
-      try {
-        await startSelectedWorld(performance.now());
-      } catch (error) {
-        handleFatalError(error, world === "sunset" ? "sunset" : "runtime");
       }
     });
   }

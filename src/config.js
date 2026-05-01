@@ -71,6 +71,7 @@ export const CONFIG = {
   calibrationHoldMs: 2000,
   calibrationGraceMs: 280,
   modeHoverMs: 900,
+  modeSelectHoverMs: 1600,
   endlessLives: 3,
   timedDurationMs: 90_000,
   sunsetDurationMs: 5 * 60_000,

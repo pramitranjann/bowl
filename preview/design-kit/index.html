@@ -1,0 +1,1264 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Bowl — Design Kit</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --font-display: "Reenie Beanie", cursive;
+      --font-body: Georgia, "Times New Roman", serif;
+      --color-coconut-cream:  #f4ebd9;
+      --color-coconut-brown:  #4c3125;
+      --color-ink-deep:       #24150f;
+      --color-hibiscus:       #d94423;
+      --color-evening-amber:  #e6a85c;
+      --color-muted-brown:    #8a7a6d;
+      --color-durian-glow:    #d7df68;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--color-coconut-brown); }
+    #app { width: 100%; height: 100vh; }
+
+    @keyframes bowl-enter {
+      from { opacity: 0; transform: translateY(18px) scale(0.96); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes bowl-breathe {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      50%       { transform: scale(1.015) rotate(0.4deg); }
+    }
+    @keyframes bowl-fade-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes sun-pulse {
+      0%, 100% { transform: translate(-50%,-50%) scale(1);     opacity: 1; }
+      50%       { transform: translate(-50%,-50%) scale(1.06);  opacity: 0.88; }
+    }
+    @keyframes cloud-drift-a {
+      from { transform: translateX(0); }
+      to   { transform: translateX(1600px); }
+    }
+    @keyframes cloud-drift-b {
+      from { transform: translateX(-400px); }
+      to   { transform: translateX(1600px); }
+    }
+    @keyframes palm-sway {
+      0%, 100% { transform: rotate(0deg); }
+      35%       { transform: rotate(1.2deg); }
+      65%       { transform: rotate(-0.8deg); }
+    }
+    @keyframes gull-drift {
+      from { transform: translateX(-320px); }
+      to   { transform: translateX(1800px); }
+    }
+  </style>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="app"></div>
+
+<!-- ═══════════════ FRUIT ICONS ═══════════════ -->
+<script type="text/babel">
+const INK = "#4c3125";
+const INK_DEEP = "#24150f";
+
+const WHOLE = {
+  watermelon: () => (
+    <g>
+      <circle cx="100" cy="100" r="84" fill="#2a8a4e" stroke={INK} strokeWidth="7"/>
+      <g fill="none" stroke="#0e3a22" strokeWidth="10" strokeLinecap="round" opacity="0.92">
+        <path d="M40 60 C 32 90, 32 122, 44 154"/>
+        <path d="M70 30 C 62 70, 60 130, 72 170"/>
+        <path d="M130 30 C 138 70, 140 130, 128 170"/>
+        <path d="M160 60 C 168 90, 168 122, 156 154"/>
+      </g>
+      <g fill="none" stroke="#7ec96b" strokeWidth="5" strokeLinecap="round" opacity="0.85">
+        <path d="M56 44 C 50 80, 50 124, 58 164"/>
+        <path d="M100 22 C 96 80, 96 124, 100 178"/>
+        <path d="M144 44 C 150 80, 150 124, 142 164"/>
+      </g>
+      <ellipse cx="74" cy="58" rx="22" ry="11" fill="#c8ee9a" opacity="0.78" transform="rotate(-30 74 58)"/>
+    </g>
+  ),
+  pineapple: () => (
+    <g>
+      <path d="M100 12 C 96 30, 88 40, 78 46 C 70 50, 64 50, 60 48 C 64 38, 76 22, 100 12 Z" fill="#5a8c3e" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <path d="M100 12 C 104 30, 112 40, 122 46 C 130 50, 136 50, 140 48 C 136 38, 124 22, 100 12 Z" fill="#5a8c3e" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <path d="M100 12 C 102 30, 100 44, 96 56 C 92 64, 88 68, 84 70 C 84 56, 92 32, 100 12 Z" fill="#7baa48" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <path d="M100 12 C 98 30, 100 44, 104 56 C 108 64, 112 68, 116 70 C 116 56, 108 32, 100 12 Z" fill="#7baa48" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <path d="M52 86 C 54 70, 72 60, 100 60 C 128 60, 146 70, 148 86 C 154 130, 142 178, 100 184 C 58 178, 46 130, 52 86 Z" fill="#f0b41c" stroke={INK} strokeWidth="6" strokeLinejoin="round"/>
+      <g stroke={INK} strokeWidth="3.5" fill="none" strokeLinecap="round" opacity="0.86">
+        <path d="M58 96 L 96 132"/><path d="M76 86 L 116 124"/><path d="M94 80 L 138 122"/><path d="M112 80 L 148 116"/>
+        <path d="M142 96 L 104 132"/><path d="M124 86 L 84 124"/><path d="M106 80 L 62 122"/><path d="M88 80 L 52 116"/>
+      </g>
+      <g fill={INK_DEEP}>
+        <circle cx="80" cy="108" r="2.5"/><circle cx="100" cy="116" r="2.5"/><circle cx="120" cy="108" r="2.5"/>
+        <circle cx="90" cy="138" r="2.5"/><circle cx="110" cy="138" r="2.5"/><circle cx="100" cy="158" r="2.5"/>
+      </g>
+    </g>
+  ),
+  mango: () => (
+    <g>
+      <path d="M120 28 C 138 18, 158 20, 168 28 C 158 40, 138 46, 118 42 Z" fill="#5a8c3e" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <path d="M40 68 C 70 38, 124 32, 156 56 C 184 78, 188 130, 164 164 C 138 192, 78 196, 48 170 C 16 142, 14 96, 40 68 Z" fill="#ff8a1a" stroke={INK} strokeWidth="7" strokeLinejoin="round"/>
+      <path d="M118 48 C 148 54, 172 76, 178 106 C 152 94, 128 82, 116 66 Z" fill="#e0432a" opacity="0.92"/>
+      <ellipse cx="74" cy="92" rx="22" ry="34" fill="#ffd066" opacity="0.85" transform="rotate(-22 74 92)"/>
+      <ellipse cx="62" cy="78" rx="9" ry="14" fill="#fff4c8" opacity="0.7" transform="rotate(-22 62 78)"/>
+    </g>
+  ),
+  dragonfruit: () => (
+    <g>
+      <path d="M62 70 C 50 48, 34 38, 18 42 C 26 60, 44 70, 62 70 Z" fill="#7baa48" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <path d="M138 70 C 150 48, 166 38, 182 42 C 174 60, 156 70, 138 70 Z" fill="#7baa48" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <path d="M70 50 C 76 32, 74 18, 64 12 C 58 24, 60 40, 70 50 Z" fill="#5a8c3e" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <path d="M130 50 C 124 32, 126 18, 136 12 C 142 24, 140 40, 130 50 Z" fill="#5a8c3e" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <path d="M52 110 C 36 108, 22 116, 18 130 C 30 134, 46 130, 56 122 Z" fill="#7baa48" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <path d="M148 110 C 164 108, 178 116, 182 130 C 170 134, 154 130, 144 122 Z" fill="#7baa48" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <path d="M50 96 C 52 70, 76 56, 100 56 C 124 56, 148 70, 150 96 C 154 144, 130 184, 100 184 C 70 184, 46 144, 50 96 Z" fill="#e64c9b" stroke={INK} strokeWidth="6" strokeLinejoin="round"/>
+      <g fill="none" stroke={INK} strokeWidth="3" opacity="0.6" strokeLinecap="round">
+        <path d="M70 100 C 78 94, 86 96, 88 104"/>
+        <path d="M114 100 C 122 94, 130 96, 132 104"/>
+        <path d="M88 134 C 96 128, 104 130, 106 138"/>
+      </g>
+      <ellipse cx="78" cy="86" rx="14" ry="10" fill="#ff80b6" opacity="0.7" transform="rotate(-26 78 86)"/>
+    </g>
+  ),
+  durian: () => (
+    <g>
+      <path d="M96 12 L 104 12 L 102 28 L 98 28 Z" fill="#4a3220" stroke={INK} strokeWidth="3" strokeLinejoin="round"/>
+      <path d="M100 22 L 116 36 L 138 30 L 144 50 L 168 60 L 162 82 L 184 96 L 172 116 L 184 138 L 162 146 L 156 168 L 134 162 L 116 180 L 100 168 L 84 180 L 66 162 L 44 168 L 38 146 L 16 138 L 28 116 L 16 96 L 38 82 L 32 60 L 56 50 L 62 30 L 84 36 Z" fill="#c5c533" stroke={INK} strokeWidth="6" strokeLinejoin="round"/>
+      <g fill={INK} opacity="0.86">
+        <path d="M100 50 L 106 64 L 94 64 Z"/><path d="M76 60 L 82 74 L 68 72 Z"/><path d="M124 60 L 132 72 L 118 74 Z"/>
+        <path d="M58 82 L 66 94 L 52 94 Z"/><path d="M142 82 L 148 94 L 134 94 Z"/>
+        <path d="M100 96 L 108 110 L 92 110 Z"/><path d="M70 110 L 78 122 L 64 122 Z"/><path d="M130 110 L 136 122 L 122 122 Z"/>
+        <path d="M86 130 L 94 142 L 80 142 Z"/><path d="M114 130 L 120 142 L 106 142 Z"/>
+        <path d="M100 150 L 106 162 L 94 162 Z"/>
+      </g>
+    </g>
+  ),
+  rambutan: () => (
+    <g>
+      <g stroke="#d63a3f" strokeWidth="5" strokeLinecap="round" fill="none">
+        <path d="M100 18 L 100 44"/><path d="M120 24 L 112 48"/><path d="M80 24 L 88 48"/>
+        <path d="M140 32 L 124 52"/><path d="M60 32 L 76 52"/>
+        <path d="M158 48 L 138 60"/><path d="M42 48 L 62 60"/>
+        <path d="M170 70 L 146 76"/><path d="M30 70 L 54 76"/>
+        <path d="M178 96 L 152 96"/><path d="M22 96 L 48 96"/>
+        <path d="M174 122 L 150 116"/><path d="M26 122 L 50 116"/>
+        <path d="M162 146 L 142 132"/><path d="M38 146 L 58 132"/>
+        <path d="M142 166 L 130 144"/><path d="M58 166 L 70 144"/>
+        <path d="M118 178 L 114 152"/><path d="M82 178 L 86 152"/>
+      </g>
+      <g fill="#7baa48" stroke={INK} strokeWidth="2">
+        <circle cx="100" cy="42" r="5"/><circle cx="112" cy="46" r="5"/><circle cx="88" cy="46" r="5"/>
+        <circle cx="124" cy="50" r="5"/><circle cx="76" cy="50" r="5"/><circle cx="138" cy="58" r="5"/>
+        <circle cx="62" cy="58" r="5"/><circle cx="146" cy="74" r="5"/><circle cx="54" cy="74" r="5"/>
+        <circle cx="152" cy="94" r="5"/><circle cx="48" cy="94" r="5"/><circle cx="150" cy="116" r="5"/>
+        <circle cx="50" cy="116" r="5"/><circle cx="142" cy="132" r="5"/><circle cx="58" cy="132" r="5"/>
+        <circle cx="130" cy="144" r="5"/><circle cx="70" cy="144" r="5"/><circle cx="114" cy="152" r="5"/><circle cx="86" cy="152" r="5"/>
+      </g>
+      <circle cx="100" cy="100" r="56" fill="#d63a3f" stroke={INK} strokeWidth="6"/>
+      <ellipse cx="78" cy="80" rx="18" ry="10" fill="#ff7a6e" opacity="0.7" transform="rotate(-26 78 80)"/>
+    </g>
+  ),
+  mangosteen: () => (
+    <g>
+      <path d="M100 16 C 92 22, 84 30, 78 42 C 88 46, 100 44, 110 38 C 116 30, 108 18, 100 16 Z" fill="#5a8c3e" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <path d="M100 16 C 108 22, 116 30, 122 42 C 112 46, 100 44, 90 38 C 84 30, 92 18, 100 16 Z" fill="#7baa48" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <path d="M64 26 C 60 38, 60 50, 70 60 C 82 56, 90 46, 86 32 C 80 24, 68 22, 64 26 Z" fill="#5a8c3e" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <path d="M136 26 C 140 38, 140 50, 130 60 C 118 56, 110 46, 114 32 C 120 24, 132 22, 136 26 Z" fill="#5a8c3e" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <circle cx="100" cy="116" r="62" fill="#5b3676" stroke={INK} strokeWidth="6"/>
+      <g stroke={INK} strokeWidth="3.5" fill="#3a234d" strokeLinejoin="round">
+        <path d="M100 158 L 86 168 L 80 158 Z"/><path d="M100 158 L 114 168 L 120 158 Z"/>
+        <path d="M100 158 L 92 174 L 100 178 Z"/><path d="M100 158 L 108 174 L 100 178 Z"/>
+        <path d="M100 158 L 76 156 L 84 162 Z"/><path d="M100 158 L 124 156 L 116 162 Z"/>
+      </g>
+      <ellipse cx="78" cy="92" rx="14" ry="8" fill="#9b78b8" opacity="0.7" transform="rotate(-22 78 92)"/>
+    </g>
+  ),
+  lychee: () => (
+    <g>
+      <path d="M104 18 C 116 14, 124 22, 122 32" fill="none" stroke="#5a8c3e" strokeWidth="6" strokeLinecap="round"/>
+      <path d="M122 30 C 138 26, 152 30, 156 44 C 144 50, 130 46, 122 38 Z" fill="#7baa48" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <path d="M58 76 C 58 50, 80 36, 100 44 C 120 36, 142 50, 142 76 C 144 116, 124 162, 100 184 C 76 162, 56 116, 58 76 Z" fill="#d4585e" stroke={INK} strokeWidth="6" strokeLinejoin="round"/>
+      <g fill="none" stroke={INK} strokeWidth="2.5" opacity="0.7" strokeLinecap="round">
+        <path d="M70 76 C 76 72, 84 72, 86 78"/><path d="M94 70 C 100 66, 108 66, 110 72"/>
+        <path d="M118 76 C 124 72, 132 72, 134 78"/><path d="M64 100 C 70 96, 78 96, 80 102"/>
+        <path d="M90 96 C 96 92, 104 92, 106 98"/><path d="M114 100 C 120 96, 128 96, 130 102"/>
+        <path d="M70 124 C 76 120, 84 120, 86 126"/><path d="M96 124 C 102 120, 110 120, 112 126"/>
+        <path d="M82 148 C 88 144, 96 144, 98 150"/><path d="M104 148 C 110 144, 116 144, 118 150"/>
+      </g>
+    </g>
+  ),
+};
+
+const SLICED = {
+  watermelon: () => (
+    <g>
+      <path d="M22 110 A 78 78 0 0 1 178 110 L 22 110 Z" fill="#e0394e" stroke={INK} strokeWidth="6" strokeLinejoin="round"/>
+      <path d="M22 110 A 78 78 0 0 1 178 110 L 22 110 Z" fill="none" stroke="#1f5a39" strokeWidth="14" strokeLinejoin="round" transform="translate(0 6)"/>
+      <path d="M14 116 A 86 86 0 0 1 186 116" fill="none" stroke="#1f5a39" strokeWidth="6"/>
+      <path d="M22 110 A 78 78 0 0 1 178 110" fill="none" stroke="#f7efd4" strokeWidth="6"/>
+      <ellipse cx="60" cy="92" rx="4" ry="7" fill={INK_DEEP} transform="rotate(-18 60 92)"/>
+      <ellipse cx="86" cy="78" rx="4" ry="7" fill={INK_DEEP}/>
+      <ellipse cx="110" cy="76" rx="4" ry="7" fill={INK_DEEP} transform="rotate(8 110 76)"/>
+      <ellipse cx="138" cy="86" rx="4" ry="7" fill={INK_DEEP} transform="rotate(20 138 86)"/>
+      <ellipse cx="100" cy="92" rx="4" ry="6.5" fill={INK_DEEP}/>
+      <ellipse cx="156" cy="40" rx="3" ry="5" fill={INK_DEEP} transform="rotate(40 156 40)"/>
+      <ellipse cx="40" cy="56" rx="3" ry="5" fill={INK_DEEP} transform="rotate(-30 40 56)"/>
+    </g>
+  ),
+  pineapple: () => (
+    <g>
+      <circle cx="100" cy="100" r="76" fill="#f0b41c" stroke="#5a8c3e" strokeWidth="14"/>
+      <circle cx="100" cy="100" r="76" fill="none" stroke={INK} strokeWidth="6"/>
+      <circle cx="100" cy="100" r="14" fill="#fff4d2" stroke={INK} strokeWidth="4"/>
+      <g stroke={INK} strokeWidth="3" fill="none" opacity="0.6" strokeLinecap="round">
+        <path d="M100 32 L 100 86"/><path d="M100 114 L 100 168"/>
+        <path d="M32 100 L 86 100"/><path d="M114 100 L 168 100"/>
+        <path d="M52 52 L 90 90"/><path d="M148 52 L 110 90"/>
+        <path d="M52 148 L 90 110"/><path d="M148 148 L 110 110"/>
+      </g>
+      <g fill={INK_DEEP}>
+        <circle cx="100" cy="58" r="3"/><circle cx="58" cy="100" r="3"/><circle cx="142" cy="100" r="3"/>
+        <circle cx="70" cy="70" r="3"/><circle cx="130" cy="70" r="3"/>
+      </g>
+    </g>
+  ),
+  mango: () => (
+    <g>
+      <path d="M40 64 C 64 44, 100 40, 130 56 C 160 72, 168 122, 148 154 C 132 178, 88 178, 64 162 C 36 142, 28 90, 40 64 Z" fill="#ffb24a" stroke={INK} strokeWidth="6" strokeLinejoin="round"/>
+      <path d="M138 60 C 156 76, 162 110, 152 142 C 144 158, 134 168, 124 174 C 142 156, 152 124, 148 96 C 144 76, 140 64, 138 60 Z" fill="#f59a30" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <g stroke={INK} strokeWidth="3" fill="none" strokeLinecap="round" opacity="0.78">
+        <path d="M56 80 L 124 148"/><path d="M82 64 L 138 130"/><path d="M104 60 L 142 110"/>
+        <path d="M122 78 L 56 144"/><path d="M138 96 L 80 158"/>
+      </g>
+    </g>
+  ),
+  dragonfruit: () => (
+    <g>
+      <ellipse cx="100" cy="104" rx="78" ry="72" fill="#fff4f7" stroke="#e64c9b" strokeWidth="14"/>
+      <ellipse cx="100" cy="104" rx="78" ry="72" fill="none" stroke={INK} strokeWidth="6"/>
+      <path d="M88 30 C 96 22, 110 22, 116 30 C 112 38, 96 38, 88 30 Z" fill="#7baa48" stroke={INK} strokeWidth="4" strokeLinejoin="round"/>
+      <g fill={INK_DEEP}>
+        <circle cx="76" cy="74" r="2.4"/><circle cx="92" cy="68" r="2.4"/><circle cx="108" cy="68" r="2.4"/><circle cx="124" cy="74" r="2.4"/>
+        <circle cx="64" cy="92" r="2.4"/><circle cx="82" cy="86" r="2.4"/><circle cx="100" cy="84" r="2.4"/><circle cx="118" cy="86" r="2.4"/><circle cx="136" cy="92" r="2.4"/>
+        <circle cx="60" cy="110" r="2.4"/><circle cx="78" cy="106" r="2.4"/><circle cx="96" cy="104" r="2.4"/><circle cx="114" cy="104" r="2.4"/><circle cx="132" cy="106" r="2.4"/>
+        <circle cx="80" cy="146" r="2.4"/><circle cx="100" cy="142" r="2.4"/><circle cx="120" cy="146" r="2.4"/>
+      </g>
+    </g>
+  ),
+  durian: () => (
+    <g>
+      <path d="M100 30 C 70 30, 40 48, 30 78 C 16 116, 30 152, 60 168 C 84 180, 116 180, 140 168 C 170 152, 184 116, 170 78 C 160 48, 130 30, 100 30 Z" fill="#c5c533" stroke={INK} strokeWidth="6" strokeLinejoin="round"/>
+      <g fill="#c5c533" stroke={INK} strokeWidth="4" strokeLinejoin="round">
+        <path d="M44 56 L 36 38 L 60 48 Z"/><path d="M76 36 L 76 18 L 92 32 Z"/>
+        <path d="M124 36 L 132 18 L 132 36 Z"/><path d="M156 56 L 172 38 L 160 60 Z"/>
+      </g>
+      <path d="M62 96 C 70 84, 90 84, 100 92 C 110 84, 130 84, 138 96 C 142 116, 130 138, 100 146 C 70 138, 58 116, 62 96 Z" fill="#fff4d2" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <g stroke={INK} strokeWidth="3" fill="none" strokeLinecap="round">
+        <path d="M82 92 C 86 110, 86 132, 82 144"/>
+        <path d="M118 92 C 114 110, 114 132, 118 144"/>
+        <path d="M100 92 L 100 146"/>
+      </g>
+      <g fill="#a87a3a">
+        <ellipse cx="72" cy="118" rx="6" ry="9"/>
+        <ellipse cx="100" cy="120" rx="6" ry="9"/>
+        <ellipse cx="128" cy="118" rx="6" ry="9"/>
+      </g>
+    </g>
+  ),
+  rambutan: () => (
+    <g>
+      <path d="M30 110 C 24 70, 50 30, 90 28 C 86 36, 80 44, 78 56 C 60 64, 46 84, 46 110 Z" fill="#d63a3f" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <path d="M170 110 C 176 70, 150 30, 110 28 C 114 36, 120 44, 122 56 C 140 64, 154 84, 154 110 Z" fill="#d63a3f" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <g stroke="#d63a3f" strokeWidth="3.5" strokeLinecap="round" fill="none">
+        <path d="M48 50 L 38 38"/><path d="M62 38 L 56 22"/><path d="M152 50 L 162 38"/><path d="M138 38 L 144 22"/>
+      </g>
+      <ellipse cx="100" cy="120" rx="56" ry="60" fill="#fff4f0" stroke={INK} strokeWidth="5"/>
+      <ellipse cx="100" cy="124" rx="22" ry="32" fill="#a87a3a" stroke={INK} strokeWidth="4"/>
+    </g>
+  ),
+  mangosteen: () => (
+    <g>
+      <path d="M16 100 C 16 56, 56 24, 100 24 C 144 24, 184 56, 184 100 C 184 116, 174 124, 158 122 C 138 96, 116 80, 100 80 C 84 80, 62 96, 42 122 C 26 124, 16 116, 16 100 Z" fill="#5b3676" stroke={INK} strokeWidth="6" strokeLinejoin="round"/>
+      <path d="M40 122 C 60 100, 80 88, 100 88 C 120 88, 140 100, 160 122 C 144 122, 116 124, 100 124 C 84 124, 56 122, 40 122 Z" fill="#a64356" stroke={INK} strokeWidth="4" strokeLinejoin="round"/>
+      <g fill="#fff4f0" stroke={INK} strokeWidth="4" strokeLinejoin="round">
+        <path d="M62 132 C 64 122, 78 116, 84 130 C 86 142, 76 154, 64 152 C 56 148, 58 138, 62 132 Z"/>
+        <path d="M86 138 C 90 130, 100 130, 104 138 C 106 154, 96 168, 90 166 C 80 162, 80 146, 86 138 Z"/>
+        <path d="M108 138 C 110 130, 124 128, 130 138 C 134 148, 124 162, 114 162 C 104 158, 104 146, 108 138 Z"/>
+        <path d="M134 132 C 136 122, 148 116, 152 130 C 154 144, 144 156, 134 152 C 126 148, 130 138, 134 132 Z"/>
+      </g>
+    </g>
+  ),
+  lychee: () => (
+    <g>
+      <path d="M28 110 C 22 70, 46 30, 90 28 C 86 36, 80 44, 78 56 C 60 66, 44 90, 44 116 Z" fill="#d4585e" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <path d="M172 110 C 178 70, 154 30, 110 28 C 114 36, 120 44, 122 56 C 140 66, 156 90, 156 116 Z" fill="#d4585e" stroke={INK} strokeWidth="5" strokeLinejoin="round"/>
+      <ellipse cx="100" cy="120" rx="58" ry="60" fill="#fff7f0" stroke={INK} strokeWidth="5"/>
+      <ellipse cx="100" cy="124" rx="20" ry="28" fill="#7a4a2a" stroke={INK} strokeWidth="4"/>
+    </g>
+  ),
+};
+
+function FruitIcon({ kind, size = 96, sliced = false, style }) {
+  const set = sliced ? SLICED : WHOLE;
+  const painter = set[kind] || WHOLE[kind];
+  if (!painter) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 200 200" style={style}>
+        <circle cx="100" cy="100" r="70" fill="#ddd" stroke={INK} strokeWidth="6"/>
+      </svg>
+    );
+  }
+  return (
+    <svg width={size} height={size} viewBox="0 0 200 200"
+      style={{ display: 'block', filter: 'drop-shadow(0 8px 14px rgba(42,31,24,0.18))', ...style }}>
+      {painter()}
+    </svg>
+  );
+}
+
+const FRUIT_KINDS = Object.keys(WHOLE);
+Object.assign(window, { FruitIcon, FRUIT_KINDS });
+</script>
+
+<!-- ═══════════════ COMPONENTS ═══════════════ -->
+<script type="text/babel">
+const { useState: _useState } = React;
+
+const SCENE_PALETTES = {
+  noon: {
+    skyTop: '#7ec5d8', skyMid: '#cfe2c2', skyHaze: '#f2e2a0',
+    sun: '#fff1c2', halo: 'rgba(255, 240, 168, 0.5)',
+    oceanFar: '#3e84a0', oceanNear: '#27556a',
+    foam: '#f7efd4', sand: '#e8c98a', sandShade: '#a87a3a',
+    island: '#3e6638', palm: '#1d3a26', cloud: '#fff7e8',
+    vignette: 'rgba(0,0,0,0.16)',
+  },
+  goldenHour: {
+    skyTop: '#f6c27a', skyMid: '#e89a55', skyHaze: '#b16a3a',
+    sun: '#ffe2a6', halo: 'rgba(255, 198, 134, 0.55)',
+    oceanFar: '#9c5a44', oceanNear: '#5a2f24',
+    foam: '#fff1d1', sand: '#d8a062', sandShade: '#7a4a2a',
+    island: '#3a2a22', palm: '#1b1108', cloud: '#ffe6c4',
+    vignette: 'rgba(0,0,0,0.20)',
+  },
+  dusk: {
+    skyTop: '#d59166', skyMid: '#8a5a52', skyHaze: '#3e3144',
+    sun: '#f6c08c', halo: 'rgba(255, 178, 130, 0.4)',
+    oceanFar: '#3e2a3a', oceanNear: '#16101a',
+    foam: '#e6c8a8', sand: '#7a5a48', sandShade: '#3a2818',
+    island: '#1b1018', palm: '#06030a', cloud: '#c39e98',
+    vignette: 'rgba(0,0,0,0.32)',
+  },
+};
+
+function Scene({ children, time = 'goldenHour', animate = true }) {
+  const p = SCENE_PALETTES[time] || SCENE_PALETTES.goldenHour;
+  const ap = animate ? 'running' : 'paused';
+  return (
+    <div style={{
+      position: 'absolute', inset: 0, overflow: 'hidden',
+      background: `linear-gradient(180deg, ${p.skyTop} 0%, ${p.skyMid} 35%, ${p.skyHaze} 56%, ${p.oceanFar} 58%, ${p.oceanNear} 76%, ${p.sand} 80%, ${p.sandShade} 100%)`,
+    }}>
+      <div style={{
+        position: 'absolute', left: '64%', top: '24%', width: 260, height: 260,
+        transform: 'translate(-50%,-50%)',
+        background: `radial-gradient(circle, ${p.halo} 0%, rgba(0,0,0,0) 60%)`,
+        animation: 'sun-pulse 7s ease-in-out infinite', animationPlayState: ap,
+        pointerEvents: 'none',
+      }}/>
+      <div style={{
+        position: 'absolute', left: '64%', top: '24%', width: 110, height: 110,
+        transform: 'translate(-50%,-50%)', borderRadius: '50%',
+        background: `radial-gradient(circle, ${p.sun} 0%, ${p.sun} 50%, rgba(255,255,255,0) 80%)`,
+        boxShadow: `0 0 90px ${p.sun}, 0 0 40px ${p.sun}`,
+        pointerEvents: 'none',
+      }}/>
+      <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice"
+           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+        <g fill={p.cloud} opacity="0.92">
+          <g style={{ animation: 'cloud-drift-a 60s linear infinite', animationPlayState: ap }}>
+            <CloudShape x={120} y={140} scale={1}/>
+            <CloudShape x={680} y={90}  scale={0.78}/>
+            <CloudShape x={1180} y={170} scale={0.92}/>
+          </g>
+          <g style={{ animation: 'cloud-drift-b 80s linear infinite', animationPlayState: ap }}>
+            <CloudShape x={360} y={220} scale={0.6} opacity={0.7}/>
+            <CloudShape x={920} y={250} scale={0.66} opacity={0.7}/>
+          </g>
+        </g>
+        <g stroke={p.foam} strokeWidth="1.5" opacity="0.5" fill="none" strokeLinecap="round">
+          <path d="M40 540 L 240 540"/><path d="M400 552 L 600 552"/>
+          <path d="M820 548 L 1020 548"/><path d="M180 588 L 380 588"/>
+          <path d="M540 596 L 740 596"/><path d="M960 590 L 1140 590"/>
+        </g>
+        <g opacity="0.86">
+          <path d={`M 980 ${900*0.58} C 1040 ${900*0.55}, 1100 ${900*0.535}, 1160 ${900*0.55} C 1220 ${900*0.565}, 1280 ${900*0.58}, 1300 ${900*0.585} L 1300 ${900*0.6} L 980 ${900*0.6} Z`} fill={p.island}/>
+        </g>
+        <path d={`M 0 ${900*0.79} C 200 ${900*0.785}, 480 ${900*0.795}, 760 ${900*0.785} C 1040 ${900*0.792}, 1320 ${900*0.78}, 1600 ${900*0.79} L 1600 ${900*0.81} C 1320 ${900*0.815}, 1040 ${900*0.802}, 760 ${900*0.812} C 480 ${900*0.808}, 200 ${900*0.815}, 0 ${900*0.815} Z`} fill={p.foam} opacity="0.78"/>
+        <g style={{ animation: 'palm-sway 9s ease-in-out infinite', animationPlayState: ap, transformOrigin: '50% 100%' }}>
+          <PalmShape x={140} baseY={760} height={420} bend={-1} fill={p.palm}/>
+          <PalmShape x={1460} baseY={770} height={380} bend={1.5} fill={p.palm}/>
+        </g>
+        <g style={{ animation: 'gull-drift 32s linear infinite', animationPlayState: ap }} opacity="0.55">
+          <GullShape x={200} y={90} scale={0.7} fill={p.palm}/>
+          <GullShape x={280} y={120} scale={0.55} fill={p.palm}/>
+        </g>
+      </svg>
+      <svg viewBox="0 0 600 400" preserveAspectRatio="xMinYMin slice"
+           style={{ position: 'absolute', top: -20, left: -40, width: 360, height: 240, pointerEvents: 'none', opacity: 0.9 }}>
+        <g fill={p.palm} stroke="#1a0e08" strokeWidth="3" strokeLinejoin="round">
+          <path d="M-20 -20 C 80 20, 180 60, 240 130 C 200 120, 140 110, 80 100 C 40 80, 0 50, -20 -20 Z"/>
+          <path d="M-20 -20 C 100 -10, 220 30, 280 80 C 220 90, 140 70, 60 50 C 20 30, -10 0, -20 -20 Z" opacity="0.86"/>
+        </g>
+      </svg>
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        background: `radial-gradient(ellipse at 50% 50%, transparent 50%, ${p.vignette} 100%)`,
+      }}/>
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.08, mixBlendMode: 'overlay',
+        backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)'/%3E%3C/svg%3E\")",
+        backgroundSize: '200px 200px',
+      }}/>
+      {children}
+    </div>
+  );
+}
+
+function CloudShape({ x, y, scale = 1, opacity = 0.94 }) {
+  return (
+    <g transform={`translate(${x} ${y}) scale(${scale})`} opacity={opacity}>
+      <ellipse cx="0" cy="0" rx="60" ry="22"/>
+      <ellipse cx="-50" cy="6" rx="38" ry="18"/>
+      <ellipse cx="40" cy="-4" rx="42" ry="22"/>
+      <ellipse cx="-20" cy="-14" rx="34" ry="18"/>
+      <ellipse cx="20" cy="-18" rx="30" ry="16"/>
+      <ellipse cx="70" cy="8" rx="28" ry="14"/>
+      <ellipse cx="-78" cy="2" rx="22" ry="12"/>
+    </g>
+  );
+}
+
+function FrondShape({ cx, cy, dx, dy }) {
+  const tx = cx + dx, ty = cy + dy;
+  const mx = cx + dx * 0.5, my = cy + dy * 0.5;
+  const perp = dx > 0 ? 1 : -1;
+  return <path d={`M ${cx} ${cy} Q ${mx + Math.abs(dy)*0.2*perp} ${my - 16} ${tx} ${ty} Q ${mx - Math.abs(dy)*0.1*perp} ${my + 14} ${cx} ${cy} Z`}/>;
+}
+
+function PalmShape({ x, baseY, height, bend, fill }) {
+  const top = baseY - height;
+  const cpx = x + bend * 30, cpy = baseY - height * 0.5;
+  return (
+    <g>
+      <path d={`M ${x-10} ${baseY} Q ${cpx-6} ${cpy} ${x + bend*40 - 6} ${top}`} fill="none" stroke={fill} strokeWidth="14" strokeLinecap="round"/>
+      <path d={`M ${x+10} ${baseY} Q ${cpx+6} ${cpy} ${x + bend*40 + 6} ${top}`} fill="none" stroke={fill} strokeWidth="14" strokeLinecap="round"/>
+      <circle cx={x + bend*40 - 8} cy={top + 8} r="6" fill={fill}/>
+      <circle cx={x + bend*40 + 12} cy={top + 14} r="6" fill={fill}/>
+      <circle cx={x + bend*40 + 2} cy={top + 22} r="6" fill={fill}/>
+      <g fill={fill} stroke="#1a0e08" strokeWidth="2" strokeLinejoin="round">
+        <FrondShape cx={x + bend*40} cy={top} dx={-160} dy={-30}/>
+        <FrondShape cx={x + bend*40} cy={top} dx={160} dy={-30}/>
+        <FrondShape cx={x + bend*40} cy={top} dx={-130} dy={60}/>
+        <FrondShape cx={x + bend*40} cy={top} dx={130} dy={60}/>
+        <FrondShape cx={x + bend*40} cy={top} dx={-30} dy={-80}/>
+        <FrondShape cx={x + bend*40} cy={top} dx={30} dy={-80}/>
+      </g>
+    </g>
+  );
+}
+
+function GullShape({ x, y, scale, fill }) {
+  return (
+    <g transform={`translate(${x} ${y}) scale(${scale})`} fill="none" stroke={fill} strokeWidth="3" strokeLinecap="round">
+      <path d="M-22 0 Q -12 -10 0 0 Q 12 -10 22 0"/>
+    </g>
+  );
+}
+
+function BrandMark({ size = 44, onClick }) {
+  return (
+    <button onClick={onClick} style={{
+      position: 'relative', minWidth: 132, minHeight: 66,
+      padding: '10px 22px 12px', border: 0, background: 'transparent',
+      cursor: 'pointer', isolation: 'isolate',
+      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+      fontFamily: 'var(--font-display)', fontSize: size, lineHeight: 1,
+      color: 'var(--color-coconut-brown)',
+      animation: 'bowl-breathe 5s ease-in-out infinite',
+    }}>
+      <span style={{
+        position: 'absolute', inset: 0, zIndex: -1,
+        backgroundImage: 'url(../../assets/ui/shapes/small-cream-blob.svg)',
+        backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
+        filter: 'drop-shadow(0 10px 22px rgba(42,31,24,0.16))',
+      }} />
+      bowl
+    </button>
+  );
+}
+
+function IconButton({ icon, label, muted, onClick, style }) {
+  const [hover, setHover] = _useState(false);
+  return (
+    <button onClick={onClick} aria-label={label}
+      onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
+      style={{
+        position: 'relative', width: 80, height: 68, padding: 0, border: 0,
+        background: 'transparent', cursor: 'pointer', isolation: 'isolate',
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        transform: hover ? 'translateY(-2px) scale(1.03) rotate(1.5deg)' : 'none',
+        filter: hover ? 'brightness(1.06)' : 'none',
+        transition: 'transform 220ms cubic-bezier(0.2,0,0,1), filter 180ms',
+        ...style,
+      }}>
+      <span style={{
+        position: 'absolute', inset: 0, zIndex: -1,
+        backgroundImage: 'url(../../assets/ui/shapes/icon-cream-blob.svg)',
+        backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
+        filter: 'drop-shadow(0 10px 20px rgba(42,31,24,0.14))',
+      }} />
+      <img src={`../../assets/ui/icons/${icon}`} alt="" style={{ width: 28, height: 28, objectFit: 'contain' }} />
+      {muted && <span style={{
+        position: 'absolute', width: 36, height: 2, background: 'var(--color-hibiscus)',
+        transform: 'rotate(-32deg)', borderRadius: 999,
+      }} />}
+    </button>
+  );
+}
+
+function BlobButton({ children, onClick, primary, style }) {
+  const [hover, setHover] = _useState(false);
+  const [press, setPress] = _useState(false);
+  let transform = 'none';
+  if (press) transform = 'scale(0.96)';
+  else if (hover) transform = 'translateY(-2px) scale(1.03) rotate(1.5deg)';
+  return (
+    <button onClick={onClick}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => { setHover(false); setPress(false); }}
+      onMouseDown={() => setPress(true)}
+      onMouseUp={() => setPress(false)}
+      style={{
+        position: 'relative', width: 240, height: 110,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '14px 24px 20px', background: 'transparent',
+        backgroundImage: 'url(../../assets/ui/shapes/large-green-blob.svg)',
+        backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
+        border: 0, cursor: 'pointer',
+        fontFamily: 'var(--font-display)', fontSize: 44, lineHeight: 0.94,
+        color: 'var(--color-coconut-brown)',
+        filter: `drop-shadow(0 18px 30px rgba(42,31,24,0.16))${primary ? ' saturate(1.12) brightness(1.03)' : ''}${hover ? ' brightness(1.06)' : ''}`,
+        transform, transition: 'transform 220ms cubic-bezier(0.2,0,0,1), filter 180ms',
+        ...style,
+      }}>
+      {children}
+    </button>
+  );
+}
+
+function HudScoreChip({ value }) {
+  return (
+    <div style={{
+      position: 'relative', width: 168, height: 124,
+      display: 'grid', placeItems: 'center', padding: '14px 16px',
+      backgroundImage: 'url(../../assets/ui/shapes/score-blob-green.svg)',
+      backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
+      filter: 'drop-shadow(0 16px 28px rgba(42,31,24,0.22))',
+      transform: 'rotate(-2deg)',
+    }}>
+      <div style={{ display: 'grid', gap: 0, justifyItems: 'center' }}>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: 22, lineHeight: 0.9, color: 'rgba(58,39,28,0.7)' }}>score</span>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: 64, lineHeight: 0.84, fontVariantNumeric: 'tabular-nums', color: 'var(--color-ink-deep)' }}>{value}</span>
+      </div>
+    </div>
+  );
+}
+
+function HudCenterTray({ time, mode }) {
+  return (
+    <div style={{
+      position: 'relative', minWidth: 380, minHeight: 110,
+      padding: '34px 64px 38px',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 22,
+      backgroundImage: 'url(../../assets/ui/shapes/cream-card-blob.svg)',
+      backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
+      filter: 'drop-shadow(0 14px 24px rgba(42,31,24,0.18))',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'rgba(58,39,28,0.7)' }}>mode</span>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: 34, lineHeight: 0.84, color: 'var(--color-coconut-brown)' }}>{mode}</span>
+      </div>
+      <span style={{ width: 1, height: 32, background: 'rgba(76,49,37,0.22)' }}/>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'rgba(58,39,28,0.7)' }}>time</span>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: 36, lineHeight: 0.84, fontVariantNumeric: 'tabular-nums', color: 'var(--color-coconut-brown)' }}>{time}</span>
+      </div>
+    </div>
+  );
+}
+
+function HudDurianChip({ lives = 3, lost = 0 }) {
+  return (
+    <div style={{
+      position: 'relative', width: 168, height: 124,
+      display: 'grid', placeItems: 'center', padding: '14px 16px',
+      backgroundImage: 'url(../../assets/ui/shapes/score-blob-dark.svg)',
+      backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
+      filter: 'drop-shadow(0 16px 28px rgba(42,31,24,0.32))',
+      transform: 'rotate(2deg)',
+    }}>
+      <div style={{ display: 'grid', gap: 6, justifyItems: 'center' }}>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: 22, lineHeight: 0.9, color: 'rgba(244,235,217,0.78)' }}>durian</span>
+        <span style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+          {Array.from({ length: lives }).map((_, i) => (
+            <span key={i} style={{
+              width: 18, height: 18, borderRadius: '50%',
+              background: i < lost ? 'rgba(244,235,217,0.16)' : 'var(--color-durian-glow)',
+              boxShadow: i < lost ? 'none' : '0 0 12px rgba(215,223,104,0.6)',
+              border: i < lost ? '1.5px dashed rgba(244,235,217,0.32)' : 'none',
+              transition: 'all 280ms',
+            }}/>
+          ))}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function HudSpread({ score, time, mode, lives, lost }) {
+  return (
+    <div style={{
+      position: 'absolute', top: 110, left: 0, right: 0, zIndex: 4,
+      display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+      padding: '0 36px', gap: 20, pointerEvents: 'none',
+    }}>
+      <HudScoreChip value={score}/>
+      <div style={{ marginTop: 14 }}><HudCenterTray time={time} mode={mode}/></div>
+      <HudDurianChip lives={lives} lost={lost}/>
+    </div>
+  );
+}
+
+function Fruit({ kind, x, y, size = 64, rot = 0, sliced, illustrated }) {
+  const colors = {
+    watermelon: '#e63946', pineapple: '#f4c430', mango: '#ffa94d',
+    dragonfruit: '#d81b7a', mangosteen: '#6a4c93', rambutan: '#c1121f',
+    lychee: '#fecaca', durian: '#c5c533',
+  };
+  if (illustrated && typeof window.FruitIcon === 'function') {
+    return (
+      <div style={{
+        position: 'absolute', left: x, top: y, width: size, height: size,
+        transform: `translate(-50%,-50%) rotate(${rot}deg)`,
+        transition: 'transform 320ms cubic-bezier(0.2,0,0,1)',
+      }}>
+        <window.FruitIcon kind={kind} size={size} sliced={sliced}/>
+      </div>
+    );
+  }
+  return (
+    <div style={{
+      position: 'absolute', left: x, top: y, width: size, height: size, borderRadius: '50%',
+      background: colors[kind] || '#999',
+      boxShadow: `0 8px 20px rgba(42,31,24,0.22), inset 0 4px 10px rgba(255,255,255,0.18), inset 0 -8px 14px rgba(0,0,0,0.12)`,
+      transform: `translate(-50%,-50%) rotate(${rot}deg)${sliced ? ' scale(0.92)' : ''}`,
+      transition: 'transform 320ms cubic-bezier(0.2,0,0,1)',
+    }} />
+  );
+}
+
+function CoconutBowl({ size = 360, children }) {
+  return (
+    <div style={{ position: 'relative', width: size, height: size * 0.78, margin: '0 auto' }}>
+      <div style={{
+        position: 'absolute', left: '14%', right: '14%', bottom: -size * 0.04,
+        height: size * 0.1, borderRadius: '50%',
+        background: 'radial-gradient(ellipse at center, rgba(20,12,8,0.42), rgba(20,12,8,0) 70%)',
+        filter: 'blur(2px)',
+      }} />
+      <svg viewBox="0 0 560 420" width={size} height={size * 0.75}
+           style={{ position: 'absolute', inset: 0, filter: 'drop-shadow(0 28px 40px rgba(0,0,0,0.42))' }}>
+        <defs>
+          <linearGradient id="bowlShell" x1="18%" y1="10%" x2="82%" y2="90%">
+            <stop offset="0%" stopColor="#a87151"/>
+            <stop offset="52%" stopColor="#7e5236"/>
+            <stop offset="100%" stopColor="#4d2e1c"/>
+          </linearGradient>
+          <linearGradient id="bowlInner" x1="30%" y1="0%" x2="70%" y2="100%">
+            <stop offset="0%" stopColor="#5a3220"/>
+            <stop offset="100%" stopColor="#28150c"/>
+          </linearGradient>
+          <linearGradient id="bowlRim" x1="0%" y1="25%" x2="100%" y2="80%">
+            <stop offset="0%" stopColor="#fff4e1"/>
+            <stop offset="55%" stopColor="#f3dec0"/>
+            <stop offset="100%" stopColor="#d8ba91"/>
+          </linearGradient>
+        </defs>
+        <path d="M88 168 C 110 280, 188 350, 280 350 C 372 350, 450 280, 472 168 C 416 196, 348 210, 280 210 C 212 210, 144 196, 88 168 Z" fill="url(#bowlShell)" stroke="#3b1f10" strokeWidth="8" strokeLinejoin="round"/>
+        <path d="M124 174 C 152 244, 218 286, 280 286 C 342 286, 408 244, 436 174 C 392 192, 336 202, 280 202 C 224 202, 168 192, 124 174 Z" fill="url(#bowlInner)"/>
+        <path d="M104 168 C 144 138, 208 122, 280 122 C 352 122, 416 138, 456 168 C 416 192, 354 206, 280 206 C 206 206, 144 192, 104 168 Z" fill="url(#bowlRim)" stroke="#724a2c" strokeWidth="6" strokeLinejoin="round"/>
+        <path d="M152 162 C 196 150, 244 144, 280 144 C 316 144, 360 150, 408 162" fill="none" stroke="rgba(255,255,255,0.46)" strokeWidth="4" strokeLinecap="round"/>
+        <g stroke="#3b1f10" strokeWidth="2.4" fill="none" opacity="0.42" strokeLinecap="round">
+          <path d="M120 220 C 160 254, 220 280, 280 282"/>
+          <path d="M380 232 C 350 258, 308 280, 274 286"/>
+        </g>
+      </svg>
+      <div style={{ position: 'absolute', left: '17%', top: '14%', width: '66%', height: '42%', overflow: 'visible', pointerEvents: 'none' }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function BowlReveal({ fruits = [], size = 420 }) {
+  return (
+    <CoconutBowl size={size}>
+      {fruits.map((f, i) => (
+        <div key={i} style={{
+          position: 'absolute', left: `${f.x}%`, top: `${f.y}%`,
+          transform: `translate(-50%,-50%) rotate(${f.rot || 0}deg)`,
+          opacity: 0, animation: `bowl-fade-in 420ms cubic-bezier(0.2,0,0,1) ${i * 70}ms both`,
+        }}>
+          <window.FruitIcon kind={f.kind} size={f.size}/>
+        </div>
+      ))}
+    </CoconutBowl>
+  );
+}
+
+function ShareSheet({ score, fruits, onClose, onAgain }) {
+  return (
+    <div style={{ position: 'absolute', inset: 0, zIndex: 6, display: 'grid', placeItems: 'center' }}>
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'radial-gradient(circle at 50% 34%, rgba(42,31,24,0.42), rgba(42,31,24,0.66))',
+        animation: 'bowl-fade-in 220ms ease both',
+      }} onClick={onClose}/>
+      <div style={{
+        position: 'relative', width: 520, padding: '34px 38px 32px',
+        backgroundImage: 'url(../../assets/ui/shapes/cream-card-blob.svg)',
+        backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
+        filter: 'drop-shadow(0 30px 56px rgba(0,0,0,0.42))',
+        animation: 'bowl-enter 360ms cubic-bezier(0.2,0,0,1) 80ms both',
+        display: 'grid', gap: 14,
+      }}>
+        {/* Stamp — top right */}
+        <div style={{
+          position: 'absolute', top: 22, right: 36, width: 96, height: 96,
+          border: '2.5px dashed rgba(76,49,37,0.62)', borderRadius: 6, padding: 6,
+          display: 'grid', placeItems: 'center', transform: 'rotate(8deg)',
+          fontFamily: 'var(--font-display)', color: 'rgba(76,49,37,0.7)',
+          textAlign: 'center', fontSize: 14, lineHeight: 1.0,
+        }}>
+          <div>
+            <div style={{ fontSize: 18, marginBottom: 2 }}>from a</div>
+            <div style={{ fontSize: 28, lineHeight: 0.84 }}>BOWL</div>
+            <div style={{ fontSize: 12, marginTop: 4, opacity: 0.7 }}>· est ·</div>
+          </div>
+        </div>
+        {/* Close */}
+        <button onClick={onClose} aria-label="close" style={{
+          position: 'absolute', top: -6, left: -6, width: 44, height: 44,
+          border: 0, background: 'rgba(244,235,217,0.92)', borderRadius: '50%', cursor: 'pointer',
+          boxShadow: '0 6px 14px rgba(0,0,0,0.22)', display: 'grid', placeItems: 'center',
+        }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--color-coconut-brown)', lineHeight: 1, transform: 'translateY(-1px)' }}>×</span>
+        </button>
+        {/* Title */}
+        <div style={{ marginRight: 110 }}>
+          <h2 style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: 56, lineHeight: 0.86, color: 'var(--color-coconut-brown)' }}>what a bowl!</h2>
+          <p style={{ margin: '6px 0 0', fontFamily: 'var(--font-display)', fontSize: 22, lineHeight: 1.0, color: 'rgba(96,70,53,0.78)', maxWidth: '20ch' }}>a bowl of fruits should never be eaten alone</p>
+        </div>
+        {/* Dotted divider */}
+        <div style={{ height: 1, marginTop: 4, backgroundImage: 'radial-gradient(circle, rgba(76,49,37,0.55) 1px, transparent 1.4px)', backgroundSize: '12px 2px', backgroundRepeat: 'repeat-x' }}/>
+        {/* Bowl + score */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 18, marginTop: 4 }}>
+          <div style={{
+            position: 'relative', width: 132, height: 132,
+            backgroundImage: 'url(../../assets/ui/shapes/score-blob-dark.svg)',
+            backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
+            display: 'grid', placeItems: 'center', flexShrink: 0,
+            filter: 'drop-shadow(0 12px 22px rgba(42,31,24,0.34))', transform: 'rotate(-4deg)',
+          }}>
+            <div style={{ display: 'grid', gap: 0, justifyItems: 'center' }}>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'rgba(244,235,217,0.78)' }}>score</span>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 56, lineHeight: 0.84, color: 'var(--color-durian-glow)', fontVariantNumeric: 'tabular-nums' }}>{score}</span>
+            </div>
+          </div>
+          <div style={{ flex: 1, display: 'grid', placeItems: 'center' }}>
+            <CoconutBowl size={240}>
+              {fruits.slice(0, 6).map((f, i) => (
+                <div key={i} style={{ position: 'absolute', left: `${f.x}%`, top: `${f.y}%`, transform: `translate(-50%,-50%) rotate(${f.rot || 0}deg)` }}>
+                  <window.FruitIcon kind={f.kind} size={Math.round(f.size * 0.7)}/>
+                </div>
+              ))}
+            </CoconutBowl>
+          </div>
+        </div>
+        {/* Actions */}
+        <div style={{ display: 'flex', gap: 18, justifyContent: 'center', marginTop: 6 }}>
+          <BlobButton style={{ width: 180, height: 96, fontSize: 36 }} onClick={onAgain}>Again</BlobButton>
+          <BlobButton primary style={{ width: 180, height: 96, fontSize: 36 }}>Share</BlobButton>
+        </div>
+        {/* Corner doodle */}
+        <svg style={{ position: 'absolute', bottom: 18, left: 22, width: 38, height: 38, pointerEvents: 'none', opacity: 0.55 }}
+             viewBox="0 0 40 40" fill="none" stroke="#4c3125" strokeWidth="2.4" strokeLinecap="round">
+          <path d="M6 30 C 14 26, 22 24, 32 24"/>
+          <path d="M16 26 C 18 22, 22 20, 26 20"/>
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { Scene, BrandMark, IconButton, BlobButton, HudSpread, Fruit, BowlReveal, CoconutBowl, ShareSheet });
+</script>
+
+<!-- ═══════════════ TWEAKS PANEL ═══════════════ -->
+<script type="text/babel">
+const { useState: _useState2, useReducer } = React;
+
+function useTweaks(defaults) {
+  const [tweaks, dispatch] = useReducer((state, { key, value }) => ({ ...state, [key]: value }), defaults);
+  return [tweaks, (key, value) => dispatch({ key, value })];
+}
+
+function TweakSection({ title, children }) {
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <div style={{ fontFamily: 'system-ui, sans-serif', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(76,49,37,0.52)', marginBottom: 6, paddingBottom: 4, borderBottom: '1px solid rgba(76,49,37,0.12)' }}>{title}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>{children}</div>
+    </div>
+  );
+}
+
+function TweakRadio({ label, value, onChange, options }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: '#4c3125', flex: '0 0 90px' }}>{label}</span>
+      <div style={{ display: 'flex', gap: 4 }}>
+        {options.map(opt => (
+          <button key={opt.value} onClick={() => onChange(opt.value)} style={{
+            padding: '3px 9px', border: 0, borderRadius: 999, cursor: 'pointer',
+            fontFamily: 'system-ui, sans-serif', fontSize: 11,
+            background: value === opt.value ? '#c5d86d' : 'rgba(76,49,37,0.08)',
+            color: value === opt.value ? '#2a1a0e' : '#4c3125',
+            fontWeight: value === opt.value ? 600 : 400,
+            transition: 'background 160ms',
+          }}>{opt.label}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TweakToggle({ label, value, onChange }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: '#4c3125', flex: '0 0 90px' }}>{label}</span>
+      <button onClick={() => onChange(!value)} style={{
+        position: 'relative', width: 36, height: 20, border: 0, borderRadius: 999,
+        background: value ? '#c5d86d' : 'rgba(76,49,37,0.16)', cursor: 'pointer', padding: 0, flexShrink: 0,
+        transition: 'background 200ms',
+      }}>
+        <span style={{
+          position: 'absolute', top: 3, left: value ? 18 : 3, width: 14, height: 14, borderRadius: '50%',
+          background: value ? '#2a4a10' : 'rgba(76,49,37,0.5)',
+          transition: 'left 200ms cubic-bezier(0.2,0,0,1)',
+        }}/>
+      </button>
+    </div>
+  );
+}
+
+function TweaksPanel({ title = 'Tweaks', defaultOpen = false, children }) {
+  const [open, setOpen] = _useState2(defaultOpen);
+  return (
+    <div style={{ position: 'fixed', bottom: 64, left: 16, zIndex: 1001, fontFamily: 'system-ui, sans-serif' }}>
+      <button onClick={() => setOpen(o => !o)} style={{
+        padding: '5px 12px', border: 0, borderRadius: 999, cursor: 'pointer',
+        background: open ? 'rgba(197,216,109,0.96)' : 'rgba(244,235,217,0.94)',
+        color: '#4c3125', fontSize: 11, fontFamily: 'inherit',
+        letterSpacing: '0.06em', textTransform: 'uppercase',
+        boxShadow: '0 6px 16px rgba(0,0,0,0.22)',
+      }}>{title} {open ? '▲' : '▼'}</button>
+      {open && (
+        <div style={{
+          position: 'absolute', bottom: 36, left: 0, minWidth: 260,
+          background: 'rgba(244,235,217,0.97)', borderRadius: 14, padding: '14px 16px',
+          boxShadow: '0 12px 32px rgba(0,0,0,0.28)', border: '1px solid rgba(76,49,37,0.1)',
+        }}>
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+Object.assign(window, { useTweaks, TweaksPanel, TweakSection, TweakRadio, TweakToggle });
+</script>
+
+<!-- ═══════════════ APP ═══════════════ -->
+<script type="text/babel">
+const { useState } = React;
+
+const TWEAK_DEFAULTS = {
+  sceneTime: 'goldenHour',
+  animateScene: true,
+  fruitsIllustrated: true,
+  showSliced: false,
+};
+
+const BOWL_FRUITS = [
+  { kind: 'watermelon', x: 22, y: 36, size: 88, rot: -8 },
+  { kind: 'pineapple',  x: 50, y: 22, size: 92, rot: 6 },
+  { kind: 'mango',      x: 78, y: 38, size: 80, rot: 14 },
+  { kind: 'rambutan',   x: 18, y: 70, size: 72, rot: -14 },
+  { kind: 'dragonfruit',x: 44, y: 64, size: 86, rot: 4 },
+  { kind: 'mangosteen', x: 70, y: 70, size: 70, rot: 18 },
+  { kind: 'lychee',     x: 30, y: 50, size: 56, rot: -4 },
+  { kind: 'durian',     x: 60, y: 50, size: 64, rot: 8 },
+];
+
+const FLIGHT = [
+  { kind: 'watermelon',  x: '22%', y: '46%', size: 96,  rot: -12 },
+  { kind: 'mango',       x: '60%', y: '58%', size: 84,  rot:  18 },
+  { kind: 'dragonfruit', x: '40%', y: '34%', size: 88,  rot:   6 },
+  { kind: 'durian',      x: '78%', y: '44%', size: 110, rot:  -4 },
+  { kind: 'rambutan',    x: '14%', y: '70%', size: 76,  rot:   8 },
+  { kind: 'lychee',      x: '54%', y: '76%', size: 64,  rot: -14 },
+];
+
+// ── Beach video background (used for mode / play / share) ─────
+function GameBg({ children }) {
+  return (
+    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: '#1a1008' }}>
+      <video
+        src="../../YTDown.com_YouTube_Video-Loop-Beach-Sea-7_Media_Kz1_dIN-sjA_001_720p.mp4"
+        autoPlay loop muted playsInline
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.72 }}
+      />
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.28) 100%)' }}/>
+      <div style={{
+        position: 'absolute', inset: 0, opacity: 0.06, mixBlendMode: 'overlay',
+        backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)'/%3E%3C/svg%3E\")",
+        backgroundSize: '200px 200px',
+      }}/>
+      {children}
+    </div>
+  );
+}
+
+// ── PlayHud — matches actual game layout exactly ───────────────
+// Score + mode: top-left stack. Durian: top-right. Time: top-center (timed only).
+function PlayHud({ score, mode, lives = 3, lost = 0, isTimed, timeStr }) {
+  return (
+    <div style={{ position: 'absolute', inset: 0, zIndex: 4, pointerEvents: 'none' }}>
+
+      {/* Mode pill — top left, compact */}
+      <div style={{
+        position: 'absolute', top: 22, left: 18,
+        padding: '6px 18px 8px',
+        backgroundImage: 'url(../../assets/ui/shapes/cream-card-blob.svg)',
+        backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
+        filter: 'drop-shadow(0 6px 12px rgba(42,31,24,0.18))',
+        fontFamily: 'var(--font-display)', fontSize: 30, lineHeight: 1,
+        color: 'var(--color-coconut-brown)',
+        minWidth: 130, minHeight: 44,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        {mode}
+      </div>
+
+      {/* Score chip — top left below mode pill */}
+      <div style={{ position: 'absolute', top: 66, left: 10 }}>
+        <div style={{
+          position: 'relative', width: 168, height: 124,
+          display: 'grid', placeItems: 'center', padding: '14px 16px',
+          backgroundImage: 'url(../../assets/ui/shapes/score-blob-green.svg)',
+          backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
+          filter: 'drop-shadow(0 16px 28px rgba(42,31,24,0.22))',
+          transform: 'rotate(-2deg)',
+        }}>
+          <div style={{ display: 'grid', gap: 0, justifyItems: 'center' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: 22, lineHeight: 0.9, color: 'rgba(58,39,28,0.7)' }}>score</span>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: 64, lineHeight: 0.84, fontVariantNumeric: 'tabular-nums', color: 'var(--color-ink-deep)' }}>{score}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Durian chip — top right */}
+      <div style={{ position: 'absolute', top: 16, right: 10 }}>
+        <div style={{
+          position: 'relative', width: 148, height: 108,
+          display: 'grid', placeItems: 'center', padding: '12px 14px',
+          backgroundImage: 'url(../../assets/ui/shapes/score-blob-dark.svg)',
+          backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
+          filter: 'drop-shadow(0 14px 24px rgba(42,31,24,0.32))',
+          transform: 'rotate(2deg)',
+        }}>
+          <div style={{ display: 'grid', gap: 5, justifyItems: 'center' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: 19, lineHeight: 0.9, color: 'rgba(244,235,217,0.78)' }}>durian</span>
+            <span style={{ display: 'flex', gap: 8 }}>
+              {Array.from({ length: lives }).map((_, i) => (
+                <span key={i} style={{
+                  width: 16, height: 16, borderRadius: '50%',
+                  background: i < lost ? 'rgba(244,235,217,0.14)' : 'var(--color-durian-glow)',
+                  boxShadow: i < lost ? 'none' : '0 0 10px rgba(215,223,104,0.6)',
+                  border: i < lost ? '1.5px dashed rgba(244,235,217,0.3)' : 'none',
+                }}/>
+              ))}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Time pill — top center, timed mode only */}
+      {isTimed && (
+        <div style={{
+          position: 'absolute', top: 28, left: '50%', transform: 'translateX(-50%)',
+          padding: '8px 32px 12px',
+          backgroundImage: 'url(../../assets/ui/shapes/cream-card-blob.svg)',
+          backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
+          filter: 'drop-shadow(0 8px 16px rgba(42,31,24,0.16))',
+          minWidth: 170, minHeight: 52,
+          display: 'grid', justifyItems: 'center',
+        }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, lineHeight: 1, color: 'rgba(58,39,28,0.7)' }}>time</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: 34, lineHeight: 0.9, fontVariantNumeric: 'tabular-nums', color: 'var(--color-coconut-brown)' }}>{timeStr}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── ShareOverlay — single post-game screen (no separate game over) ─
+function ShareOverlay({ score, fruits, onAgain }) {
+  return (
+    <div style={{ position: 'absolute', inset: 0, zIndex: 6, display: 'grid', placeItems: 'center' }}>
+      {/* dim backdrop */}
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(18,10,4,0.52)', animation: 'bowl-fade-in 280ms ease both' }}/>
+
+      {/* card */}
+      <div style={{
+        position: 'relative', zIndex: 1,
+        width: 'min(500px, calc(100vw - 48px))',
+        background: 'var(--color-coconut-cream)',
+        borderRadius: 28, padding: '36px 40px 32px',
+        boxShadow: '0 32px 64px rgba(0,0,0,0.44), 0 0 0 1.5px rgba(76,49,37,0.08)',
+        animation: 'bowl-enter 380ms cubic-bezier(0.2,0,0,1) 60ms both',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0,
+      }}>
+
+        {/* postmark stamp — decorative, top right */}
+        <div style={{
+          position: 'absolute', top: 20, right: 28,
+          width: 80, height: 80, transform: 'rotate(9deg)',
+          border: '2px dashed rgba(76,49,37,0.44)', borderRadius: 6,
+          display: 'grid', placeItems: 'center',
+          fontFamily: 'var(--font-display)', color: 'rgba(76,49,37,0.6)',
+          textAlign: 'center', fontSize: 12, lineHeight: 1,
+          pointerEvents: 'none',
+        }}>
+          <div>
+            <div style={{ fontSize: 14, marginBottom: 1 }}>from a</div>
+            <div style={{ fontSize: 22, lineHeight: 0.84 }}>BOWL</div>
+          </div>
+        </div>
+
+        {/* title */}
+        <h2 style={{
+          margin: '0 0 4px', alignSelf: 'flex-start', paddingRight: 100,
+          fontFamily: 'var(--font-display)', fontWeight: 400,
+          fontSize: 'clamp(2.8rem, 5vw, 3.8rem)', lineHeight: 0.88,
+          color: 'var(--color-coconut-brown)',
+          animation: 'bowl-enter 360ms cubic-bezier(0.2,0,0,1) 100ms both',
+        }}>what a bowl!</h2>
+
+        <p style={{
+          margin: '0 0 18px', alignSelf: 'flex-start',
+          fontFamily: 'var(--font-display)', fontSize: 20, lineHeight: 1.1,
+          color: 'rgba(96,70,53,0.72)',
+          animation: 'bowl-enter 360ms cubic-bezier(0.2,0,0,1) 160ms both',
+        }}>a bowl of fruits should never be eaten alone</p>
+
+        {/* dotted divider */}
+        <div style={{
+          width: '100%', height: 1, marginBottom: 20,
+          backgroundImage: 'radial-gradient(circle, rgba(76,49,37,0.45) 1px, transparent 1.4px)',
+          backgroundSize: '10px 2px', backgroundRepeat: 'repeat-x',
+        }}/>
+
+        {/* score — prominent, centered */}
+        <div style={{
+          position: 'relative', width: 160, height: 160,
+          backgroundImage: 'url(../../assets/ui/shapes/score-blob-dark.svg)',
+          backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
+          display: 'grid', placeItems: 'center', marginBottom: 4,
+          filter: 'drop-shadow(0 14px 28px rgba(42,31,24,0.38))',
+          animation: 'bowl-enter 400ms cubic-bezier(0.2,0,0,1) 200ms both',
+        }}>
+          <div style={{ display: 'grid', gap: 0, justifyItems: 'center' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'rgba(244,235,217,0.72)' }}>score</span>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: 68, lineHeight: 0.84, color: 'var(--color-durian-glow)', fontVariantNumeric: 'tabular-nums' }}>{score}</span>
+          </div>
+        </div>
+
+        {/* bowl reveal */}
+        <div style={{ animation: 'bowl-enter 420ms cubic-bezier(0.2,0,0,1) 280ms both', marginBottom: 8 }}>
+          <window.BowlReveal fruits={fruits} size={320}/>
+        </div>
+
+        {/* actions */}
+        <div style={{ display: 'flex', gap: 16, justifyContent: 'center', marginTop: 8, animation: 'bowl-enter 360ms cubic-bezier(0.2,0,0,1) 400ms both' }}>
+          <window.BlobButton style={{ width: 180, height: 92, fontSize: 36 }} onClick={onAgain}>Again</window.BlobButton>
+          <window.BlobButton primary style={{ width: 180, height: 92, fontSize: 36 }}>Share</window.BlobButton>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── ScreenPicker dev overlay ───────────────────────────────────
+function ScreenPicker({ screen, setScreen }) {
+  const screens = ['opening', 'mode', 'play', 'share'];
+  return (
+    <div style={{
+      position: 'fixed', bottom: 16, right: 16, zIndex: 1000,
+      display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px',
+      background: 'rgba(244,235,217,0.94)', borderRadius: 999,
+      boxShadow: '0 10px 24px rgba(0,0,0,0.32)',
+      fontFamily: 'system-ui, -apple-system, sans-serif', fontSize: 12, color: '#4c3125',
+    }}>
+      <span style={{ padding: '0 8px', opacity: 0.6, textTransform: 'uppercase', letterSpacing: 0.4, fontSize: 10 }}>screens</span>
+      {screens.map(s => (
+        <button key={s} onClick={() => setScreen(s)} style={{
+          border: 0, padding: '6px 12px', borderRadius: 999,
+          background: screen === s ? '#c5d86d' : 'transparent',
+          fontFamily: 'inherit', fontSize: 12, color: 'inherit',
+          cursor: 'pointer', textTransform: 'capitalize',
+        }}>{s}</button>
+      ))}
+    </div>
+  );
+}
+
+function App() {
+  const [screen, setScreen] = useState('mode');
+  const [muted, setMuted] = useState(false);
+  const [score] = useState(184);
+  const [tweaks, setTweak] = window.useTweaks(TWEAK_DEFAULTS);
+  const { sceneTime, animateScene, fruitsIllustrated, showSliced } = tweaks;
+  const [mode, setMode] = useState('Endless');
+  const goPlay = (m) => { setMode(m); setScreen('play'); };
+  const isTimed = mode === 'Timed';
+
+  // Opening uses the Scene backdrop. Everything else uses the beach video.
+  const useScene = screen === 'opening';
+
+  const background = useScene
+    ? <window.Scene time={sceneTime} animate={animateScene}>{null}</window.Scene>
+    : <GameBg/>;
+
+  return (
+    <div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
+      {/* Background layer */}
+      {useScene
+        ? <window.Scene time={sceneTime} animate={animateScene}/>
+        : <GameBg/>
+      }
+
+      {/* Brand mark — visible on all non-play screens */}
+      {screen !== 'play' && screen !== 'share' && (
+        <div style={{ position: 'absolute', top: 24, left: 28, zIndex: 5 }}>
+          <window.BrandMark size={44} onClick={() => setScreen('opening')} />
+        </div>
+      )}
+
+      {/* Sound toggle — mode + play screens */}
+      {(screen === 'mode' || screen === 'play') && (
+        <div style={{ position: 'absolute', bottom: 28, left: 28, zIndex: 5 }}>
+          <window.IconButton icon="sound on.svg" label="Sound" muted={muted} onClick={() => setMuted(!muted)} />
+        </div>
+      )}
+
+      {/* Home button — play screen only */}
+      {screen === 'play' && (
+        <div style={{ position: 'absolute', top: 24, right: 28, zIndex: 5 }}>
+          <window.IconButton icon="iconHomeBold.svg" label="Home" onClick={() => setScreen('mode')} />
+        </div>
+      )}
+
+      {/* ── OPENING ── */}
+      {screen === 'opening' && (
+        <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', textAlign: 'center', zIndex: 4 }}>
+          <div style={{ display: 'grid', gap: 12, justifyItems: 'center' }}>
+            <h1 style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: 'clamp(3.8rem, 8vw, 7rem)', lineHeight: 0.92, color: 'var(--color-evening-amber)', textShadow: '0 6px 16px rgba(0,0,0,0.34)', animation: 'bowl-enter 480ms cubic-bezier(0.2,0,0,1) both' }}>raise a finger</h1>
+            <p style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 'clamp(1.6rem, 2.5vw, 2.5rem)', lineHeight: 0.98, color: 'rgba(244,235,217,0.96)', textShadow: '0 4px 12px rgba(0,0,0,0.30)', animation: 'bowl-enter 480ms cubic-bezier(0.2,0,0,1) 140ms both' }}>looking at your finger very closely</p>
+            <button onClick={() => setScreen('mode')} style={{ marginTop: 32, fontFamily: 'system-ui, sans-serif', fontStyle: 'italic', fontSize: 12, background: 'transparent', color: 'rgba(244,235,217,0.6)', border: 0, cursor: 'pointer' }}>(skip · in the real game: hand-tracking)</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODE SELECT — Endless + Timed only ── */}
+      {screen === 'mode' && (
+        <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', zIndex: 4 }}>
+          <div style={{ display: 'flex', gap: 'clamp(34px, 3vw, 58px)' }}>
+            <window.BlobButton onClick={() => goPlay('Endless')}>Endless</window.BlobButton>
+            <window.BlobButton onClick={() => goPlay('Timed')}>Timed</window.BlobButton>
+          </div>
+        </div>
+      )}
+
+      {/* ── PLAY ── */}
+      {screen === 'play' && (
+        <>
+          <PlayHud score={score} mode={mode} lives={3} lost={1} isTimed={isTimed} timeStr="1:23"/>
+          {FLIGHT.map((f, i) => (
+            <window.Fruit key={i} {...f} illustrated={fruitsIllustrated} sliced={showSliced && i % 2 === 0}/>
+          ))}
+          <button onClick={() => setScreen('share')} style={{ position: 'absolute', bottom: 96, left: '50%', transform: 'translateX(-50%)', fontFamily: 'system-ui, sans-serif', fontStyle: 'italic', fontSize: 12, background: 'transparent', color: 'rgba(244,235,217,0.55)', border: 0, cursor: 'pointer' }}>(simulate game over)</button>
+        </>
+      )}
+
+      {/* ── SHARE (combined post-game + share) ── */}
+      {screen === 'share' && (
+        <ShareOverlay score={score} fruits={BOWL_FRUITS} onAgain={() => setScreen('mode')}/>
+      )}
+
+      <ScreenPicker screen={screen} setScreen={setScreen}/>
+
+      <window.TweaksPanel title="Tweaks" defaultOpen={false}>
+        <window.TweakSection title="Opening scene">
+          <window.TweakRadio label="time of day" value={sceneTime} onChange={(v) => setTweak('sceneTime', v)}
+            options={[{ value: 'noon', label: 'noon' }, { value: 'goldenHour', label: 'golden' }, { value: 'dusk', label: 'dusk' }]}/>
+          <window.TweakToggle label="animation" value={animateScene} onChange={(v) => setTweak('animateScene', v)}/>
+        </window.TweakSection>
+        <window.TweakSection title="Fruits">
+          <window.TweakToggle label="illustrated" value={fruitsIllustrated} onChange={(v) => setTweak('fruitsIllustrated', v)}/>
+          <window.TweakToggle label="show sliced" value={showSliced} onChange={(v) => setTweak('showSliced', v)}/>
+        </window.TweakSection>
+      </window.TweaksPanel>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('app')).render(<App />);
+</script>
+
+</body>
+</html>

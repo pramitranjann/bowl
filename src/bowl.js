@@ -1,5 +1,5 @@
 import { CONFIG } from "./config.js";
-import { drawBowlSvg, drawFruitSvg } from "./vector-art.js";
+import { drawBowlSvg, drawFruitSvg } from "./vector-art.js?v=3";
 
 const BOWL_COLORS = {
   cream: "rgba(244, 235, 217, 0.78)",

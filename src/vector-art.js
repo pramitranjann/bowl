@@ -423,9 +423,9 @@ function drawPlayfulBowlSticker(ctx, bowlRadius) {
 }
 
 function drawCutFace(ctx, type, radius, juiceColor) {
-  const flesh = mixHex(juiceColor, "#fff6dd", 0.36);
+  const flesh = mixHex(juiceColor, "#fff6dd", 0.24);
   const shadow = mixHex(juiceColor, "#23150f", 0.26);
-  const width = radius * (type === "pineapple" ? 0.22 : type === "starfruit" ? 0.28 : 0.24);
+  const width = radius * (type === "pineapple" ? 0.16 : type === "starfruit" ? 0.2 : 0.17);
   const height = radius * (type === "pineapple" ? 0.96 : 0.84);
 
   ctx.save();
@@ -463,6 +463,43 @@ function drawCutFace(ctx, type, radius, juiceColor) {
   ctx.restore();
 }
 
+function drawHalfArc(ctx, radius, side) {
+  ctx.beginPath();
+  if (side === "left") {
+    ctx.arc(0, 0, radius, Math.PI / 2, (Math.PI * 3) / 2);
+  } else {
+    ctx.arc(0, 0, radius, -Math.PI / 2, Math.PI / 2);
+  }
+  ctx.closePath();
+}
+
+function drawFruitHalfBase(ctx, type, radius, juiceColor, side) {
+  const rind = mixHex(juiceColor, "#2a180f", 0.32);
+  const flesh = mixHex(juiceColor, "#fff4d8", 0.18);
+  const innerRadius =
+    type === "pineapple" ? radius * 0.84 : type === "starfruit" ? radius * 0.8 : radius * 0.86;
+  const innerOffset =
+    side === "left" ? -radius * 0.06 : radius * 0.06;
+
+  ctx.save();
+  ctx.fillStyle = rind;
+  drawHalfArc(ctx, radius, side);
+  ctx.fill();
+
+  ctx.save();
+  ctx.translate(innerOffset, 0);
+  ctx.fillStyle = flesh;
+  drawHalfArc(ctx, innerRadius, side);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.strokeStyle = mixHex(juiceColor, "#1c120d", 0.22);
+  ctx.lineWidth = Math.max(2, radius * 0.05);
+  drawHalfArc(ctx, radius, side);
+  ctx.stroke();
+  ctx.restore();
+}
+
 export function preloadVectorArt() {
   for (const [type, art] of Object.entries(FRUIT_ART)) {
     const image = getCachedImage(`fruit:${type}`, art.svg);
@@ -493,27 +530,7 @@ export function drawFruitSvg(ctx, type, radius, variant = "flight") {
 }
 
 export function drawFruitHalfSvg(ctx, type, radius, juiceColor, side) {
-  const art = getFruitArt(type);
-  const image = getCachedImage(`fruit:${type}`, art.svg);
-  const drawRadius = radius * art.flightScale;
-
-  if (!image.complete || image.naturalWidth <= 0) {
-    return false;
-  }
-
-  drawPlayfulFruitSticker(ctx, type, radius * 0.98);
-  ctx.save();
-  ctx.beginPath();
-  if (side === "left") {
-    ctx.rect(-drawRadius - 2, -drawRadius - 2, drawRadius + 4, drawRadius * 2 + 4);
-  } else {
-    ctx.rect(-2, -drawRadius - 2, drawRadius + 4, drawRadius * 2 + 4);
-  }
-  ctx.clip();
-  ctx.filter = "saturate(1.14) brightness(1.04)";
-  ctx.drawImage(image, -drawRadius, -drawRadius, drawRadius * 2, drawRadius * 2);
-  ctx.restore();
-
+  drawFruitHalfBase(ctx, type, radius, juiceColor, side);
   drawCutFace(ctx, type, radius, juiceColor);
   return true;
 }

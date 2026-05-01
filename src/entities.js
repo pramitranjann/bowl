@@ -1,5 +1,5 @@
 import { CONFIG } from "./config.js";
-import { drawFruitHalfSvg, drawFruitSvg } from "./vector-art.js";
+import { drawFruitHalfSvg, drawFruitSvg } from "./vector-art.js?v=3";
 
 export const FRUITS = {
   watermelon: {

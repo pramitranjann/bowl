@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    >
+    <title>Fruit Icons Preview</title>
+    <style>
+      :root {
+        --bg: #f6ecd7;
+        --ink: #4c3125;
+        --ink-soft: #604635;
+        --panel: rgba(255, 249, 239, 0.82);
+        --panel-border: rgba(76, 49, 37, 0.14);
+        --shadow: 0 18px 48px rgba(76, 49, 37, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Georgia, "Times New Roman", serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(255, 225, 153, 0.58), transparent 36%),
+          radial-gradient(circle at top right, rgba(231, 85, 120, 0.18), transparent 28%),
+          linear-gradient(180deg, #fff8ec 0%, var(--bg) 100%);
+      }
+
+      main {
+        width: min(1200px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 40px 0 56px;
+      }
+
+      .hero {
+        margin-bottom: 28px;
+        padding: 28px 28px 24px;
+        border: 2px solid rgba(76, 49, 37, 0.12);
+        border-radius: 28px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(10px);
+      }
+
+      .eyebrow {
+        margin: 0 0 10px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2.4rem, 5vw, 4.6rem);
+        line-height: 0.95;
+      }
+
+      .hero p {
+        width: min(62ch, 100%);
+        margin: 16px 0 0;
+        font-size: 1.02rem;
+        line-height: 1.55;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 18px;
+      }
+
+      .card {
+        position: relative;
+        overflow: hidden;
+        padding: 20px 18px 18px;
+        border: 2px solid var(--panel-border);
+        border-radius: 24px;
+        background: rgba(255, 252, 246, 0.9);
+        box-shadow: var(--shadow);
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        inset: auto -12% -32% auto;
+        width: 150px;
+        height: 150px;
+        border-radius: 999px;
+        background: rgba(255, 221, 173, 0.32);
+        filter: blur(10px);
+      }
+
+      .card h2 {
+        position: relative;
+        z-index: 1;
+        margin: 0 0 14px;
+        font-size: 1.18rem;
+        text-transform: capitalize;
+      }
+
+      .swatches {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 14px;
+      }
+
+      .swatch {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 14px 10px 12px;
+        border-radius: 18px;
+        background: rgba(255, 248, 237, 0.95);
+        border: 1px solid rgba(76, 49, 37, 0.08);
+        text-align: center;
+      }
+
+      .swatch svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-width: 108px;
+        margin: 0 auto;
+        filter: drop-shadow(0 8px 14px rgba(42, 31, 24, 0.18));
+      }
+
+      .swatch.sliced svg {
+        transform: scale(0.92) rotate(-4deg);
+      }
+
+      .tag {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: rgba(76, 49, 37, 0.08);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      @media (max-width: 640px) {
+        main {
+          width: min(100% - 20px, 1200px);
+          padding-top: 20px;
+        }
+
+        .hero {
+          padding: 22px 18px 20px;
+        }
+
+        .swatches {
+          gap: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <p class="eyebrow">Local Preview</p>
+        <h1>FruitIcons.jsx visual output</h1>
+        <p>
+          This page mirrors the SVG artwork defined in
+          <code>/Users/pramitranjan/Downloads/FruitIcons.jsx</code> and shows
+          both the default icon state and the sliced transform variant.
+        </p>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <h2>Watermelon</h2>
+          <div class="swatches">
+            <div class="swatch">
+              <svg viewBox="0 0 200 200" aria-label="Watermelon icon">
+                <g>
+                  <path d="M22 102 C 24 50, 70 18, 100 18 C 138 18, 178 52, 178 102 C 178 110, 174 118, 166 118 L 34 118 C 26 118, 22 110, 22 102 Z" fill="#1f5a39" stroke="#4c3125" stroke-width="6" stroke-linejoin="round" />
+                  <path d="M34 110 C 36 60, 76 30, 100 30 C 130 30, 168 60, 166 110 Z" fill="#f7efd4" />
+                  <path d="M44 108 C 46 64, 80 38, 100 38 C 124 38, 156 64, 156 108 Z" fill="#e0394e" />
+                  <ellipse cx="74" cy="92" rx="4" ry="7" fill="#24150f" transform="rotate(-18 74 92)" />
+                  <ellipse cx="100" cy="78" rx="4" ry="7" fill="#24150f" />
+                  <ellipse cx="128" cy="92" rx="4" ry="7" fill="#24150f" transform="rotate(16 128 92)" />
+                  <ellipse cx="86" cy="104" rx="4" ry="6.5" fill="#24150f" transform="rotate(-8 86 104)" />
+                  <ellipse cx="116" cy="104" rx="4" ry="6.5" fill="#24150f" transform="rotate(8 116 104)" />
+                  <path d="M30 114 L 170 114" stroke="#4c3125" stroke-width="4" stroke-linecap="round" opacity="0.5" />
+                </g>
+              </svg>
+              <span class="tag">Default</span>
+            </div>
+            <div class="swatch sliced">
+              <svg viewBox="0 0 200 200" aria-label="Watermelon icon sliced">
+                <use href="#watermelon-shape"></use>
+                <g>
+                  <path d="M22 102 C 24 50, 70 18, 100 18 C 138 18, 178 52, 178 102 C 178 110, 174 118, 166 118 L 34 118 C 26 118, 22 110, 22 102 Z" fill="#1f5a39" stroke="#4c3125" stroke-width="6" stroke-linejoin="round" />
+                  <path d="M34 110 C 36 60, 76 30, 100 30 C 130 30, 168 60, 166 110 Z" fill="#f7efd4" />
+                  <path d="M44 108 C 46 64, 80 38, 100 38 C 124 38, 156 64, 156 108 Z" fill="#e0394e" />
+                  <ellipse cx="74" cy="92" rx="4" ry="7" fill="#24150f" transform="rotate(-18 74 92)" />
+                  <ellipse cx="100" cy="78" rx="4" ry="7" fill="#24150f" />
+                  <ellipse cx="128" cy="92" rx="4" ry="7" fill="#24150f" transform="rotate(16 128 92)" />
+                  <ellipse cx="86" cy="104" rx="4" ry="6.5" fill="#24150f" transform="rotate(-8 86 104)" />
+                  <ellipse cx="116" cy="104" rx="4" ry="6.5" fill="#24150f" transform="rotate(8 116 104)" />
+                  <path d="M30 114 L 170 114" stroke="#4c3125" stroke-width="4" stroke-linecap="round" opacity="0.5" />
+                </g>
+              </svg>
+              <span class="tag">Sliced</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Pineapple</h2>
+          <div class="swatches">
+            <div class="swatch">
+              <svg viewBox="0 0 200 200" aria-label="Pineapple icon">
+                <g>
+                  <path d="M100 12 C 96 30, 88 40, 78 46 C 70 50, 64 50, 60 48 C 64 38, 76 22, 100 12 Z" fill="#5a8c3e" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M100 12 C 104 30, 112 40, 122 46 C 130 50, 136 50, 140 48 C 136 38, 124 22, 100 12 Z" fill="#5a8c3e" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M100 12 C 102 30, 100 44, 96 56 C 92 64, 88 68, 84 70 C 84 56, 92 32, 100 12 Z" fill="#7baa48" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M100 12 C 98 30, 100 44, 104 56 C 108 64, 112 68, 116 70 C 116 56, 108 32, 100 12 Z" fill="#7baa48" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M52 86 C 54 70, 72 60, 100 60 C 128 60, 146 70, 148 86 C 154 130, 142 178, 100 184 C 58 178, 46 130, 52 86 Z" fill="#f0b41c" stroke="#4c3125" stroke-width="6" stroke-linejoin="round" />
+                  <g stroke="#4c3125" stroke-width="3.5" fill="none" stroke-linecap="round" opacity="0.86">
+                    <path d="M58 96 L 96 132" />
+                    <path d="M76 86 L 116 124" />
+                    <path d="M94 80 L 138 122" />
+                    <path d="M112 80 L 148 116" />
+                    <path d="M142 96 L 104 132" />
+                    <path d="M124 86 L 84 124" />
+                    <path d="M106 80 L 62 122" />
+                    <path d="M88 80 L 52 116" />
+                  </g>
+                  <g fill="#24150f">
+                    <circle cx="80" cy="108" r="2.5" />
+                    <circle cx="100" cy="116" r="2.5" />
+                    <circle cx="120" cy="108" r="2.5" />
+                    <circle cx="90" cy="138" r="2.5" />
+                    <circle cx="110" cy="138" r="2.5" />
+                    <circle cx="100" cy="158" r="2.5" />
+                  </g>
+                </g>
+              </svg>
+              <span class="tag">Default</span>
+            </div>
+            <div class="swatch sliced">
+              <svg viewBox="0 0 200 200" aria-label="Pineapple icon sliced">
+                <g>
+                  <path d="M100 12 C 96 30, 88 40, 78 46 C 70 50, 64 50, 60 48 C 64 38, 76 22, 100 12 Z" fill="#5a8c3e" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M100 12 C 104 30, 112 40, 122 46 C 130 50, 136 50, 140 48 C 136 38, 124 22, 100 12 Z" fill="#5a8c3e" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M100 12 C 102 30, 100 44, 96 56 C 92 64, 88 68, 84 70 C 84 56, 92 32, 100 12 Z" fill="#7baa48" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M100 12 C 98 30, 100 44, 104 56 C 108 64, 112 68, 116 70 C 116 56, 108 32, 100 12 Z" fill="#7baa48" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M52 86 C 54 70, 72 60, 100 60 C 128 60, 146 70, 148 86 C 154 130, 142 178, 100 184 C 58 178, 46 130, 52 86 Z" fill="#f0b41c" stroke="#4c3125" stroke-width="6" stroke-linejoin="round" />
+                  <g stroke="#4c3125" stroke-width="3.5" fill="none" stroke-linecap="round" opacity="0.86">
+                    <path d="M58 96 L 96 132" />
+                    <path d="M76 86 L 116 124" />
+                    <path d="M94 80 L 138 122" />
+                    <path d="M112 80 L 148 116" />
+                    <path d="M142 96 L 104 132" />
+                    <path d="M124 86 L 84 124" />
+                    <path d="M106 80 L 62 122" />
+                    <path d="M88 80 L 52 116" />
+                  </g>
+                  <g fill="#24150f">
+                    <circle cx="80" cy="108" r="2.5" />
+                    <circle cx="100" cy="116" r="2.5" />
+                    <circle cx="120" cy="108" r="2.5" />
+                    <circle cx="90" cy="138" r="2.5" />
+                    <circle cx="110" cy="138" r="2.5" />
+                    <circle cx="100" cy="158" r="2.5" />
+                  </g>
+                </g>
+              </svg>
+              <span class="tag">Sliced</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Mango</h2>
+          <div class="swatches">
+            <div class="swatch">
+              <svg viewBox="0 0 200 200" aria-label="Mango icon">
+                <g>
+                  <path d="M120 32 C 134 24, 148 24, 156 30 C 150 40, 134 48, 118 46 Z" fill="#5a8c3e" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M70 60 C 96 40, 132 36, 154 56 C 176 78, 178 124, 158 156 C 138 184, 96 188, 68 168 C 38 144, 38 86, 70 60 Z" fill="#f59a30" stroke="#4c3125" stroke-width="6" stroke-linejoin="round" />
+                  <path d="M80 78 C 100 64, 130 64, 142 78 C 132 86, 110 90, 86 92 Z" fill="#ffc46c" opacity="0.9" />
+                  <path d="M82 130 C 96 142, 124 144, 142 132" fill="none" stroke="#4c3125" stroke-width="3.5" stroke-linecap="round" opacity="0.5" />
+                </g>
+              </svg>
+              <span class="tag">Default</span>
+            </div>
+            <div class="swatch sliced">
+              <svg viewBox="0 0 200 200" aria-label="Mango icon sliced">
+                <g>
+                  <path d="M120 32 C 134 24, 148 24, 156 30 C 150 40, 134 48, 118 46 Z" fill="#5a8c3e" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M70 60 C 96 40, 132 36, 154 56 C 176 78, 178 124, 158 156 C 138 184, 96 188, 68 168 C 38 144, 38 86, 70 60 Z" fill="#f59a30" stroke="#4c3125" stroke-width="6" stroke-linejoin="round" />
+                  <path d="M80 78 C 100 64, 130 64, 142 78 C 132 86, 110 90, 86 92 Z" fill="#ffc46c" opacity="0.9" />
+                  <path d="M82 130 C 96 142, 124 144, 142 132" fill="none" stroke="#4c3125" stroke-width="3.5" stroke-linecap="round" opacity="0.5" />
+                </g>
+              </svg>
+              <span class="tag">Sliced</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Dragonfruit</h2>
+          <div class="swatches">
+            <div class="swatch">
+              <svg viewBox="0 0 200 200" aria-label="Dragonfruit icon">
+                <g>
+                  <path d="M62 70 C 50 48, 34 38, 18 42 C 26 60, 44 70, 62 70 Z" fill="#7baa48" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M138 70 C 150 48, 166 38, 182 42 C 174 60, 156 70, 138 70 Z" fill="#7baa48" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M70 50 C 76 32, 74 18, 64 12 C 58 24, 60 40, 70 50 Z" fill="#5a8c3e" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M130 50 C 124 32, 126 18, 136 12 C 142 24, 140 40, 130 50 Z" fill="#5a8c3e" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M52 110 C 36 108, 22 116, 18 130 C 30 134, 46 130, 56 122 Z" fill="#7baa48" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M148 110 C 164 108, 178 116, 182 130 C 170 134, 154 130, 144 122 Z" fill="#7baa48" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M50 96 C 52 70, 76 56, 100 56 C 124 56, 148 70, 150 96 C 154 144, 130 184, 100 184 C 70 184, 46 144, 50 96 Z" fill="#e64c9b" stroke="#4c3125" stroke-width="6" stroke-linejoin="round" />
+                  <ellipse cx="100" cy="124" rx="36" ry="44" fill="#fff4f7" />
+                  <g fill="#24150f">
+                    <circle cx="86" cy="104" r="2.4" />
+                    <circle cx="100" cy="98" r="2.4" />
+                    <circle cx="114" cy="104" r="2.4" />
+                    <circle cx="78" cy="120" r="2.4" />
+                    <circle cx="92" cy="118" r="2.4" />
+                    <circle cx="108" cy="118" r="2.4" />
+                    <circle cx="122" cy="120" r="2.4" />
+                    <circle cx="84" cy="138" r="2.4" />
+                    <circle cx="100" cy="138" r="2.4" />
+                    <circle cx="116" cy="138" r="2.4" />
+                    <circle cx="92" cy="156" r="2.4" />
+                    <circle cx="108" cy="156" r="2.4" />
+                  </g>
+                </g>
+              </svg>
+              <span class="tag">Default</span>
+            </div>
+            <div class="swatch sliced">
+              <svg viewBox="0 0 200 200" aria-label="Dragonfruit icon sliced">
+                <g>
+                  <path d="M62 70 C 50 48, 34 38, 18 42 C 26 60, 44 70, 62 70 Z" fill="#7baa48" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M138 70 C 150 48, 166 38, 182 42 C 174 60, 156 70, 138 70 Z" fill="#7baa48" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M70 50 C 76 32, 74 18, 64 12 C 58 24, 60 40, 70 50 Z" fill="#5a8c3e" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M130 50 C 124 32, 126 18, 136 12 C 142 24, 140 40, 130 50 Z" fill="#5a8c3e" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M52 110 C 36 108, 22 116, 18 130 C 30 134, 46 130, 56 122 Z" fill="#7baa48" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M148 110 C 164 108, 178 116, 182 130 C 170 134, 154 130, 144 122 Z" fill="#7baa48" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M50 96 C 52 70, 76 56, 100 56 C 124 56, 148 70, 150 96 C 154 144, 130 184, 100 184 C 70 184, 46 144, 50 96 Z" fill="#e64c9b" stroke="#4c3125" stroke-width="6" stroke-linejoin="round" />
+                  <ellipse cx="100" cy="124" rx="36" ry="44" fill="#fff4f7" />
+                  <g fill="#24150f">
+                    <circle cx="86" cy="104" r="2.4" />
+                    <circle cx="100" cy="98" r="2.4" />
+                    <circle cx="114" cy="104" r="2.4" />
+                    <circle cx="78" cy="120" r="2.4" />
+                    <circle cx="92" cy="118" r="2.4" />
+                    <circle cx="108" cy="118" r="2.4" />
+                    <circle cx="122" cy="120" r="2.4" />
+                    <circle cx="84" cy="138" r="2.4" />
+                    <circle cx="100" cy="138" r="2.4" />
+                    <circle cx="116" cy="138" r="2.4" />
+                    <circle cx="92" cy="156" r="2.4" />
+                    <circle cx="108" cy="156" r="2.4" />
+                  </g>
+                </g>
+              </svg>
+              <span class="tag">Sliced</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Durian</h2>
+          <div class="swatches">
+            <div class="swatch">
+              <svg viewBox="0 0 200 200" aria-label="Durian icon">
+                <g>
+                  <path d="M96 12 L 104 12 L 102 28 L 98 28 Z" fill="#4a3220" stroke="#4c3125" stroke-width="3" stroke-linejoin="round" />
+                  <path d="M100 22 L 116 36 L 138 30 L 144 50 L 168 60 L 162 82 L 184 96 L 172 116 L 184 138 L 162 146 L 156 168 L 134 162 L 116 180 L 100 168 L 84 180 L 66 162 L 44 168 L 38 146 L 16 138 L 28 116 L 16 96 L 38 82 L 32 60 L 56 50 L 62 30 L 84 36 Z" fill="#c5c533" stroke="#4c3125" stroke-width="6" stroke-linejoin="round" />
+                  <g fill="#4c3125" opacity="0.86">
+                    <path d="M100 50 L 106 64 L 94 64 Z" />
+                    <path d="M76 60 L 82 74 L 68 72 Z" />
+                    <path d="M124 60 L 132 72 L 118 74 Z" />
+                    <path d="M58 82 L 66 94 L 52 94 Z" />
+                    <path d="M142 82 L 148 94 L 134 94 Z" />
+                    <path d="M100 96 L 108 110 L 92 110 Z" />
+                    <path d="M70 110 L 78 122 L 64 122 Z" />
+                    <path d="M130 110 L 136 122 L 122 122 Z" />
+                    <path d="M86 130 L 94 142 L 80 142 Z" />
+                    <path d="M114 130 L 120 142 L 106 142 Z" />
+                    <path d="M100 150 L 106 162 L 94 162 Z" />
+                  </g>
+                </g>
+              </svg>
+              <span class="tag">Default</span>
+            </div>
+            <div class="swatch sliced">
+              <svg viewBox="0 0 200 200" aria-label="Durian icon sliced">
+                <g>
+                  <path d="M96 12 L 104 12 L 102 28 L 98 28 Z" fill="#4a3220" stroke="#4c3125" stroke-width="3" stroke-linejoin="round" />
+                  <path d="M100 22 L 116 36 L 138 30 L 144 50 L 168 60 L 162 82 L 184 96 L 172 116 L 184 138 L 162 146 L 156 168 L 134 162 L 116 180 L 100 168 L 84 180 L 66 162 L 44 168 L 38 146 L 16 138 L 28 116 L 16 96 L 38 82 L 32 60 L 56 50 L 62 30 L 84 36 Z" fill="#c5c533" stroke="#4c3125" stroke-width="6" stroke-linejoin="round" />
+                  <g fill="#4c3125" opacity="0.86">
+                    <path d="M100 50 L 106 64 L 94 64 Z" />
+                    <path d="M76 60 L 82 74 L 68 72 Z" />
+                    <path d="M124 60 L 132 72 L 118 74 Z" />
+                    <path d="M58 82 L 66 94 L 52 94 Z" />
+                    <path d="M142 82 L 148 94 L 134 94 Z" />
+                    <path d="M100 96 L 108 110 L 92 110 Z" />
+                    <path d="M70 110 L 78 122 L 64 122 Z" />
+                    <path d="M130 110 L 136 122 L 122 122 Z" />
+                    <path d="M86 130 L 94 142 L 80 142 Z" />
+                    <path d="M114 130 L 120 142 L 106 142 Z" />
+                    <path d="M100 150 L 106 162 L 94 162 Z" />
+                  </g>
+                </g>
+              </svg>
+              <span class="tag">Sliced</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Rambutan</h2>
+          <div class="swatches">
+            <div class="swatch">
+              <svg viewBox="0 0 200 200" aria-label="Rambutan icon">
+                <g>
+                  <g stroke="#4c3125" stroke-width="4.5" stroke-linecap="round" fill="none">
+                    <path d="M100 18 L 100 44" />
+                    <path d="M120 24 L 112 48" />
+                    <path d="M80 24 L 88 48" />
+                    <path d="M140 32 L 124 52" />
+                    <path d="M60 32 L 76 52" />
+                    <path d="M158 48 L 138 60" />
+                    <path d="M42 48 L 62 60" />
+                    <path d="M170 70 L 146 76" />
+                    <path d="M30 70 L 54 76" />
+                    <path d="M178 96 L 152 96" />
+                    <path d="M22 96 L 48 96" />
+                    <path d="M174 122 L 150 116" />
+                    <path d="M26 122 L 50 116" />
+                    <path d="M162 146 L 142 132" />
+                    <path d="M38 146 L 58 132" />
+                    <path d="M142 166 L 130 144" />
+                    <path d="M58 166 L 70 144" />
+                    <path d="M118 178 L 114 152" />
+                    <path d="M82 178 L 86 152" />
+                  </g>
+                  <g fill="#7baa48">
+                    <circle cx="100" cy="44" r="4" />
+                    <circle cx="112" cy="48" r="4" />
+                    <circle cx="88" cy="48" r="4" />
+                    <circle cx="124" cy="52" r="4" />
+                    <circle cx="76" cy="52" r="4" />
+                    <circle cx="138" cy="60" r="4" />
+                    <circle cx="62" cy="60" r="4" />
+                    <circle cx="146" cy="76" r="4" />
+                    <circle cx="54" cy="76" r="4" />
+                    <circle cx="152" cy="96" r="4" />
+                    <circle cx="48" cy="96" r="4" />
+                    <circle cx="150" cy="116" r="4" />
+                    <circle cx="50" cy="116" r="4" />
+                    <circle cx="142" cy="132" r="4" />
+                    <circle cx="58" cy="132" r="4" />
+                    <circle cx="130" cy="144" r="4" />
+                    <circle cx="70" cy="144" r="4" />
+                    <circle cx="114" cy="152" r="4" />
+                    <circle cx="86" cy="152" r="4" />
+                  </g>
+                  <circle cx="100" cy="100" r="56" fill="#d63a3f" stroke="#4c3125" stroke-width="6" />
+                  <ellipse cx="78" cy="80" rx="18" ry="10" fill="#ff7a6e" opacity="0.7" transform="rotate(-26 78 80)" />
+                </g>
+              </svg>
+              <span class="tag">Default</span>
+            </div>
+            <div class="swatch sliced">
+              <svg viewBox="0 0 200 200" aria-label="Rambutan icon sliced">
+                <g>
+                  <g stroke="#4c3125" stroke-width="4.5" stroke-linecap="round" fill="none">
+                    <path d="M100 18 L 100 44" />
+                    <path d="M120 24 L 112 48" />
+                    <path d="M80 24 L 88 48" />
+                    <path d="M140 32 L 124 52" />
+                    <path d="M60 32 L 76 52" />
+                    <path d="M158 48 L 138 60" />
+                    <path d="M42 48 L 62 60" />
+                    <path d="M170 70 L 146 76" />
+                    <path d="M30 70 L 54 76" />
+                    <path d="M178 96 L 152 96" />
+                    <path d="M22 96 L 48 96" />
+                    <path d="M174 122 L 150 116" />
+                    <path d="M26 122 L 50 116" />
+                    <path d="M162 146 L 142 132" />
+                    <path d="M38 146 L 58 132" />
+                    <path d="M142 166 L 130 144" />
+                    <path d="M58 166 L 70 144" />
+                    <path d="M118 178 L 114 152" />
+                    <path d="M82 178 L 86 152" />
+                  </g>
+                  <g fill="#7baa48">
+                    <circle cx="100" cy="44" r="4" />
+                    <circle cx="112" cy="48" r="4" />
+                    <circle cx="88" cy="48" r="4" />
+                    <circle cx="124" cy="52" r="4" />
+                    <circle cx="76" cy="52" r="4" />
+                    <circle cx="138" cy="60" r="4" />
+                    <circle cx="62" cy="60" r="4" />
+                    <circle cx="146" cy="76" r="4" />
+                    <circle cx="54" cy="76" r="4" />
+                    <circle cx="152" cy="96" r="4" />
+                    <circle cx="48" cy="96" r="4" />
+                    <circle cx="150" cy="116" r="4" />
+                    <circle cx="50" cy="116" r="4" />
+                    <circle cx="142" cy="132" r="4" />
+                    <circle cx="58" cy="132" r="4" />
+                    <circle cx="130" cy="144" r="4" />
+                    <circle cx="70" cy="144" r="4" />
+                    <circle cx="114" cy="152" r="4" />
+                    <circle cx="86" cy="152" r="4" />
+                  </g>
+                  <circle cx="100" cy="100" r="56" fill="#d63a3f" stroke="#4c3125" stroke-width="6" />
+                  <ellipse cx="78" cy="80" rx="18" ry="10" fill="#ff7a6e" opacity="0.7" transform="rotate(-26 78 80)" />
+                </g>
+              </svg>
+              <span class="tag">Sliced</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Mangosteen</h2>
+          <div class="swatches">
+            <div class="swatch">
+              <svg viewBox="0 0 200 200" aria-label="Mangosteen icon">
+                <g>
+                  <path d="M100 16 C 92 22, 84 30, 78 42 C 88 46, 100 44, 110 38 C 116 30, 108 18, 100 16 Z" fill="#5a8c3e" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M100 16 C 108 22, 116 30, 122 42 C 112 46, 100 44, 90 38 C 84 30, 92 18, 100 16 Z" fill="#7baa48" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M64 26 C 60 38, 60 50, 70 60 C 82 56, 90 46, 86 32 C 80 24, 68 22, 64 26 Z" fill="#5a8c3e" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M136 26 C 140 38, 140 50, 130 60 C 118 56, 110 46, 114 32 C 120 24, 132 22, 136 26 Z" fill="#5a8c3e" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <circle cx="100" cy="116" r="62" fill="#5b3676" stroke="#4c3125" stroke-width="6" />
+                  <g stroke="#4c3125" stroke-width="3.5" fill="#3a234d" stroke-linejoin="round">
+                    <path d="M100 158 L 86 168 L 80 158 Z" />
+                    <path d="M100 158 L 114 168 L 120 158 Z" />
+                    <path d="M100 158 L 92 174 L 100 178 Z" />
+                    <path d="M100 158 L 108 174 L 100 178 Z" />
+                    <path d="M100 158 L 76 156 L 84 162 Z" />
+                    <path d="M100 158 L 124 156 L 116 162 Z" />
+                  </g>
+                  <ellipse cx="78" cy="92" rx="14" ry="8" fill="#9b78b8" opacity="0.7" transform="rotate(-22 78 92)" />
+                </g>
+              </svg>
+              <span class="tag">Default</span>
+            </div>
+            <div class="swatch sliced">
+              <svg viewBox="0 0 200 200" aria-label="Mangosteen icon sliced">
+                <g>
+                  <path d="M100 16 C 92 22, 84 30, 78 42 C 88 46, 100 44, 110 38 C 116 30, 108 18, 100 16 Z" fill="#5a8c3e" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M100 16 C 108 22, 116 30, 122 42 C 112 46, 100 44, 90 38 C 84 30, 92 18, 100 16 Z" fill="#7baa48" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M64 26 C 60 38, 60 50, 70 60 C 82 56, 90 46, 86 32 C 80 24, 68 22, 64 26 Z" fill="#5a8c3e" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M136 26 C 140 38, 140 50, 130 60 C 118 56, 110 46, 114 32 C 120 24, 132 22, 136 26 Z" fill="#5a8c3e" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <circle cx="100" cy="116" r="62" fill="#5b3676" stroke="#4c3125" stroke-width="6" />
+                  <g stroke="#4c3125" stroke-width="3.5" fill="#3a234d" stroke-linejoin="round">
+                    <path d="M100 158 L 86 168 L 80 158 Z" />
+                    <path d="M100 158 L 114 168 L 120 158 Z" />
+                    <path d="M100 158 L 92 174 L 100 178 Z" />
+                    <path d="M100 158 L 108 174 L 100 178 Z" />
+                    <path d="M100 158 L 76 156 L 84 162 Z" />
+                    <path d="M100 158 L 124 156 L 116 162 Z" />
+                  </g>
+                  <ellipse cx="78" cy="92" rx="14" ry="8" fill="#9b78b8" opacity="0.7" transform="rotate(-22 78 92)" />
+                </g>
+              </svg>
+              <span class="tag">Sliced</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Lychee</h2>
+          <div class="swatches">
+            <div class="swatch">
+              <svg viewBox="0 0 200 200" aria-label="Lychee icon">
+                <g>
+                  <path d="M104 18 C 116 14, 124 22, 122 32" fill="none" stroke="#5a8c3e" stroke-width="6" stroke-linecap="round" />
+                  <path d="M122 30 C 138 26, 152 30, 156 44 C 144 50, 130 46, 122 38 Z" fill="#7baa48" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M58 76 C 58 50, 80 36, 100 44 C 120 36, 142 50, 142 76 C 144 116, 124 162, 100 184 C 76 162, 56 116, 58 76 Z" fill="#d4585e" stroke="#4c3125" stroke-width="6" stroke-linejoin="round" />
+                  <g fill="#4c3125" opacity="0.78">
+                    <circle cx="74" cy="80" r="3.5" />
+                    <circle cx="92" cy="74" r="3.5" />
+                    <circle cx="110" cy="74" r="3.5" />
+                    <circle cx="128" cy="80" r="3.5" />
+                    <circle cx="68" cy="100" r="3.5" />
+                    <circle cx="86" cy="98" r="3.5" />
+                    <circle cx="104" cy="96" r="3.5" />
+                    <circle cx="122" cy="98" r="3.5" />
+                    <circle cx="134" cy="100" r="3.5" />
+                    <circle cx="74" cy="124" r="3.5" />
+                    <circle cx="92" cy="120" r="3.5" />
+                    <circle cx="110" cy="120" r="3.5" />
+                    <circle cx="128" cy="124" r="3.5" />
+                    <circle cx="84" cy="146" r="3.5" />
+                    <circle cx="100" cy="142" r="3.5" />
+                    <circle cx="116" cy="146" r="3.5" />
+                    <circle cx="92" cy="166" r="3.5" />
+                    <circle cx="108" cy="166" r="3.5" />
+                  </g>
+                </g>
+              </svg>
+              <span class="tag">Default</span>
+            </div>
+            <div class="swatch sliced">
+              <svg viewBox="0 0 200 200" aria-label="Lychee icon sliced">
+                <g>
+                  <path d="M104 18 C 116 14, 124 22, 122 32" fill="none" stroke="#5a8c3e" stroke-width="6" stroke-linecap="round" />
+                  <path d="M122 30 C 138 26, 152 30, 156 44 C 144 50, 130 46, 122 38 Z" fill="#7baa48" stroke="#4c3125" stroke-width="5" stroke-linejoin="round" />
+                  <path d="M58 76 C 58 50, 80 36, 100 44 C 120 36, 142 50, 142 76 C 144 116, 124 162, 100 184 C 76 162, 56 116, 58 76 Z" fill="#d4585e" stroke="#4c3125" stroke-width="6" stroke-linejoin="round" />
+                  <g fill="#4c3125" opacity="0.78">
+                    <circle cx="74" cy="80" r="3.5" />
+                    <circle cx="92" cy="74" r="3.5" />
+                    <circle cx="110" cy="74" r="3.5" />
+                    <circle cx="128" cy="80" r="3.5" />
+                    <circle cx="68" cy="100" r="3.5" />
+                    <circle cx="86" cy="98" r="3.5" />
+                    <circle cx="104" cy="96" r="3.5" />
+                    <circle cx="122" cy="98" r="3.5" />
+                    <circle cx="134" cy="100" r="3.5" />
+                    <circle cx="74" cy="124" r="3.5" />
+                    <circle cx="92" cy="120" r="3.5" />
+                    <circle cx="110" cy="120" r="3.5" />
+                    <circle cx="128" cy="124" r="3.5" />
+                    <circle cx="84" cy="146" r="3.5" />
+                    <circle cx="100" cy="142" r="3.5" />
+                    <circle cx="116" cy="146" r="3.5" />
+                    <circle cx="92" cy="166" r="3.5" />
+                    <circle cx="108" cy="166" r="3.5" />
+                  </g>
+                </g>
+              </svg>
+              <span class="tag">Sliced</span>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

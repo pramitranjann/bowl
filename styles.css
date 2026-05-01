@@ -27,11 +27,11 @@
   --ui-top-gap: clamp(8px, 1vw, 16px);
   --ui-action-gap: clamp(14px, 2vw, 28px);
   --ui-center-width: min(44rem, calc(100vw - (var(--ui-edge-pad) * 2)));
-  --ui-hud-top-offset: 8px;
-  --ui-hud-side-width: clamp(64px, 18vw, 108px);
-  --ui-hud-chip-width: clamp(98px, 28vw, 148px);
-  --ui-hud-side-height: clamp(70px, 9vw, 96px);
-  --ui-hud-chip-height: clamp(70px, 8vw, 84px);
+  --ui-hud-top-offset: 0px;
+  --ui-hud-side-width: clamp(94px, 20vw, 138px);
+  --ui-hud-chip-width: clamp(148px, 30vw, 192px);
+  --ui-hud-side-height: clamp(96px, 11vw, 128px);
+  --ui-hud-chip-height: clamp(92px, 10vw, 112px);
 }
 
 html,
@@ -209,7 +209,7 @@ textarea {
   font-size: clamp(2.15rem, 3.1vw, 3.35rem);
   line-height: 1;
   color: var(--color-coconut-brown);
-  opacity: 0.98;
+  opacity: 1;
   transition:
     transform 220ms var(--ui-ease),
     filter 180ms var(--ui-ease),
@@ -474,7 +474,7 @@ textarea {
   position: absolute;
   inset: 0;
   z-index: -1;
-  opacity: 0.88;
+  opacity: 1;
   background-position: center;
   background-repeat: no-repeat;
   background-size: 100% 100%;
@@ -489,16 +489,7 @@ textarea {
 .ui-error-card::after,
 .ui-share-sheet::after,
 .ui-action-swatch::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  opacity: 0.09;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)'/%3E%3C/svg%3E");
-  background-size: 160px 160px;
-  background-repeat: repeat;
+  content: none;
 }
 
 .ui-pill-button:hover,
@@ -565,7 +556,6 @@ textarea {
 #screen-mode-select .ui-pill-button::before,
 #screen-mode-select .ui-pill-button::after,
 #screen-mode-select .ui-scribble-button::before,
-#screen-mode-select .ui-scribble-button::after,
 #screen-mode-select .ui-panel::after,
 #screen-mode-select .ui-choice-row::after {
   content: none !important;
@@ -578,14 +568,9 @@ textarea {
   width: auto;
 }
 
-.ui-panel--worlds {
-  top: 44.5%;
-  width: auto;
-}
-
 .ui-choice-row {
   display: grid;
-  grid-template-columns: repeat(3, minmax(240px, 278px));
+  grid-template-columns: repeat(2, minmax(240px, 278px));
   gap: clamp(34px, 3vw, 58px);
   width: auto;
   align-items: center;
@@ -646,6 +631,38 @@ textarea {
 
 #screen-mode-select .ui-scribble-button {
   filter: drop-shadow(0 18px 30px rgba(42, 31, 24, 0.16));
+  transition:
+    transform 220ms var(--ui-ease),
+    filter 180ms var(--ui-ease),
+    box-shadow 180ms var(--ui-ease);
+}
+
+#screen-mode-select .ui-scribble-button::after {
+  content: "";
+  position: absolute;
+  left: 16%;
+  right: 16%;
+  bottom: 14px;
+  height: 7px;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, var(--color-hibiscus), var(--color-evening-amber));
+  transform-origin: left center;
+  transform: scaleX(var(--finger-progress, 0));
+  opacity: calc(0.12 + (var(--finger-progress, 0) * 0.88));
+  transition:
+    transform 120ms linear,
+    opacity 120ms linear;
+  pointer-events: none;
+}
+
+#screen-mode-select .ui-scribble-button.is-finger-hovered {
+  transform: translateY(-2px) scale(1.02) rotate(1deg);
+  filter:
+    drop-shadow(0 22px 34px rgba(42, 31, 24, 0.2))
+    saturate(calc(1 + var(--finger-progress, 0) * 0.18))
+    brightness(calc(1.02 + var(--finger-progress, 0) * 0.06));
+  box-shadow: 0 0 0 3px rgba(244, 235, 217, calc(0.18 + var(--finger-progress, 0) * 0.24));
 }
 
 #screen-mode-select .ui-pill-button {
@@ -654,15 +671,6 @@ textarea {
   background-repeat: no-repeat;
   background-size: 100% 100%;
   filter: drop-shadow(0 18px 30px rgba(42, 31, 24, 0.16));
-}
-
-.ui-panel--worlds .ui-scribble-button--icon {
-  gap: 0;
-  align-content: center;
-}
-
-.ui-panel--worlds .ui-scribble-button--icon img {
-  display: none;
 }
 
 .ui-scribble-button--icon {
@@ -787,15 +795,20 @@ textarea {
   margin-top: clamp(68px, 6vw, 84px);
 }
 
+#ui-timer-pill,
+.ui-pill-chip--mode {
+  margin-top: 0;
+}
+
 .ui-score-card,
 .ui-pill-chip {
   box-sizing: border-box;
   display: grid;
   justify-items: center;
   gap: 0;
-  min-width: 112px;
-  min-height: 102px;
-  padding: 10px 14px 12px;
+  min-width: 136px;
+  min-height: 118px;
+  padding: 12px 16px 14px;
   background: transparent;
   color: var(--color-coconut-brown);
   box-shadow: none;
@@ -809,27 +822,27 @@ textarea {
   width: var(--ui-hud-side-width);
   min-width: var(--ui-hud-side-width);
   min-height: var(--ui-hud-side-height);
-  padding: 10px 8px 12px;
+  padding: 12px 10px 14px;
   align-content: center;
-  gap: 1px;
+  gap: 2px;
 }
 
 .ui-score-card::before {
   background-image: url("./assets/ui/shapes/score-blob-green.svg");
   filter: saturate(1.4) brightness(0.86);
-  opacity: 0.84;
 }
 
 .ui-score-label,
 .ui-pill-label {
   font-family: var(--font-display);
-  font-size: clamp(1rem, 1.2vw, 1.4rem);
+  font-size: clamp(1.52rem, 1.7vw, 1.92rem);
   line-height: 0.96;
   letter-spacing: 0.01em;
 }
 
 .ui-score-label {
   color: rgba(58, 39, 28, 0.72);
+  font-size: clamp(1.84rem, 2.06vw, 2.34rem);
 }
 
 .ui-score-value {
@@ -846,19 +859,18 @@ textarea {
   width: var(--ui-hud-chip-width);
   min-width: var(--ui-hud-chip-width);
   min-height: var(--ui-hud-chip-height);
-  padding: 8px 14px 10px;
+  padding: 12px 16px 14px;
   align-content: center;
 }
 
 .ui-pill-chip::before {
   background-image: url("./assets/ui/shapes/small-green-blob.svg");
   filter: saturate(1.4) brightness(0.86);
-  opacity: 0.82;
 }
 
 .ui-pill-chip--durian::before {
+  background-image: url("./assets/ui/shapes/score-blob-dark.svg");
   filter: none;
-  opacity: 0.9;
 }
 
 #ui-timer-pill {
@@ -882,26 +894,23 @@ textarea {
   width: var(--ui-hud-side-width);
   min-width: var(--ui-hud-side-width);
   min-height: var(--ui-hud-side-height);
-  padding: 10px 8px 12px;
+  padding: 12px 10px 14px;
   justify-items: center;
-  align-content: center;
-  gap: 1px;
+  align-content: start;
+  gap: 2px;
   color: var(--color-coconut-cream);
-}
-
-.ui-pill-chip--durian::before {
-  background-image: url("./assets/ui/shapes/score-blob-dark.svg");
 }
 
 .ui-pill-chip--durian .ui-pill-label {
   color: rgba(244, 235, 217, 0.88);
   text-align: center;
   width: 100%;
+  font-size: clamp(1.84rem, 2.06vw, 2.34rem);
 }
 
 .ui-pill-value {
   font-family: var(--font-display);
-  font-size: clamp(2.7rem, 3.7vw, 4.3rem);
+  font-size: clamp(2.45rem, 3.15vw, 3.75rem);
   line-height: 0.86;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1, "lnum" 1;
@@ -1288,10 +1297,10 @@ textarea {
     --ui-edge-pad: 16px;
     --ui-top-gap: 6px;
     --ui-hud-top-offset: 84px;
-    --ui-hud-side-width: 56px;
-    --ui-hud-chip-width: 92px;
-    --ui-hud-side-height: 62px;
-    --ui-hud-chip-height: 68px;
+    --ui-hud-side-width: 78px;
+    --ui-hud-chip-width: 126px;
+    --ui-hud-side-height: 84px;
+    --ui-hud-chip-height: 88px;
   }
 
   #screen-error {
@@ -1346,13 +1355,13 @@ textarea {
 
   #ui-timer-pill {
     grid-column: 2;
-    grid-row: 2;
+    grid-row: 1;
     justify-self: end;
   }
 
   .ui-pill-chip--mode {
     grid-column: 3;
-    grid-row: 2;
+    grid-row: 1;
     justify-self: start;
   }
 
@@ -1418,17 +1427,22 @@ textarea {
 
   .ui-score-card,
   .ui-pill-chip {
-    padding: 8px 10px 10px;
+    padding: 10px 12px 12px;
   }
 
   .ui-score-card,
   .ui-pill-chip--durian {
-    padding: 8px 6px 10px;
+    padding: 10px 8px 12px;
   }
 
   .ui-score-label,
   .ui-pill-label {
-    font-size: clamp(0.82rem, 2.8vw, 1rem);
+    font-size: clamp(1.24rem, 3.7vw, 1.48rem);
+  }
+
+  .ui-score-label,
+  .ui-pill-chip--durian .ui-pill-label {
+    font-size: clamp(1.46rem, 4.5vw, 1.76rem);
   }
 
   .ui-score-value,
