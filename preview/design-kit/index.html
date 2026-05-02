@@ -749,7 +749,7 @@ function ShareSheet({ score, fruits, onClose, onAgain }) {
         animation: 'bowl-fade-in 220ms ease both',
       }} onClick={onClose}/>
       <div style={{
-        position: 'relative', width: 520, padding: '34px 38px 32px',
+        position: 'relative', width: 'min(520px, calc(100vw - 64px))', padding: '34px 38px 32px',
         backgroundImage: 'url(../../assets/ui/shapes/cream-card-blob.svg)',
         backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
         filter: 'drop-shadow(0 30px 56px rgba(0,0,0,0.42))',
@@ -1046,92 +1046,6 @@ function PlayHud({ score, mode, lives = 3, lost = 0, isTimed, timeStr }) {
   );
 }
 
-// ── ShareOverlay — single post-game screen (no separate game over) ─
-function ShareOverlay({ score, fruits, onAgain }) {
-  return (
-    <div style={{ position: 'absolute', inset: 0, zIndex: 6, display: 'grid', placeItems: 'center' }}>
-      {/* dim backdrop */}
-      <div style={{ position: 'absolute', inset: 0, background: 'rgba(18,10,4,0.52)', animation: 'bowl-fade-in 280ms ease both' }}/>
-
-      {/* card */}
-      <div style={{
-        position: 'relative', zIndex: 1,
-        width: 'min(500px, calc(100vw - 48px))',
-        background: 'var(--color-coconut-cream)',
-        borderRadius: 28, padding: '36px 40px 32px',
-        boxShadow: '0 32px 64px rgba(0,0,0,0.44), 0 0 0 1.5px rgba(76,49,37,0.08)',
-        animation: 'bowl-enter 380ms cubic-bezier(0.2,0,0,1) 60ms both',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0,
-      }}>
-
-        {/* postmark stamp — decorative, top right */}
-        <div style={{
-          position: 'absolute', top: 20, right: 28,
-          width: 80, height: 80, transform: 'rotate(9deg)',
-          border: '2px dashed rgba(76,49,37,0.44)', borderRadius: 6,
-          display: 'grid', placeItems: 'center',
-          fontFamily: 'var(--font-display)', color: 'rgba(76,49,37,0.6)',
-          textAlign: 'center', fontSize: 12, lineHeight: 1,
-          pointerEvents: 'none',
-        }}>
-          <div>
-            <div style={{ fontSize: 14, marginBottom: 1 }}>from a</div>
-            <div style={{ fontSize: 22, lineHeight: 0.84 }}>BOWL</div>
-          </div>
-        </div>
-
-        {/* title */}
-        <h2 style={{
-          margin: '0 0 4px', alignSelf: 'flex-start', paddingRight: 100,
-          fontFamily: 'var(--font-display)', fontWeight: 400,
-          fontSize: 'clamp(2.8rem, 5vw, 3.8rem)', lineHeight: 0.88,
-          color: 'var(--color-coconut-brown)',
-          animation: 'bowl-enter 360ms cubic-bezier(0.2,0,0,1) 100ms both',
-        }}>what a bowl!</h2>
-
-        <p style={{
-          margin: '0 0 18px', alignSelf: 'flex-start',
-          fontFamily: 'var(--font-display)', fontSize: 20, lineHeight: 1.1,
-          color: 'rgba(96,70,53,0.72)',
-          animation: 'bowl-enter 360ms cubic-bezier(0.2,0,0,1) 160ms both',
-        }}>a bowl of fruits should never be eaten alone</p>
-
-        {/* dotted divider */}
-        <div style={{
-          width: '100%', height: 1, marginBottom: 20,
-          backgroundImage: 'radial-gradient(circle, rgba(76,49,37,0.45) 1px, transparent 1.4px)',
-          backgroundSize: '10px 2px', backgroundRepeat: 'repeat-x',
-        }}/>
-
-        {/* score — prominent, centered */}
-        <div style={{
-          position: 'relative', width: 160, height: 160,
-          backgroundImage: 'url(../../assets/ui/shapes/score-blob-dark.svg)',
-          backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
-          display: 'grid', placeItems: 'center', marginBottom: 4,
-          filter: 'drop-shadow(0 14px 28px rgba(42,31,24,0.38))',
-          animation: 'bowl-enter 400ms cubic-bezier(0.2,0,0,1) 200ms both',
-        }}>
-          <div style={{ display: 'grid', gap: 0, justifyItems: 'center' }}>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'rgba(244,235,217,0.72)' }}>score</span>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: 68, lineHeight: 0.84, color: 'var(--color-durian-glow)', fontVariantNumeric: 'tabular-nums' }}>{score}</span>
-          </div>
-        </div>
-
-        {/* bowl reveal */}
-        <div style={{ animation: 'bowl-enter 420ms cubic-bezier(0.2,0,0,1) 280ms both', marginBottom: 8 }}>
-          <window.BowlReveal fruits={fruits} size={320}/>
-        </div>
-
-        {/* actions */}
-        <div style={{ display: 'flex', gap: 16, justifyContent: 'center', marginTop: 8, animation: 'bowl-enter 360ms cubic-bezier(0.2,0,0,1) 400ms both' }}>
-          <window.BlobButton style={{ width: 180, height: 92, fontSize: 36 }} onClick={onAgain}>Again</window.BlobButton>
-          <window.BlobButton primary style={{ width: 180, height: 92, fontSize: 36 }}>Share</window.BlobButton>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ── ScreenPicker dev overlay ───────────────────────────────────
 function ScreenPicker({ screen, setScreen }) {
@@ -1237,7 +1151,7 @@ function App() {
 
       {/* ── SHARE (combined post-game + share) ── */}
       {screen === 'share' && (
-        <ShareOverlay score={score} fruits={BOWL_FRUITS} onAgain={() => setScreen('mode')}/>
+        <window.ShareSheet score={score} fruits={BOWL_FRUITS} onClose={() => setScreen('mode')} onAgain={() => setScreen('mode')}/>
       )}
 
       <ScreenPicker screen={screen} setScreen={setScreen}/>

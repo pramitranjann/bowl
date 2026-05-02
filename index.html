@@ -23,6 +23,92 @@
     <video id="environment" autoplay playsinline muted loop></video>
     <canvas id="game" aria-label="bowl phase 2 mechanics"></canvas>
     <div id="ui-root" data-scene="loading" data-menu-panel="modes">
+      <div id="scene-bg" aria-hidden="true">
+        <div class="scene-sun-halo"></div>
+        <div class="scene-sun-disc"></div>
+        <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice"
+             style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" aria-hidden="true">
+          <!-- clouds A — slow drift -->
+          <g fill="#fff7e8" opacity="0.92">
+            <g class="scene-cloud-a">
+              <g transform="translate(120 140)"><ellipse cx="0" cy="0" rx="60" ry="22"/><ellipse cx="-50" cy="6" rx="38" ry="18"/><ellipse cx="40" cy="-4" rx="42" ry="22"/><ellipse cx="-20" cy="-14" rx="34" ry="18"/><ellipse cx="20" cy="-18" rx="30" ry="16"/><ellipse cx="70" cy="8" rx="28" ry="14"/><ellipse cx="-78" cy="2" rx="22" ry="12"/></g>
+              <g transform="translate(680 90) scale(0.78)"><ellipse cx="0" cy="0" rx="60" ry="22"/><ellipse cx="-50" cy="6" rx="38" ry="18"/><ellipse cx="40" cy="-4" rx="42" ry="22"/><ellipse cx="-20" cy="-14" rx="34" ry="18"/><ellipse cx="20" cy="-18" rx="30" ry="16"/><ellipse cx="70" cy="8" rx="28" ry="14"/><ellipse cx="-78" cy="2" rx="22" ry="12"/></g>
+              <g transform="translate(1180 170) scale(0.92)"><ellipse cx="0" cy="0" rx="60" ry="22"/><ellipse cx="-50" cy="6" rx="38" ry="18"/><ellipse cx="40" cy="-4" rx="42" ry="22"/><ellipse cx="-20" cy="-14" rx="34" ry="18"/><ellipse cx="20" cy="-18" rx="30" ry="16"/><ellipse cx="70" cy="8" rx="28" ry="14"/><ellipse cx="-78" cy="2" rx="22" ry="12"/></g>
+            </g>
+            <!-- clouds B — medium drift -->
+            <g class="scene-cloud-b">
+              <g transform="translate(360 220) scale(0.6)" opacity="0.7"><ellipse cx="0" cy="0" rx="60" ry="22"/><ellipse cx="-50" cy="6" rx="38" ry="18"/><ellipse cx="40" cy="-4" rx="42" ry="22"/><ellipse cx="-20" cy="-14" rx="34" ry="18"/><ellipse cx="20" cy="-18" rx="30" ry="16"/><ellipse cx="70" cy="8" rx="28" ry="14"/><ellipse cx="-78" cy="2" rx="22" ry="12"/></g>
+              <g transform="translate(920 250) scale(0.66)" opacity="0.7"><ellipse cx="0" cy="0" rx="60" ry="22"/><ellipse cx="-50" cy="6" rx="38" ry="18"/><ellipse cx="40" cy="-4" rx="42" ry="22"/><ellipse cx="-20" cy="-14" rx="34" ry="18"/><ellipse cx="20" cy="-18" rx="30" ry="16"/><ellipse cx="70" cy="8" rx="28" ry="14"/><ellipse cx="-78" cy="2" rx="22" ry="12"/></g>
+              <g transform="translate(1420 210) scale(0.5)" opacity="0.65"><ellipse cx="0" cy="0" rx="60" ry="22"/><ellipse cx="-50" cy="6" rx="38" ry="18"/><ellipse cx="40" cy="-4" rx="42" ry="22"/><ellipse cx="-20" cy="-14" rx="34" ry="18"/><ellipse cx="20" cy="-18" rx="30" ry="16"/><ellipse cx="70" cy="8" rx="28" ry="14"/><ellipse cx="-78" cy="2" rx="22" ry="12"/></g>
+            </g>
+          </g>
+          <!-- ocean shimmer -->
+          <g stroke="#f7efd4" stroke-width="1.5" opacity="0.5" fill="none" stroke-linecap="round">
+            <path d="M40 540 L 240 540"/><path d="M400 552 L 600 552"/><path d="M820 548 L 1020 548"/><path d="M1180 558 L 1360 558"/>
+            <path d="M180 588 L 380 588"/><path d="M540 596 L 740 596"/><path d="M960 590 L 1140 590"/><path d="M1240 600 L 1440 600"/>
+            <path d="M80 632 L 280 632"/><path d="M460 640 L 660 640"/><path d="M880 638 L 1080 638"/>
+          </g>
+          <!-- distant island -->
+          <g opacity="0.86">
+            <path d="M 980 522 C 1040 495, 1100 481.5, 1160 495 C 1220 508.5, 1280 522, 1300 526.5 L 1300 540 L 980 540 Z" fill="#3e6638"/>
+            <g stroke="#1d3a26" stroke-width="2" fill="none" stroke-linecap="round">
+              <path d="M1080 510 C 1080 500, 1080 494, 1080 488"/><path d="M1080 488 C 1072 484, 1064 484, 1060 486"/><path d="M1080 488 C 1088 484, 1096 484, 1100 486"/>
+              <path d="M1180 506 C 1180 496, 1180 490, 1180 484"/><path d="M1180 484 C 1172 480, 1164 480, 1160 482"/><path d="M1180 484 C 1188 480, 1196 480, 1200 482"/>
+            </g>
+          </g>
+          <!-- beach foam -->
+          <path d="M 0 711 C 200 706.5, 480 715.5, 760 706.5 C 1040 712.8, 1320 702, 1600 711 L 1600 729 C 1320 733.5, 1040 721.8, 760 730.8 C 480 727.2, 200 733.5, 0 733.5 Z" fill="#f7efd4" opacity="0.78"/>
+          <path d="M 0 711 C 200 706.5, 480 715.5, 760 706.5 C 1040 712.8, 1320 702, 1600 711" fill="none" stroke="#4c3125" stroke-width="2" opacity="0.32" stroke-linecap="round"/>
+          <!-- sand texture -->
+          <g fill="#4c3125" opacity="0.18">
+            <circle cx="120" cy="780" r="1.2"/><circle cx="220" cy="816" r="1.2"/><circle cx="360" cy="800" r="1.2"/><circle cx="500" cy="836" r="1.2"/>
+            <circle cx="640" cy="816" r="1.2"/><circle cx="780" cy="848" r="1.2"/><circle cx="900" cy="824" r="1.2"/><circle cx="1040" cy="852" r="1.2"/>
+            <circle cx="1180" cy="828" r="1.2"/><circle cx="1320" cy="860" r="1.2"/><circle cx="1440" cy="836" r="1.2"/>
+            <circle cx="160" cy="850" r="1.2"/><circle cx="320" cy="868" r="1.2"/><circle cx="540" cy="876" r="1.2"/>
+            <circle cx="720" cy="880" r="1.2"/><circle cx="980" cy="884" r="1.2"/><circle cx="1240" cy="876" r="1.2"/>
+          </g>
+          <!-- mid palms (sway) -->
+          <g class="scene-palms">
+            <path d="M 130 760 Q 104 550 94 340" fill="none" stroke="#1d3a26" stroke-width="14" stroke-linecap="round"/>
+            <path d="M 150 760 Q 116 550 106 340" fill="none" stroke="#1d3a26" stroke-width="14" stroke-linecap="round"/>
+            <circle cx="92" cy="348" r="6" fill="#1d3a26"/><circle cx="112" cy="354" r="6" fill="#1d3a26"/><circle cx="102" cy="362" r="6" fill="#1d3a26"/>
+            <g fill="#1d3a26" stroke="#1a0e08" stroke-width="2" stroke-linejoin="round">
+              <path d="M 100 340 Q 14 309 -60 310 Q 23 339 100 340 Z"/>
+              <path d="M 100 340 Q 186 309 260 310 Q 177 339 100 340 Z"/>
+              <path d="M 100 340 Q 23 354 -30 400 Q 41 384 100 340 Z"/>
+              <path d="M 100 340 Q 177 354 230 400 Q 159 384 100 340 Z"/>
+              <path d="M 100 340 Q 69 284 70 260 Q 93 314 100 340 Z"/>
+              <path d="M 100 340 Q 131 284 130 260 Q 107 314 100 340 Z"/>
+            </g>
+            <path d="M 1450 770 Q 1499 580 1514 390" fill="none" stroke="#1d3a26" stroke-width="14" stroke-linecap="round"/>
+            <path d="M 1470 770 Q 1511 580 1526 390" fill="none" stroke="#1d3a26" stroke-width="14" stroke-linecap="round"/>
+            <circle cx="1512" cy="398" r="6" fill="#1d3a26"/><circle cx="1532" cy="404" r="6" fill="#1d3a26"/><circle cx="1522" cy="412" r="6" fill="#1d3a26"/>
+            <g fill="#1d3a26" stroke="#1a0e08" stroke-width="2" stroke-linejoin="round">
+              <path d="M 1520 390 Q 1434 359 1360 360 Q 1443 389 1520 390 Z"/>
+              <path d="M 1520 390 Q 1606 359 1680 360 Q 1597 389 1520 390 Z"/>
+              <path d="M 1520 390 Q 1443 404 1390 450 Q 1461 434 1520 390 Z"/>
+              <path d="M 1520 390 Q 1597 404 1650 450 Q 1579 434 1520 390 Z"/>
+              <path d="M 1520 390 Q 1489 334 1490 310 Q 1513 364 1520 390 Z"/>
+              <path d="M 1520 390 Q 1551 334 1550 310 Q 1527 364 1520 390 Z"/>
+            </g>
+          </g>
+          <!-- seagulls -->
+          <g class="scene-gulls" opacity="0.55">
+            <g transform="translate(200 90) scale(0.7)" fill="none" stroke="#1d3a26" stroke-width="3" stroke-linecap="round"><path d="M-22 0 Q -12 -10 0 0 Q 12 -10 22 0"/></g>
+            <g transform="translate(280 120) scale(0.55)" fill="none" stroke="#1d3a26" stroke-width="3" stroke-linecap="round"><path d="M-22 0 Q -12 -10 0 0 Q 12 -10 22 0"/></g>
+          </g>
+        </svg>
+        <!-- foreground frond top-left -->
+        <svg viewBox="0 0 600 400" preserveAspectRatio="xMinYMin slice"
+             style="position:absolute;top:-20px;left:-40px;width:360px;height:240px;pointer-events:none;opacity:0.9" aria-hidden="true">
+          <g fill="#1d3a26" stroke="#1a0e08" stroke-width="3" stroke-linejoin="round">
+            <path d="M-20 -20 C 80 20, 180 60, 240 130 C 200 120, 140 110, 80 100 C 40 80, 0 50, -20 -20 Z"/>
+            <path d="M-20 -20 C 100 -10, 220 30, 280 80 C 220 90, 140 70, 60 50 C 20 30, -10 0, -20 -20 Z" opacity="0.86"/>
+          </g>
+        </svg>
+        <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(0,0,0,0.16) 100%)"></div>
+        <div class="scene-grain"></div>
+      </div>
       <button
         id="ui-brand-button"
         class="ui-brand hand-target"
