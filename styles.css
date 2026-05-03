@@ -635,30 +635,55 @@ textarea {
 #screen-mode-select .ui-scribble-button::after {
   content: "";
   position: absolute;
-  inset: -10px;
-  z-index: -2;
-  background-image: url("./assets/ui/shapes/large-green-blob.svg");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  opacity: calc(var(--finger-progress, 0) * 0.28);
+  inset: -14px;
+  z-index: -1;
+  border-radius: 50% 47% 49% 51% / 45% 52% 48% 55%;
+  background:
+    conic-gradient(
+      from -90deg,
+      var(--color-pandan) calc(var(--finger-progress, 0) * 1turn),
+      rgba(244, 235, 217, 0.22) 0turn
+    );
+  opacity: calc(0.16 + var(--finger-progress, 0) * 0.84);
   transform:
-    scale(calc(1 + var(--finger-progress, 0) * 0.08))
+    scale(calc(0.96 + var(--finger-progress, 0) * 0.08))
     rotate(-2deg);
-  filter: blur(10px) brightness(1.08);
+  filter:
+    drop-shadow(0 10px 18px rgba(42, 31, 24, 0.16))
+    saturate(1.08);
   transition:
-    opacity 140ms linear,
-    transform 140ms linear,
-    filter 140ms linear;
+    opacity 100ms linear,
+    transform 100ms linear;
   pointer-events: none;
+
+  /* makes it a ring instead of a filled blob */
+  -webkit-mask:
+    radial-gradient(
+      ellipse at center,
+      transparent 57%,
+      black 59%,
+      black 70%,
+      transparent 72%
+    );
+  mask:
+    radial-gradient(
+      ellipse at center,
+      transparent 57%,
+      black 59%,
+      black 70%,
+      transparent 72%
+    );
 }
 
 #screen-mode-select .ui-scribble-button.is-finger-hovered {
-  transform: translateY(-2px) scale(1.025) rotate(1deg);
+  transform:
+    translateY(calc(-3px - var(--finger-progress, 0) * 3px))
+    scale(calc(1.025 + var(--finger-progress, 0) * 0.045))
+    rotate(1deg);
   filter:
-    drop-shadow(0 22px 34px rgba(42, 31, 24, 0.18))
-    saturate(calc(1 + var(--finger-progress, 0) * 0.12))
-    brightness(calc(1.01 + var(--finger-progress, 0) * 0.04));
+    drop-shadow(0 24px 38px rgba(42, 31, 24, 0.22))
+    saturate(calc(1.04 + var(--finger-progress, 0) * 0.22))
+    brightness(calc(1.02 + var(--finger-progress, 0) * 0.08));
   box-shadow: none;
 }
 
@@ -1061,13 +1086,21 @@ textarea {
 }
 
 .ui-share-preview {
-  width: 178px;
-  height: 178px;
-  border-radius: 50% 47% 49% 51% / 45% 52% 48% 55%;
-  background: rgba(201, 202, 206, 0.78) center / cover no-repeat;
-  box-shadow:
-    inset 0 0 0 1px rgba(0, 0, 0, 0.08),
-    0 18px 34px rgba(42, 31, 24, 0.12);
+  width: 260px;
+  height: 190px;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ui-share-preview canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .ui-share-doodle {

@@ -284,24 +284,21 @@ export class TrailSystem {
       const washWidth = Math.max(4, CONFIG.trailWidth * (0.78 + speedBoost * 0.16));
       const edgeWidth = Math.max(2.5, CONFIG.trailWidth * 0.26);
 
-      ctx.globalCompositeOperation = "screen";
-      ctx.shadowColor = palette.glow;
-      ctx.shadowBlur = 18 + speedBoost * 16;
+ctx.globalCompositeOperation = "source-over";
+ctx.shadowBlur = 0;
+ctx.shadowColor = "transparent";
 
-      ctx.globalAlpha = life * 0.34;
-      strokeTrailPath(ctx, trail.points, glowWidth, palette.glow);
+/* soft solid trail, no glow */
+ctx.globalAlpha = life * 0.52;
+strokeTrailPath(ctx, trail.points, washWidth * 0.72, palette.core);
 
-      ctx.globalAlpha = life * (0.52 + speedBoost * 0.14);
-      strokeTrailPath(ctx, trail.points, washWidth, palette.core);
-
-      ctx.shadowBlur = 0;
-      ctx.globalAlpha = life * 0.88;
-      strokeTrailPath(ctx, trail.points, edgeWidth, palette.edge);
+/* thin cream highlight */
+ctx.globalAlpha = life * 0.72;
+strokeTrailPath(ctx, trail.points, edgeWidth, palette.edge);
 
       ctx.globalCompositeOperation = "source-over";
 
-const markerX = head.sliceX;
-const markerY = head.sliceY;
+/* fingertip marker is handled in main.js renderHandMarkers() */
 const markerScale = 1 + speedBoost * 0.18;
 
 /* soft outer glow */

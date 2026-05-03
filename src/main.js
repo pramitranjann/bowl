@@ -13,7 +13,7 @@ import { detectSlices } from "./slice.js";
 import { WaveSpawner } from "./spawner.js";
 import { MODE_META, MODES, STATES } from "./states.js";
 import { TrailSystem } from "./trail.js";
-import { preloadVectorArt } from "./vector-art.js?v=3";
+import { preloadVectorArt, drawBowlSvg, drawFruitSvg } from "./vector-art.js?v=3";
 import { HandTracker } from "./vision.js";
 
 const canvas = document.getElementById("game");
@@ -287,16 +287,79 @@ function updateMenuPanel() {
 function updateWorldSelectionUi() {
   return;
 }
+function renderShareBowlPreview() {
+  ui.sharePreview.innerHTML = "";
+  ui.sharePreview.style.backgroundImage = "";
+
+  const previewCanvas = document.createElement("canvas");
+  const previewCtx = previewCanvas.getContext("2d");
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  const width = 260;
+  const height = 190;
+
+  previewCanvas.width = Math.round(width * dpr);
+  previewCanvas.height = Math.round(height * dpr);
+  previewCanvas.style.width = `${width}px`;
+  previewCanvas.style.height = `${height}px`;
+
+  previewCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  previewCtx.imageSmoothingEnabled = true;
+  previewCtx.imageSmoothingQuality = "high";
+
+  ui.sharePreview.appendChild(previewCanvas);
+
+  const centerX = width / 2;
+  const centerY = height * 0.64;
+  const bowlRadius = 82;
+
+  // Draw fruit first so the bowl sits in front visually.
+  const fruit = bowl.collected;
+  const fruitCount = fruit.length;
+
+  fruit.forEach((item, index) => {
+    const ring = Math.floor(index / 6);
+    const indexInRing = index % 6;
+    const itemsInRing = Math.min(6, fruitCount - ring * 6);
+
+    const angle =
+      -Math.PI / 2 +
+      (indexInRing / Math.max(1, itemsInRing)) * Math.PI * 2 +
+      ring * 0.42;
+
+    const ringRadius = 16 + ring * 16;
+
+    const x = centerX + Math.cos(angle) * ringRadius;
+    const y = centerY - 38 + Math.sin(angle) * ringRadius * 0.42;
+
+    const radius = Math.max(17, Math.min(27, (item.radius || 28) * 0.38));
+
+    previewCtx.save();
+    previewCtx.translate(x, y);
+    previewCtx.rotate((index - fruitCount / 2) * 0.08);
+    drawFruitSvg(previewCtx, item.type, radius, "bowl");
+    previewCtx.restore();
+  });
+
+  // Draw the proper vector bowl.
+  previewCtx.save();
+  previewCtx.translate(centerX, centerY);
+  drawBowlSvg(previewCtx, bowlRadius);
+  previewCtx.restore();
+
+  game.sharePreviewUrl = previewCanvas.toDataURL("image/png");
+}
 
 function openShareModal() {
   try {
-    game.sharePreviewUrl = canvas.toDataURL("image/png");
-    ui.sharePreview.style.backgroundImage = `url("${game.sharePreviewUrl}")`;
+    renderShareBowlPreview();
   } catch (error) {
-    console.warn("Unable to snapshot share preview", error);
+    console.warn("Unable to render share preview", error);
     game.sharePreviewUrl = "";
+    ui.sharePreview.innerHTML = "";
     ui.sharePreview.style.backgroundImage = "";
   }
+
   ui.shareScoreValue.textContent = `${game.score}`;
   ui.shareModal.hidden = false;
   resetAllTrackedUiButtons();
@@ -1071,20 +1134,28 @@ function renderHandMarkers(sceneCtx, hands) {
   if (!hands.length) {
     return;
   }
-  sceneCtx.save();
-  for (const hand of hands) {
-    sceneCtx.strokeStyle = hand.color;
-    sceneCtx.lineWidth = 4;
-    sceneCtx.beginPath();
-    sceneCtx.moveTo(hand.rawBladeStartX ?? hand.rawX ?? hand.x, hand.rawBladeStartY ?? hand.rawY ?? hand.y);
-    sceneCtx.lineTo(hand.rawBladeEndX ?? hand.rawX ?? hand.x, hand.rawBladeEndY ?? hand.rawY ?? hand.y);
-    sceneCtx.stroke();
 
-    sceneCtx.fillStyle = hand.color;
+  sceneCtx.save();
+
+  for (const hand of hands) {
+    const x = hand.rawX ?? hand.x;
+    const y = hand.rawY ?? hand.y;
+
+    /* tiny cream touch point */
+    sceneCtx.globalAlpha = 0.82;
+    sceneCtx.fillStyle = "rgba(244, 235, 217, 0.86)";
     sceneCtx.beginPath();
-    sceneCtx.arc(hand.rawX ?? hand.x, hand.rawY ?? hand.y, 7, 0, Math.PI * 2);
+    sceneCtx.arc(x, y, 6, 0, Math.PI * 2);
+    sceneCtx.fill();
+
+    /* small brown center */
+    sceneCtx.globalAlpha = 0.72;
+    sceneCtx.fillStyle = "rgba(76, 49, 37, 0.72)";
+    sceneCtx.beginPath();
+    sceneCtx.arc(x, y, 2.6, 0, Math.PI * 2);
     sceneCtx.fill();
   }
+
   sceneCtx.restore();
 }
 
