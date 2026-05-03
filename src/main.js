@@ -401,42 +401,43 @@ function renderShareExportImage() {
   exportCtx.fillText(`${game.score} points`, width / 2, 250);
 
   const centerX = width / 2;
-  const centerY = height * 0.58;
-  const bowlRadius = 150;
+const centerY = height * 0.58;
+const bowlRadius = 136;
 
-  const fruit = bowl.collected;
+const fruit = bowl.collected;
 
-  const fruitLayout = [
-    [-122, -50, 42, -0.16],
-    [-84, -86, 46, 0.1],
-    [-34, -106, 48, -0.06],
-    [24, -106, 48, 0.08],
-    [78, -86, 46, 0.12],
-    [122, -50, 42, 0.16],
-    [-44, -56, 44, -0.08],
-    [44, -56, 44, 0.08],
-  ];
+const fruitLayout = [
+  [-82, -18, 34, -0.16],
+  [-52, -34, 38, 0.08],
+  [-18, -42, 40, -0.04],
+  [18, -42, 40, 0.06],
+  [52, -34, 38, 0.12],
+  [82, -18, 34, 0.16],
+  [-28, -20, 36, -0.08],
+  [28, -20, 36, 0.08],
+];
 
-  fruit.forEach((item, index) => {
-    const [x, y, fallbackRadius, rotation] =
-      fruitLayout[index % fruitLayout.length];
+fruit.forEach((item, index) => {
+  const [x, y, fallbackRadius, rotation] =
+    fruitLayout[index % fruitLayout.length];
 
-    const radius = Math.max(
-      34,
-      Math.min(54, item.radius ? item.radius * 0.58 : fallbackRadius)
-    );
+  const radius = Math.max(
+    28,
+    Math.min(44, item.radius ? item.radius * 0.48 : fallbackRadius)
+  );
 
-    exportCtx.save();
-    exportCtx.translate(centerX + x, centerY + y);
-    exportCtx.rotate(rotation);
-    drawFruitSvg(exportCtx, item.type, radius, "bowl");
-    exportCtx.restore();
-  });
+  previewCtx.save();
+  previewCtx.translate(centerX + x, centerY + y);
+  previewCtx.rotate(rotation);
+  drawFruitSvg(previewCtx, item.type, radius, "bowl");
+  previewCtx.restore();
+});
 
-  exportCtx.save();
-  exportCtx.translate(centerX, centerY);
-  drawBowlSvg(exportCtx, bowlRadius, false);
-  exportCtx.restore();
+// Bowl must be drawn AFTER the fruit so it covers the lower part.
+previewCtx.save();
+previewCtx.translate(centerX, centerY);
+drawBowlSvg(previewCtx, bowlRadius, false);
+previewCtx.restore();
 
   // invite / CTA
   exportCtx.fillStyle = "#4c3125";
