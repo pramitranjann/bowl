@@ -250,25 +250,29 @@
         </div>
       </section>
 
-      <section id="gameover-actions" aria-live="polite" hidden>
-        <p class="ui-gameover-caption">what a bowl</p>
-        <button id="ui-gameover-restart" class="ui-scribble-button ui-scribble-button--primary hand-target" type="button">
-          Again
-        </button>
-        <button id="ui-gameover-share" class="ui-scribble-button hand-target" type="button">
-          Share
-        </button>
-      </section>
-
       <section id="share-modal" class="ui-modal" hidden aria-live="polite">
         <div class="ui-modal-backdrop"></div>
         <div class="ui-share-sheet">
-          <button id="ui-share-close-x" class="ui-share-close hand-target" type="button" aria-label="Close share sheet">
-            <img src="./assets/ui/icons/iconErrorBold.svg" alt="" aria-hidden="true">
+          <div class="ui-share-stamp" aria-hidden="true">
+            <span>from a</span>
+            <span>BOWL</span>
+            <span>· est ·</span>
+          </div>
+          <button id="ui-share-close-x" class="ui-share-close hand-target" type="button" aria-label="Close">
+            <span aria-hidden="true">×</span>
           </button>
-          <h2 class="ui-share-title">Share your bowl</h2>
-          <p class="ui-share-copy">a bowl of fruits should never be eaten alone</p>
-          <div id="ui-share-preview" class="ui-share-preview" aria-hidden="true"></div>
+          <div class="ui-share-heading">
+            <h2 class="ui-share-title">what a bowl!</h2>
+            <p class="ui-share-copy">a bowl of fruits should never be eaten alone</p>
+          </div>
+          <div class="ui-share-divider" aria-hidden="true"></div>
+          <div class="ui-share-main">
+            <div class="ui-share-score-blob">
+              <span class="ui-share-score-label">score</span>
+              <span id="ui-share-score-value" class="ui-share-score-value">0</span>
+            </div>
+            <div id="ui-share-preview" class="ui-share-preview" aria-hidden="true"></div>
+          </div>
           <div class="ui-share-actions">
             <button id="ui-share-close" class="ui-scribble-button hand-target" type="button" aria-label="Play again">
               Again
@@ -277,6 +281,10 @@
               Share
             </button>
           </div>
+          <svg class="ui-share-doodle" viewBox="0 0 40 40" fill="none" stroke="#4c3125" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+            <path d="M6 30 C 14 26, 22 24, 32 24"/>
+            <path d="M16 26 C 18 22, 22 20, 26 20"/>
+          </svg>
         </div>
       </section>
     </div>

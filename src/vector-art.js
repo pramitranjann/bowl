@@ -54,35 +54,6 @@ const FRUIT_ART = {
       </svg>
     `,
   },
-  papaya: {
-    flightScale: 1.62,
-    bowlScale: 1.2,
-    svg: `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-        <defs>
-          <linearGradient id="papayaBody" x1="20%" y1="8%" x2="78%" y2="88%">
-            <stop offset="0%" stop-color="#ffb36f"/>
-            <stop offset="55%" stop-color="#ff8248"/>
-            <stop offset="100%" stop-color="#ea5b28"/>
-          </linearGradient>
-        </defs>
-        <path d="M128 36c40 0 72 35 72 90 0 57-31 95-72 95s-72-38-72-95c0-55 32-90 72-90Z" fill="url(#papayaBody)" stroke="#d9541f" stroke-width="6"/>
-        <path d="M128 67c28 0 49 24 49 58s-21 58-49 58-49-24-49-58 21-58 49-58Z" fill="#2b231a" opacity=".18"/>
-        <path d="M128 75c24 0 42 21 42 50s-18 50-42 50-42-21-42-50 18-50 42-50Z" fill="#20170e"/>
-        <g fill="#3a2814">
-          <circle cx="108" cy="113" r="5"/>
-          <circle cx="125" cy="101" r="5"/>
-          <circle cx="142" cy="111" r="5"/>
-          <circle cx="149" cy="131" r="5"/>
-          <circle cx="131" cy="149" r="5"/>
-          <circle cx="111" cy="145" r="5"/>
-          <circle cx="118" cy="128" r="4"/>
-          <circle cx="140" cy="128" r="4"/>
-        </g>
-        <ellipse cx="105" cy="88" rx="26" ry="12" fill="#fff2d8" opacity=".2" transform="rotate(-22 105 88)"/>
-      </svg>
-    `,
-  },
   dragonfruit: {
     flightScale: 1.68,
     bowlScale: 1.22,
@@ -152,24 +123,6 @@ const FRUIT_ART = {
       </svg>
     `,
   },
-  starfruit: {
-    flightScale: 1.72,
-    bowlScale: 1.24,
-    svg: `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-        <defs>
-          <linearGradient id="starBody" x1="15%" y1="18%" x2="88%" y2="86%">
-            <stop offset="0%" stop-color="#ffe88f"/>
-            <stop offset="55%" stop-color="#f7cf4a"/>
-            <stop offset="100%" stop-color="#d8a826"/>
-          </linearGradient>
-        </defs>
-        <path d="M128 43 150 88 199 94 164 127 172 178 128 155 84 178 92 127 57 94 106 88Z" fill="url(#starBody)" stroke="#c4941d" stroke-width="6" stroke-linejoin="round"/>
-        <path d="M128 62 144 95 180 100 155 124 161 161 128 145 95 161 101 124 76 100 112 95Z" fill="#fff3c5" opacity=".38"/>
-        <circle cx="128" cy="128" r="15" fill="#ffe08a" opacity=".46"/>
-      </svg>
-    `,
-  },
   lychee: {
     flightScale: 1.5,
     bowlScale: 1.12,
@@ -190,31 +143,6 @@ const FRUIT_ART = {
           <path d="M118 124 C 124 120, 130 120, 130 126"/>
           <path d="M82 148 C 88 144, 96 144, 98 150"/>
           <path d="M104 148 C 110 144, 116 144, 118 150"/>
-        </g>
-      </svg>
-    `,
-  },
-  guava: {
-    flightScale: 1.56,
-    bowlScale: 1.14,
-    svg: `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-        <defs>
-          <radialGradient id="guavaBody" cx="34%" cy="30%" r="75%">
-            <stop offset="0%" stop-color="#ffd0cf"/>
-            <stop offset="55%" stop-color="#f7a5a5"/>
-            <stop offset="100%" stop-color="#ea8088"/>
-          </radialGradient>
-        </defs>
-        <path d="M128 55c38 0 69 31 69 70 0 40-31 73-69 73s-69-33-69-73c0-39 31-70 69-70Z" fill="url(#guavaBody)" stroke="#d27179" stroke-width="6"/>
-        <path d="M128 55c8-13 20-22 36-27-2 15-11 26-26 34-13 7-25 9-36 5 6-5 15-9 26-12Z" fill="#5f9b50"/>
-        <circle cx="128" cy="127" r="28" fill="#f8c0c7" opacity=".58"/>
-        <g fill="#f2d8b7" opacity=".76">
-          <circle cx="117" cy="118" r="3"/>
-          <circle cx="133" cy="116" r="3"/>
-          <circle cx="144" cy="129" r="3"/>
-          <circle cx="125" cy="136" r="3"/>
-          <circle cx="111" cy="131" r="3"/>
         </g>
       </svg>
     `,
@@ -321,8 +249,6 @@ function drawPlayfulFruitSticker(ctx, type, radius) {
   ctx.beginPath();
   if (type === "pineapple") {
     ctx.ellipse(0, radius * 0.1, radius * 1.06, radius * 1.36, 0, 0, Math.PI * 2);
-  } else if (type === "starfruit") {
-    ctx.ellipse(0, radius * 0.04, radius * 1.14, radius * 1.14, 0, 0, Math.PI * 2);
   } else if (type === "durian") {
     ctx.ellipse(0, radius * 0.02, radius * 1.12, radius * 1.08, 0, 0, Math.PI * 2);
   } else {
@@ -361,7 +287,7 @@ function drawPlayfulBowlSticker(ctx, bowlRadius) {
 function drawCutFace(ctx, type, radius, juiceColor) {
   const flesh = mixHex(juiceColor, "#fff6dd", 0.24);
   const shadow = mixHex(juiceColor, "#23150f", 0.26);
-  const width = radius * (type === "pineapple" ? 0.16 : type === "starfruit" ? 0.2 : 0.17);
+  const width = radius * (type === "pineapple" ? 0.16 : 0.17);
   const height = radius * (type === "pineapple" ? 0.96 : 0.84);
 
   ctx.save();
@@ -377,15 +303,10 @@ function drawCutFace(ctx, type, radius, juiceColor) {
   ctx.lineTo(0, height * 0.94);
   ctx.stroke();
 
-  if (type === "papaya" || type === "watermelon" || type === "guava" || type === "dragonfruit") {
-    const seedColor =
-      type === "dragonfruit"
-        ? "#2d2322"
-        : type === "guava"
-          ? "#f1dfc5"
-          : "#332016";
+  if (type === "watermelon" || type === "dragonfruit") {
+    const seedColor = type === "dragonfruit" ? "#2d2322" : "#332016";
     ctx.fillStyle = seedColor;
-    const seedCount = type === "papaya" ? 6 : 4;
+    const seedCount = 4;
     for (let index = 0; index < seedCount; index += 1) {
       const t = seedCount === 1 ? 0.5 : index / (seedCount - 1);
       const y = -height * 0.5 + t * height;
@@ -413,7 +334,7 @@ function drawFruitHalfBase(ctx, type, radius, juiceColor, side) {
   const rind = mixHex(juiceColor, "#2a180f", 0.32);
   const flesh = mixHex(juiceColor, "#fff4d8", 0.18);
   const innerRadius =
-    type === "pineapple" ? radius * 0.84 : type === "starfruit" ? radius * 0.8 : radius * 0.86;
+    type === "pineapple" ? radius * 0.84 : radius * 0.86;
   const innerOffset =
     side === "left" ? -radius * 0.06 : radius * 0.06;
 

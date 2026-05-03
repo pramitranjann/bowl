@@ -43,12 +43,10 @@ const ui = {
   modeValue: document.getElementById("ui-mode-value"),
   durianValue: document.getElementById("ui-durian-value"),
   countdownValue: document.getElementById("ui-countdown-value"),
-  gameoverActions: document.getElementById("gameover-actions"),
   idleRestartButton: document.getElementById("ui-idle-restart"),
   errorRetryButton: document.getElementById("ui-error-retry"),
-  gameoverRestartButton: document.getElementById("ui-gameover-restart"),
-  gameoverShareButton: document.getElementById("ui-gameover-share"),
   shareModal: document.getElementById("share-modal"),
+  shareScoreValue: document.getElementById("ui-share-score-value"),
   sharePreview: document.getElementById("ui-share-preview"),
   shareCloseX: document.getElementById("ui-share-close-x"),
   shareCloseButton: document.getElementById("ui-share-close"),
@@ -188,10 +186,6 @@ function applyDebugUiState(nowMs = performance.now()) {
   }
 
   setState(STATES.GAMEOVER, nowMs, "again");
-
-  if (debugUiState === "share") {
-    requestAnimationFrame(() => openShareModal());
-  }
 }
 
 function normalizeSafariLoopbackOrigin() {
@@ -235,6 +229,7 @@ function resize() {
   ctx.setTransform(viewport.dpr, 0, 0, viewport.dpr, 0, 0);
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";
+  CONFIG.fruitBaseSize = Math.round(viewport.height * 0.15);
   compositor.resize(viewport);
   environment.resize(viewport);
 }
@@ -273,6 +268,9 @@ function setState(state, nowMs, statusText = game.statusText) {
     resetAllTrackedUiButtons();
   }
   updateUiState(nowMs);
+  if (state === STATES.GAMEOVER) {
+    openShareModal();
+  }
 }
 
 function updateMenuPanel() {
@@ -299,18 +297,13 @@ function openShareModal() {
     game.sharePreviewUrl = "";
     ui.sharePreview.style.backgroundImage = "";
   }
+  ui.shareScoreValue.textContent = `${game.score}`;
   ui.shareModal.hidden = false;
-  if (game.state === STATES.GAMEOVER) {
-    ui.gameoverActions.hidden = true;
-  }
   resetAllTrackedUiButtons();
 }
 
 function closeShareModal() {
   ui.shareModal.hidden = true;
-  if (game.state === STATES.GAMEOVER) {
-    ui.gameoverActions.hidden = false;
-  }
   resetAllTrackedUiButtons();
 }
 
@@ -357,8 +350,6 @@ function updateUiState(nowMs = performance.now()) {
   ui.idleScreen.hidden = game.state !== STATES.IDLE;
   ui.errorScreen.hidden = game.state !== STATES.ERROR;
   ui.playHud.hidden = game.state !== STATES.PLAY;
-  ui.gameoverActions.hidden =
-    game.state !== STATES.GAMEOVER || !ui.shareModal.hidden;
   ui.brandButton.hidden =
     game.state === STATES.CALIBRATION || game.state === STATES.LOADING;
   ui.homeButton.hidden = !(
@@ -453,9 +444,7 @@ function getTrackedUiButtons() {
       ? 18
       : button.id === "ui-brand-button"
         ? 12
-        : button.closest("#gameover-actions")
-          ? 24
-          : button.closest("#screen-mode-select")
+        : button.closest("#screen-mode-select")
             ? 8
             : button.closest(".ui-share-actions")
               ? 14
@@ -1342,11 +1331,6 @@ async function init() {
 
   ui.idleRestartButton.addEventListener("click", restartHandler);
   ui.errorRetryButton.addEventListener("click", restartHandler);
-  ui.gameoverRestartButton.addEventListener("click", restartHandler);
-
-  ui.gameoverShareButton.addEventListener("click", () => {
-    openShareModal();
-  });
 
   function dismissShareModal() {
     closeShareModal();

@@ -183,7 +183,6 @@ textarea {
 .ui-icon-button,
 .ui-screen,
 #play-hud,
-#gameover-actions,
 .ui-modal {
   position: absolute;
 }
@@ -601,8 +600,7 @@ textarea {
 }
 
 #screen-idle .ui-scribble-button::before,
-#screen-error .ui-scribble-button::before,
-#gameover-actions .ui-scribble-button::before {
+#screen-error .ui-scribble-button::before {
   background-image: url("./assets/ui/shapes/large-green-blob.svg");
 }
 
@@ -637,29 +635,31 @@ textarea {
 #screen-mode-select .ui-scribble-button::after {
   content: "";
   position: absolute;
-  left: 16%;
-  right: 16%;
-  bottom: 14px;
-  height: 7px;
-  border-radius: 999px;
-  background:
-    linear-gradient(90deg, var(--color-hibiscus), var(--color-evening-amber));
-  transform-origin: left center;
-  transform: scaleX(var(--finger-progress, 0));
-  opacity: calc(0.12 + (var(--finger-progress, 0) * 0.88));
+  inset: -10px;
+  z-index: -2;
+  background-image: url("./assets/ui/shapes/large-green-blob.svg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  opacity: calc(var(--finger-progress, 0) * 0.28);
+  transform:
+    scale(calc(1 + var(--finger-progress, 0) * 0.08))
+    rotate(-2deg);
+  filter: blur(10px) brightness(1.08);
   transition:
-    transform 120ms linear,
-    opacity 120ms linear;
+    opacity 140ms linear,
+    transform 140ms linear,
+    filter 140ms linear;
   pointer-events: none;
 }
 
 #screen-mode-select .ui-scribble-button.is-finger-hovered {
-  transform: translateY(-2px) scale(1.02) rotate(1deg);
+  transform: translateY(-2px) scale(1.025) rotate(1deg);
   filter:
-    drop-shadow(0 22px 34px rgba(42, 31, 24, 0.2))
-    saturate(calc(1 + var(--finger-progress, 0) * 0.18))
-    brightness(calc(1.02 + var(--finger-progress, 0) * 0.06));
-  box-shadow: 0 0 0 3px rgba(244, 235, 217, calc(0.18 + var(--finger-progress, 0) * 0.24));
+    drop-shadow(0 22px 34px rgba(42, 31, 24, 0.18))
+    saturate(calc(1 + var(--finger-progress, 0) * 0.12))
+    brightness(calc(1.01 + var(--finger-progress, 0) * 0.04));
+  box-shadow: none;
 }
 
 #screen-mode-select .ui-pill-button {
@@ -950,43 +950,9 @@ textarea {
   margin-top: 4px;
 }
 
-#gameover-actions {
-  left: 50%;
-  bottom: var(--ui-bottom-anchor);
-  display: flex;
-  width: min(640px, calc(100vw - (var(--ui-edge-pad) * 2)));
-  gap: var(--ui-action-gap);
-  justify-content: center;
-  align-items: end;
-  transform: translateX(-50%);
-}
-
-#gameover-actions .ui-scribble-button {
-  flex: 1 1 0;
-  min-width: 0;
-  min-height: 104px;
-  font-size: clamp(2.6rem, 3.2vw, 3.8rem);
-}
-
-#gameover-actions .ui-scribble-button--primary,
 .ui-share-actions .ui-scribble-button--primary {
   flex-grow: 1.12;
   filter: saturate(1.12) brightness(1.03);
-}
-
-.ui-gameover-caption {
-  position: absolute;
-  left: 50%;
-  bottom: calc(var(--ui-bottom-anchor) + 110px);
-  transform: translateX(-50%);
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 2.5vw, 2.9rem);
-  line-height: 1;
-  color: var(--color-hibiscus);
-  white-space: nowrap;
-  pointer-events: none;
-  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.14);
 }
 
 .ui-modal {
@@ -998,83 +964,131 @@ textarea {
 .ui-modal-backdrop {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(circle at 50% 34%, rgba(42, 31, 24, 0.05), rgba(42, 31, 24, 0.1));
+  background: radial-gradient(circle at 50% 34%, rgba(42, 31, 24, 0.42), rgba(42, 31, 24, 0.66));
 }
 
 .ui-share-sheet {
   z-index: 1;
-  width: min(458px, calc(100vw - 48px));
-  min-height: 620px;
-  gap: 10px;
-  padding: 24px 26px 28px;
-  grid-template-rows: auto auto 1fr auto;
+  position: relative;
+  width: min(520px, calc(100vw - 64px));
+  padding: 42px 42px 38px;
+  display: grid;
+  gap: 0;
+  min-height: 580px;
+  align-content: start;
 }
+
+.ui-share-stamp {
+  display: none;
+}
+
+.ui-share-stamp span { display: block; }
+.ui-share-stamp span:nth-child(1) { font-size: 1.8rem; margin-bottom: 2px; }
+.ui-share-stamp span:nth-child(2) { font-size: 2.8rem; line-height: 0.84; }
+.ui-share-stamp span:nth-child(3) { font-size: 1.2rem; margin-top: 4px; opacity: 0.7; }
 
 .ui-share-close {
-  position: absolute;
-  top: 14px;
-  right: 16px;
-  width: 52px;
-  height: 52px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  display: none;
 }
 
-.ui-share-close img {
-  width: 36px;
-  height: 36px;
+.ui-share-close span {
+  font-family: var(--font-display);
+  font-size: 2.8rem;
+  color: var(--color-coconut-brown);
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+.ui-share-heading {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 64px 0;
+  transform: translateX(-14px);
 }
 
 .ui-share-title {
-  max-width: 16ch;
-  text-align: center;
-  font-size: clamp(2.4rem, 3.2vw, 3.8rem);
-  line-height: 0.9;
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(3.7rem, 5vw, 5.3rem);
+  line-height: 0.88;
   color: var(--color-coconut-brown);
 }
 
 .ui-share-copy {
-  max-width: 13ch;
+  margin: 16px 0 0;
+  font-size: clamp(1.5rem, 2vw, 1.95rem);
+  line-height: 1.05;
+  color: rgba(96, 70, 53, 0.78);
+  max-width: 18ch;
   text-align: center;
-  font-size: clamp(1.9rem, 2.6vw, 2.6rem);
-  line-height: 0.96;
-  color: rgba(96, 70, 53, 0.84);
+}
+
+.ui-share-divider {
+  display: none;
+}
+
+.ui-share-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 56px;
+  transform: translateX(-14px);
+}
+
+.ui-share-score-blob {
+  display: none;
+}
+
+.ui-share-score-label {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: rgba(244, 235, 217, 0.78);
+  text-align: center;
+}
+
+.ui-share-score-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 5.6rem;
+  line-height: 0.84;
+  color: var(--color-durian-glow);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
 }
 
 .ui-share-preview {
-  width: 168px;
-  height: 168px;
-  align-self: center;
-  margin: 0;
+  width: 178px;
+  height: 178px;
   border-radius: 50% 47% 49% 51% / 45% 52% 48% 55%;
-  background:
-    rgba(201, 202, 206, 0.78)
-    center / cover
-    no-repeat;
+  background: rgba(201, 202, 206, 0.78) center / cover no-repeat;
   box-shadow:
     inset 0 0 0 1px rgba(0, 0, 0, 0.08),
     0 18px 34px rgba(42, 31, 24, 0.12);
 }
 
+.ui-share-doodle {
+  display: none;
+}
+
 .ui-share-actions {
   display: flex;
-  gap: var(--ui-action-gap);
+  gap: 18px;
   width: 100%;
   justify-content: center;
-  align-self: end;
+  margin-top: auto;
+  padding-top: 34px;
+  transform: translateX(-14px);
 }
 
 .ui-share-actions .ui-scribble-button {
-  width: calc(50% - 8px);
+  flex: 1;
   min-width: 0;
-  min-height: 96px;
-  font-size: clamp(2rem, 4vw, 3rem);
+  min-height: 78px;
+  font-size: clamp(1.95rem, 3vw, 2.5rem);
 }
 
 .ui-share-actions .ui-scribble-button::before {
@@ -1279,14 +1293,6 @@ textarea {
     align-self: start;
   }
 
-  #gameover-actions {
-    width: min(560px, calc(100vw - 40px));
-  }
-
-  #gameover-actions .ui-scribble-button {
-    min-width: 0;
-    width: calc(50% - 9px);
-  }
 }
 
 @media (max-width: 720px), (max-height: 720px) {
@@ -1606,10 +1612,6 @@ textarea {
 #screen-mode-select:not([hidden]) .ui-choice-row > *:nth-child(2) { animation: ui-enter 360ms var(--ui-ease) 160ms both; }
 #screen-mode-select:not([hidden]) .ui-choice-row > *:nth-child(3) { animation: ui-enter 360ms var(--ui-ease) 240ms both; }
 
-/* Gameover action buttons stagger */
-#gameover-actions:not([hidden]) .ui-gameover-caption { animation: ui-enter 360ms var(--ui-ease) 20ms both; }
-#gameover-actions:not([hidden]) > *:nth-child(2) { animation: ui-enter 360ms var(--ui-ease) 60ms both; }
-#gameover-actions:not([hidden]) > *:nth-child(3) { animation: ui-enter 360ms var(--ui-ease) 140ms both; }
 
 /* Play HUD stagger */
 #play-hud:not([hidden]) > *:nth-child(1) { animation: ui-enter 300ms var(--ui-ease) 60ms both; }

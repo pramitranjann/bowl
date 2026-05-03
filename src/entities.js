@@ -26,14 +26,6 @@ export const FRUITS = {
     behavior: "default",
     wobbleAmp: 0.05,
   },
-  papaya: {
-    sizeMult: 1.2,
-    weight: 1.1,
-    score: 10,
-    juiceColor: "#ff6b35",
-    behavior: "large",
-    wobbleAmp: 0.04,
-  },
   dragonfruit: {
     sizeMult: 1.0,
     weight: 1.0,
@@ -58,14 +50,6 @@ export const FRUITS = {
     behavior: "fast",
     wobbleAmp: 0.08,
   },
-  starfruit: {
-    sizeMult: 0.9,
-    weight: 0.8,
-    score: 15,
-    juiceColor: "#fcd34d",
-    behavior: "spin",
-    wobbleAmp: 0.1,
-  },
   lychee: {
     sizeMult: 0.5,
     weight: 0.5,
@@ -73,14 +57,6 @@ export const FRUITS = {
     juiceColor: "#fecaca",
     behavior: "cluster",
     wobbleAmp: 0.08,
-  },
-  guava: {
-    sizeMult: 0.9,
-    weight: 0.9,
-    score: 10,
-    juiceColor: "#fca5a5",
-    behavior: "default",
-    wobbleAmp: 0.05,
   },
 };
 
