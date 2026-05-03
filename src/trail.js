@@ -299,44 +299,6 @@ strokeTrailPath(ctx, trail.points, edgeWidth, palette.edge);
       ctx.globalCompositeOperation = "source-over";
 
 /* fingertip marker is handled in main.js renderHandMarkers() */
-const markerScale = 1 + speedBoost * 0.18;
-
-/* soft outer glow */
-ctx.globalAlpha = life * 0.22;
-ctx.fillStyle = "rgba(197, 216, 109, 0.55)";
-ctx.beginPath();
-ctx.ellipse(
-  markerX,
-  markerY,
-  22 * markerScale,
-  18 * markerScale,
-  -0.18,
-  0,
-  Math.PI * 2
-);
-ctx.fill();
-
-/* cream touch blob */
-ctx.globalAlpha = life * 0.72;
-ctx.fillStyle = "rgba(244, 235, 217, 0.82)";
-ctx.beginPath();
-ctx.ellipse(
-  markerX,
-  markerY,
-  12 * markerScale,
-  10 * markerScale,
-  -0.18,
-  0,
-  Math.PI * 2
-);
-ctx.fill();
-
-/* brown center dot */
-ctx.globalAlpha = life * 0.78;
-ctx.fillStyle = "rgba(76, 49, 37, 0.72)";
-ctx.beginPath();
-ctx.arc(markerX, markerY, 3.8 * markerScale, 0, Math.PI * 2);
-ctx.fill();
     }
 
     ctx.restore();
