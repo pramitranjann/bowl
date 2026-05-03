@@ -1093,9 +1093,9 @@ textarea {
 }
 
 .ui-share-preview {
-  width: 300px;
-  height: 210px;
-  margin-top: 28px;
+  width: 360px;
+  height: 258px;
+  margin-top: 34px;
   border-radius: 0;
   background: transparent !important;
   box-shadow: none;

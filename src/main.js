@@ -295,13 +295,13 @@ function renderShareBowlPreview() {
   const previewCtx = previewCanvas.getContext("2d");
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-  const width = 300;
-  const height = 210;
+const width = 720;
+const height = 900;
 
   previewCanvas.width = Math.round(width * dpr);
   previewCanvas.height = Math.round(height * dpr);
-  previewCanvas.style.width = `${width}px`;
-  previewCanvas.style.height = `${height}px`;
+previewCanvas.style.width = "300px";
+previewCanvas.style.height = "375px";
 
   previewCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
   previewCtx.imageSmoothingEnabled = true;
@@ -309,28 +309,59 @@ function renderShareBowlPreview() {
 
   ui.sharePreview.appendChild(previewCanvas);
 
-  const centerX = width / 2;
-  const centerY = height * 0.66;
-  const bowlRadius = 82;
+// Background
+const bg = previewCtx.createLinearGradient(0, 0, 0, height);
+bg.addColorStop(0, "#f4ebd9");
+bg.addColorStop(0.58, "#fff3dc");
+bg.addColorStop(1, "#d9b172");
 
-  // Draw bowl first
-  previewCtx.save();
-  previewCtx.translate(centerX, centerY);
-  drawBowlSvg(previewCtx, bowlRadius);
-  previewCtx.restore();
+previewCtx.fillStyle = bg;
+previewCtx.fillRect(0, 0, width, height);
 
-// Draw only actually collected fruit, placed on the bowl shell/rim
+// soft sun / glow
+previewCtx.globalAlpha = 0.5;
+previewCtx.fillStyle = "#fff4c8";
+previewCtx.beginPath();
+previewCtx.arc(width * 0.78, height * 0.16, 120, 0, Math.PI * 2);
+previewCtx.fill();
+previewCtx.globalAlpha = 1;
+
+// title
+previewCtx.fillStyle = "#4c3125";
+previewCtx.textAlign = "center";
+previewCtx.textBaseline = "top";
+previewCtx.font = '400 96px "Reenie Beanie", cursive';
+previewCtx.fillText("what a bowl!", width / 2, 82);
+
+// context line
+previewCtx.fillStyle = "rgba(76, 49, 37, 0.72)";
+previewCtx.font = '400 44px "Reenie Beanie", cursive';
+previewCtx.fillText("i made this bowl of fruit", width / 2, 188);
+
+// score
+previewCtx.fillStyle = "#4c3125";
+previewCtx.font = '400 72px "Reenie Beanie", cursive';
+previewCtx.fillText(`${game.score} points`, width / 2, 250);
+
+const centerX = width / 2;
+const centerY = height * 0.58;
+const bowlRadius = 150;
+
 const fruit = bowl.collected;
 
+/*
+  Fruit is drawn first so the bowl can sit in front of it.
+  This makes the fruit look nested inside the shell instead of floating.
+*/
 const shellFruitLayout = [
-  [-62, -58, 30, -0.22],
-  [-34, -82, 32, 0.1],
-  [0, -92, 34, -0.04],
-  [34, -82, 32, 0.12],
-  [62, -58, 30, 0.2],
-  [-20, -54, 28, -0.08],
-  [22, -54, 28, 0.08],
-  [0, -66, 30, 0],
+  [-104, -42, 36, -0.16],
+  [-72, -72, 40, 0.1],
+  [-30, -88, 42, -0.06],
+  [20, -88, 42, 0.08],
+  [68, -72, 40, 0.12],
+  [104, -42, 36, 0.16],
+  [-38, -48, 38, -0.08],
+  [38, -48, 38, 0.08],
 ];
 
 fruit.forEach((item, index) => {
@@ -338,9 +369,9 @@ fruit.forEach((item, index) => {
     shellFruitLayout[index % shellFruitLayout.length];
 
   const radius = Math.max(
-    22,
-    Math.min(36, item.radius ? item.radius * 0.42 : fallbackRadius)
-  );
+  30,
+  Math.min(48, item.radius ? item.radius * 0.52 : fallbackRadius)
+);
 
   previewCtx.save();
   previewCtx.translate(centerX + x, centerY + y);
@@ -348,6 +379,24 @@ fruit.forEach((item, index) => {
   drawFruitSvg(previewCtx, item.type, radius, "bowl");
   previewCtx.restore();
 });
+
+// Draw bowl second, so it masks the lower part of the fruit cluster.
+previewCtx.save();
+previewCtx.translate(centerX, centerY);
+drawBowlSvg(previewCtx, bowlRadius, false);
+previewCtx.restore();
+
+// invite / CTA
+previewCtx.fillStyle = "#4c3125";
+previewCtx.textAlign = "center";
+previewCtx.textBaseline = "top";
+previewCtx.font = '400 64px "Reenie Beanie", cursive';
+previewCtx.fillText("can you beat mine?", width / 2, height - 180);
+
+// small brand line
+previewCtx.fillStyle = "rgba(76, 49, 37, 0.62)";
+previewCtx.font = '400 38px "Reenie Beanie", cursive';
+previewCtx.fillText("play bowl", width / 2, height - 108);
 
   game.sharePreviewUrl = previewCanvas.toDataURL("image/png");
 }
