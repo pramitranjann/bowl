@@ -297,59 +297,54 @@ function renderShareModalPreview() {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
   const width = 420;
-  const height = 300;
+  const height = 340;
 
   previewCanvas.width = Math.round(width * dpr);
   previewCanvas.height = Math.round(height * dpr);
   previewCanvas.style.width = "360px";
-  previewCanvas.style.height = "258px";
+  previewCanvas.style.height = "292px";
 
   previewCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
   previewCtx.imageSmoothingEnabled = true;
   previewCtx.imageSmoothingQuality = "high";
 
   ui.sharePreview.appendChild(previewCanvas);
-  
-const centerX = width / 2;
-const centerY = height * 0.70;
-const bowlRadius = 138;
 
-const fruit = bowl.collected;
+  const centerX = width / 2;
+  const centerY = height * 0.58;
+  const bowlRadius = 128;
 
-const backFruitLayout = [
-  [-92, -42, 36, -0.18],
-  [-58, -66, 40, 0.08],
-  [-20, -78, 42, -0.04],
-  [22, -78, 42, 0.06],
-  [60, -66, 40, 0.14],
-  [94, -42, 36, 0.2],
-  [-34, -44, 38, -0.08],
-  [34, -44, 38, 0.08],
-];
+  const fruit = bowl.collected;
 
-fruit.forEach((item, index) => {
-  const [x, y, fallbackRadius, rotation] =
-    backFruitLayout[index % backFruitLayout.length];
+  const backFruitLayout = [
+    [-88, -54, 34, -0.16],
+    [-58, -78, 38, 0.08],
+    [-22, -88, 40, -0.04],
+    [20, -88, 40, 0.06],
+    [56, -78, 38, 0.12],
+    [88, -54, 34, 0.16],
+    [-34, -58, 36, -0.08],
+    [34, -58, 36, 0.08],
+  ];
 
-  const radius = Math.max(
-    28,
-    Math.min(46, item.radius ? item.radius * 0.5 : fallbackRadius)
-  );
+  // Draw fruits first.
+  fruit.forEach((item, index) => {
+    const [x, y, fallbackRadius, rotation] =
+      backFruitLayout[index % backFruitLayout.length];
 
-  previewCtx.save();
-  previewCtx.translate(centerX + x, centerY + y);
-  previewCtx.rotate(rotation);
-  drawFruitSvg(previewCtx, item.type, radius, "bowl");
-  previewCtx.restore();
-});
+    const radius = Math.max(
+      28,
+      Math.min(44, item.radius ? item.radius * 0.48 : fallbackRadius)
+    );
 
-// Bowl must be drawn AFTER the fruit so it masks the lower part.
-previewCtx.save();
-previewCtx.translate(centerX, centerY);
-drawBowlSvg(previewCtx, bowlRadius, false);
-previewCtx.restore();
+    previewCtx.save();
+    previewCtx.translate(centerX + x, centerY + y);
+    previewCtx.rotate(rotation);
+    drawFruitSvg(previewCtx, item.type, radius, "bowl");
+    previewCtx.restore();
+  });
 
-  // Bowl second, so fruits look inside it.
+  // Draw bowl second so the rim covers the lower part of the fruits.
   previewCtx.save();
   previewCtx.translate(centerX, centerY);
   drawBowlSvg(previewCtx, bowlRadius, false);
@@ -450,9 +445,13 @@ function renderShareExportImage() {
   exportCtx.font = '400 64px "Reenie Beanie", cursive';
   exportCtx.fillText("can you beat mine?", width / 2, height - 180);
 
-  exportCtx.fillStyle = "rgba(76, 49, 37, 0.62)";
-  exportCtx.font = '400 38px "Reenie Beanie", cursive';
-  exportCtx.fillText("play bowl", width / 2, height - 108);
+ exportCtx.fillStyle = "rgba(76, 49, 37, 0.72)";
+exportCtx.font = '400 42px "Reenie Beanie", cursive';
+exportCtx.fillText("play bowl", width / 2, height - 118);
+
+exportCtx.fillStyle = "rgba(76, 49, 37, 0.58)";
+exportCtx.font = '400 30px "Reenie Beanie", cursive';
+exportCtx.fillText("https://bowl-nu.vercel.app/", width / 2, height - 78);
 
   return exportCanvas.toDataURL("image/png");
 }
