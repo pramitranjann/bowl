@@ -847,9 +847,9 @@ textarea {
   width: var(--ui-hud-chip-width);
   min-width: var(--ui-hud-chip-width);
   min-height: var(--ui-hud-chip-height);
-  padding: 18px 16px 14px;
+  padding: 18px 16px 16px;
   align-content: center;
-  gap: 2px;
+  gap: 8px;
 }
 
 /* Score — important stat, brown card */
@@ -888,23 +888,20 @@ textarea {
 }
 
 .ui-pill-label {
-  font-family: var(--font-display);
-  font-size: clamp(1.2rem, 1.35vw, 1.55rem);
-  line-height: 0.9;
-  letter-spacing: 0.01em;
-  color: rgba(58, 39, 28, 0.62);
-  transform: translateY(4px);
+  font-size: clamp(1.45rem, 1.65vw, 1.95rem);
+  color: rgba(58, 39, 28, 0.66);
+  transform: translateY(2px);
 }
 
 .ui-pill-value {
   font-family: var(--font-display);
-  font-size: clamp(2.2rem, 2.85vw, 3.35rem);
+  font-size: clamp(2.2rem, 2.85vw, 3.25rem);
   line-height: 0.82;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1, "lnum" 1;
   color: var(--color-coconut-brown);
   text-shadow: none;
-  transform: translateY(2px);
+  transform: translateY(0);
 }
 
 /* Score label is quieter */
@@ -961,7 +958,7 @@ textarea {
 }
 
 .ui-pill-chip--mode .ui-pill-value {
-  font-size: clamp(2rem, 2.55vw, 3rem);
+  font-size: clamp(2.15rem, 2.75vw, 3.15rem);
 }
 
 #ui-timer-pill {
