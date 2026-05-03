@@ -319,32 +319,35 @@ function renderShareBowlPreview() {
   drawBowlSvg(previewCtx, bowlRadius);
   previewCtx.restore();
 
-  // Draw only actually collected fruit
-  const fruit = bowl.collected;
+// Draw only actually collected fruit, placed on the bowl shell/rim
+const fruit = bowl.collected;
 
-  const layout = [
-    [-44, -60, 24],
-    [-18, -76, 23],
-    [14, -76, 23],
-    [44, -60, 24],
-    [-28, -48, 22],
-    [28, -48, 22],
-    [0, -58, 24],
-    [-4, -88, 20],
-  ];
+const shellFruitLayout = [
+  [-62, -58, 30, -0.22],
+  [-34, -82, 32, 0.1],
+  [0, -92, 34, -0.04],
+  [34, -82, 32, 0.12],
+  [62, -58, 30, 0.2],
+  [-20, -54, 28, -0.08],
+  [22, -54, 28, 0.08],
+  [0, -66, 30, 0],
+];
 
-  fruit.forEach((item, index) => {
-    const [x, y, r] = layout[index % layout.length];
+fruit.forEach((item, index) => {
+  const [x, y, fallbackRadius, rotation] =
+    shellFruitLayout[index % shellFruitLayout.length];
 
-    previewCtx.save();
-    previewCtx.translate(centerX + x, centerY + y);
-    previewCtx.rotate((index - fruit.length / 2) * 0.08);
+  const radius = Math.max(
+    22,
+    Math.min(36, item.radius ? item.radius * 0.42 : fallbackRadius)
+  );
 
-    const radius = Math.max(18, Math.min(28, item.radius ? item.radius * 0.32 : r));
-    drawFruitSvg(previewCtx, item.type, radius, "bowl");
-
-    previewCtx.restore();
-  });
+  previewCtx.save();
+  previewCtx.translate(centerX + x, centerY + y);
+  previewCtx.rotate(rotation);
+  drawFruitSvg(previewCtx, item.type, radius, "bowl");
+  previewCtx.restore();
+});
 
   game.sharePreviewUrl = previewCanvas.toDataURL("image/png");
 }

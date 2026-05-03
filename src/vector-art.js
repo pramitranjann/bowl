@@ -171,28 +171,92 @@ const BOWL_ART = {
   svg: `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 420">
       <defs>
-        <linearGradient id="shell" x1="18%" y1="10%" x2="82%" y2="90%">
-          <stop offset="0%" stop-color="#b57c51"/>
-          <stop offset="52%" stop-color="#966340"/>
-          <stop offset="100%" stop-color="#6d4227"/>
+        <linearGradient id="claudeShell" x1="18%" y1="8%" x2="82%" y2="94%">
+          <stop offset="0%" stop-color="#a86a3f"/>
+          <stop offset="54%" stop-color="#7f492c"/>
+          <stop offset="100%" stop-color="#4d2818"/>
         </linearGradient>
-        <linearGradient id="shellInner" x1="30%" y1="0%" x2="70%" y2="100%">
-          <stop offset="0%" stop-color="#714228"/>
-          <stop offset="100%" stop-color="#4d2a18"/>
-        </linearGradient>
-        <linearGradient id="rim" x1="0%" y1="25%" x2="100%" y2="80%">
-          <stop offset="0%" stop-color="#fff4e1"/>
-          <stop offset="55%" stop-color="#f3dec0"/>
-          <stop offset="100%" stop-color="#d8ba91"/>
+        <linearGradient id="claudeInner" x1="30%" y1="0%" x2="70%" y2="100%">
+          <stop offset="0%" stop-color="#8a5635"/>
+          <stop offset="70%" stop-color="#3b1f14"/>
         </linearGradient>
       </defs>
-      <ellipse cx="280" cy="340" rx="182" ry="30" fill="#51331f" opacity=".16"/>
-      <path d="M100 170c22 92 92 156 180 156s158-64 180-156c-52 24-112 36-180 36s-128-12-180-36Z" fill="url(#shell)" stroke="#59321d" stroke-width="14" stroke-linejoin="round"/>
-      <path d="M126 173c28 49 86 80 154 80s126-31 154-80c-44 20-95 30-154 30s-110-10-154-30Z" fill="url(#shellInner)"/>
-      <path d="M110 164c42-31 99-46 170-46s128 15 170 46c-36 19-92 31-170 31s-134-12-170-31Z" fill="url(#rim)" stroke="#8e6844" stroke-width="10" stroke-linejoin="round"/>
-      <path d="M142 168c37-17 83-26 138-26s101 9 138 26c-30 11-76 18-138 18s-108-7-138-18Z" fill="#694029" opacity=".48"/>
-      <path d="M184 284c34 17 65 24 98 24 31 0 62-7 96-22" fill="none" stroke="#f8eddc" stroke-width="12" stroke-linecap="round" opacity=".22"/>
-      <ellipse cx="214" cy="160" rx="88" ry="22" fill="#fff" opacity=".18" transform="rotate(-5 214 160)"/>
+
+      <!-- soft grounding shadow -->
+      <ellipse cx="280" cy="346" rx="178" ry="26" fill="#2a1f18" opacity="0.16"/>
+
+      <!-- main coconut shell -->
+      <path
+        d="M86 168
+           C 112 276, 186 344, 280 344
+           C 374 344, 448 276, 474 168
+           C 418 198, 352 214, 280 214
+           C 208 214, 142 198, 86 168 Z"
+        fill="url(#claudeShell)"
+        stroke="#4c3125"
+        stroke-width="16"
+        stroke-linejoin="round"
+      />
+
+      <!-- dark inner mouth -->
+      <path
+        d="M118 166
+           C 154 126, 210 106, 280 106
+           C 350 106, 406 126, 442 166
+           C 398 190, 344 202, 280 202
+           C 216 202, 162 190, 118 166 Z"
+        fill="url(#claudeInner)"
+        stroke="#4c3125"
+        stroke-width="12"
+        stroke-linejoin="round"
+      />
+
+      <!-- top rim -->
+      <path
+        d="M126 164
+           C 164 136, 216 122, 280 122
+           C 344 122, 396 136, 434 164
+           C 394 180, 342 190, 280 190
+           C 218 190, 166 180, 126 164 Z"
+        fill="#f1dfc5"
+        stroke="#8a6846"
+        stroke-width="8"
+        stroke-linejoin="round"
+      />
+
+      <!-- inner brown rim shade -->
+      <path
+        d="M150 166
+           C 184 150, 228 142, 280 142
+           C 332 142, 376 150, 410 166
+           C 376 176, 334 182, 280 182
+           C 226 182, 184 176, 150 166 Z"
+        fill="#6b3f28"
+        opacity="0.58"
+      />
+
+      <!-- shell highlight -->
+      <path
+        d="M162 250
+           C 204 278, 248 292, 292 292
+           C 336 292, 378 280, 414 254"
+        fill="none"
+        stroke="#c08a5c"
+        stroke-width="12"
+        stroke-linecap="round"
+        opacity="0.28"
+      />
+
+      <!-- small cream glint on rim -->
+      <ellipse
+        cx="230"
+        cy="154"
+        rx="74"
+        ry="16"
+        fill="#fff4e1"
+        opacity="0.34"
+        transform="rotate(-7 230 154)"
+      />
     </svg>
   `,
 };
@@ -371,9 +435,13 @@ export function drawFruitSvg(ctx, type, radius, variant = "flight") {
   const image = getCachedImage(`fruit:${type}`, art.svg);
   const scale = variant === "bowl" ? art.bowlScale : art.flightScale;
   const drawRadius = radius * scale;
-  drawPlayfulFruitSticker(ctx, type, radius);
+
   ctx.save();
-  ctx.filter = "saturate(1.16) brightness(1.05)";
+  ctx.filter =
+    variant === "bowl"
+      ? "saturate(1.08) brightness(1.02)"
+      : "saturate(1.16) brightness(1.05)";
+
   const drawn = drawImageIfReady(
     ctx,
     image,
@@ -382,6 +450,7 @@ export function drawFruitSvg(ctx, type, radius, variant = "flight") {
     drawRadius * 2,
     drawRadius * 2
   );
+
   ctx.restore();
   return drawn;
 }
@@ -392,14 +461,26 @@ export function drawFruitHalfSvg(ctx, type, radius, juiceColor, side) {
   return true;
 }
 
-export function drawBowlSvg(ctx, bowlRadius) {
+export function drawBowlSvg(ctx, bowlRadius, withSticker = false) {
   const image = getCachedImage("bowl", BOWL_ART.svg);
   const width = bowlRadius * BOWL_ART.scale * 2.2;
   const height = bowlRadius * BOWL_ART.scale * 1.58;
-  drawPlayfulBowlSticker(ctx, bowlRadius);
+
+  if (withSticker) {
+    drawPlayfulBowlSticker(ctx, bowlRadius);
+  }
+
   ctx.save();
   ctx.filter = "saturate(1.08) brightness(1.04)";
-  const drawn = drawImageIfReady(ctx, image, -width / 2, -height * 0.34, width, height);
+  const drawn = drawImageIfReady(
+    ctx,
+    image,
+    -width / 2,
+    -height * 0.34,
+    width,
+    height
+  );
   ctx.restore();
+
   return drawn;
 }

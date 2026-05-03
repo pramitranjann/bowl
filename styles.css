@@ -633,28 +633,49 @@ textarea {
 }
 
 #screen-mode-select .ui-scribble-button::after {
+
   content: "";
+
   position: absolute;
-  left: 14%;
-  right: 14%;
-  bottom: 18px;
-  height: 10px;
+
+  left: 16%;
+
+  bottom: 19px;
+
+  width: 68%;
+
+  height: 12px;
+
   z-index: 1;
+
   pointer-events: none;
 
-  background: var(--color-coconut-brown);
-  border-radius: 999px;
+  background:
+
+    radial-gradient(circle at 8% 55%, var(--color-coconut-brown) 0 2.4px, transparent 2.8px),
+
+    radial-gradient(circle at 22% 48%, var(--color-coconut-brown) 0 2px, transparent 2.5px),
+
+    radial-gradient(circle at 38% 60%, var(--color-coconut-brown) 0 2.6px, transparent 3px),
+
+    radial-gradient(circle at 54% 45%, var(--color-coconut-brown) 0 2.2px, transparent 2.7px),
+
+    radial-gradient(circle at 70% 56%, var(--color-coconut-brown) 0 2.5px, transparent 3px),
+
+    radial-gradient(circle at 86% 50%, var(--color-coconut-brown) 0 2.1px, transparent 2.6px);
 
   transform-origin: left center;
+
   transform: scaleX(var(--finger-progress, 0)) rotate(-1.5deg);
 
-  opacity: calc(0.12 + var(--finger-progress, 0) * 0.68);
-
-  filter: none;
+  opacity: calc(0.16 + var(--finger-progress, 0) * 0.72);
 
   transition:
+
     transform 90ms linear,
+
     opacity 90ms linear;
+
 }
 
 #screen-mode-select .ui-scribble-button.is-finger-hovered {
