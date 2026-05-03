@@ -338,7 +338,7 @@ function renderShareModalPreview() {
     );
 
     previewCtx.save();
-    previewCtx.translate(centerX + x, centerY + y);
+    previewCtx.translate(centerX + x, fruitCenterY + y);
     previewCtx.rotate(rotation);
     drawFruitSvg(previewCtx, item.type, radius, "bowl");
     previewCtx.restore();
@@ -375,14 +375,6 @@ function renderShareExportImage() {
   exportCtx.fillStyle = bg;
   exportCtx.fillRect(0, 0, width, height);
 
-  // soft sun / glow
-  exportCtx.globalAlpha = 0.5;
-  exportCtx.fillStyle = "#fff4c8";
-  exportCtx.beginPath();
-  exportCtx.arc(width * 0.78, height * 0.16, 120, 0, Math.PI * 2);
-  exportCtx.fill();
-  exportCtx.globalAlpha = 1;
-
   // title
   exportCtx.fillStyle = "#4c3125";
   exportCtx.textAlign = "center";
@@ -401,7 +393,8 @@ function renderShareExportImage() {
   exportCtx.fillText(`${game.score} points`, width / 2, 250);
 
   const centerX = width / 2;
-const centerY = height * 0.58;
+const fruitCenterY = height * 0.58;
+const bowlCenterY = height * 0.50;
 const bowlRadius = 136;
 
 const fruit = bowl.collected;
@@ -435,7 +428,7 @@ fruit.forEach((item, index) => {
 
 // Bowl must be drawn AFTER the fruit so it covers the lower part.
 previewCtx.save();
-previewCtx.translate(centerX, centerY);
+previewCtx.translate(centerX, bowlCenterY);
 drawBowlSvg(previewCtx, bowlRadius, false);
 previewCtx.restore();
 

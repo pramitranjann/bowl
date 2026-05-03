@@ -831,15 +831,25 @@ textarea {
   box-sizing: border-box;
   display: grid;
   justify-items: center;
-  gap: 0;
+  gap: 2px;
   min-width: 136px;
   min-height: 118px;
-  padding: 12px 16px 14px;
+  padding: 18px 16px 14px;
   background: transparent;
   color: var(--color-coconut-brown);
   box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
+  align-content: center;
+}
+
+.ui-pill-chip {
+  width: var(--ui-hud-chip-width);
+  min-width: var(--ui-hud-chip-width);
+  min-height: var(--ui-hud-chip-height);
+  padding: 18px 16px 14px;
+  align-content: center;
+  gap: 2px;
 }
 
 /* Score — important stat, brown card */
@@ -877,6 +887,26 @@ textarea {
   letter-spacing: 0.01em;
 }
 
+.ui-pill-label {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 1.35vw, 1.55rem);
+  line-height: 0.9;
+  letter-spacing: 0.01em;
+  color: rgba(58, 39, 28, 0.62);
+  transform: translateY(4px);
+}
+
+.ui-pill-value {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 2.85vw, 3.35rem);
+  line-height: 0.82;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+  color: var(--color-coconut-brown);
+  text-shadow: none;
+  transform: translateY(2px);
+}
+
 /* Score label is quieter */
 .ui-score-label {
 
@@ -899,21 +929,13 @@ textarea {
 
 /* Timer + mode chips */
 .ui-score-value {
-
   font-family: var(--font-display);
-
   font-size: clamp(3.25rem, 4.9vw, 5.15rem);
-
   line-height: 0.82;
-
   font-variant-numeric: tabular-nums;
-
   font-feature-settings: "tnum" 1, "lnum" 1;
-
-  color: var(--color-ink-deep);
-
-  text-shadow: 0 1px 0 rgba(244, 235, 217, 0.14);
-
+  color: var(--color-coconut-brown);
+  text-shadow: 0 1px 0 rgba(244, 235, 217, 0.16);
 }
 
 .ui-pill-chip::before {
