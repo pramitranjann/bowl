@@ -635,55 +635,38 @@ textarea {
 #screen-mode-select .ui-scribble-button::after {
   content: "";
   position: absolute;
-  inset: -14px;
-  z-index: -1;
-  border-radius: 50% 47% 49% 51% / 45% 52% 48% 55%;
-  background:
-    conic-gradient(
-      from -90deg,
-      var(--color-pandan) calc(var(--finger-progress, 0) * 1turn),
-      rgba(244, 235, 217, 0.22) 0turn
-    );
-  opacity: calc(0.16 + var(--finger-progress, 0) * 0.84);
-  transform:
-    scale(calc(0.96 + var(--finger-progress, 0) * 0.08))
-    rotate(-2deg);
-  filter:
-    drop-shadow(0 10px 18px rgba(42, 31, 24, 0.16))
-    saturate(1.08);
-  transition:
-    opacity 100ms linear,
-    transform 100ms linear;
+  left: 14%;
+  right: 14%;
+  bottom: 18px;
+  height: 10px;
+  z-index: 1;
   pointer-events: none;
 
-  /* makes it a ring instead of a filled blob */
-  -webkit-mask:
-    radial-gradient(
-      ellipse at center,
-      transparent 57%,
-      black 59%,
-      black 70%,
-      transparent 72%
-    );
-  mask:
-    radial-gradient(
-      ellipse at center,
-      transparent 57%,
-      black 59%,
-      black 70%,
-      transparent 72%
-    );
+  background: var(--color-coconut-brown);
+  border-radius: 999px;
+
+  transform-origin: left center;
+  transform: scaleX(var(--finger-progress, 0)) rotate(-1.5deg);
+
+  opacity: calc(0.12 + var(--finger-progress, 0) * 0.68);
+
+  filter: none;
+
+  transition:
+    transform 90ms linear,
+    opacity 90ms linear;
 }
 
 #screen-mode-select .ui-scribble-button.is-finger-hovered {
   transform:
-    translateY(calc(-3px - var(--finger-progress, 0) * 3px))
-    scale(calc(1.025 + var(--finger-progress, 0) * 0.045))
+    translateY(calc(-2px - var(--finger-progress, 0) * 2px))
+    scale(calc(1.02 + var(--finger-progress, 0) * 0.025))
     rotate(1deg);
+
   filter:
-    drop-shadow(0 24px 38px rgba(42, 31, 24, 0.22))
-    saturate(calc(1.04 + var(--finger-progress, 0) * 0.22))
-    brightness(calc(1.02 + var(--finger-progress, 0) * 0.08));
+    drop-shadow(0 20px 32px rgba(42, 31, 24, 0.18))
+    brightness(calc(1.02 + var(--finger-progress, 0) * 0.05));
+
   box-shadow: none;
 }
 
@@ -989,9 +972,12 @@ textarea {
 .ui-modal-backdrop {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 34%, rgba(42, 31, 24, 0.42), rgba(42, 31, 24, 0.66));
+  background: radial-gradient(
+    circle at 50% 34%,
+    rgba(42, 31, 24, 0.64),
+    rgba(42, 31, 24, 0.82)
+  );
 }
-
 .ui-share-sheet {
   z-index: 1;
   position: relative;
@@ -1086,8 +1072,9 @@ textarea {
 }
 
 .ui-share-preview {
-  width: 260px;
-  height: 190px;
+  width: 300px;
+  height: 210px;
+  margin-top: 28px;
   border-radius: 0;
   background: transparent !important;
   box-shadow: none;

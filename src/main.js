@@ -295,8 +295,8 @@ function renderShareBowlPreview() {
   const previewCtx = previewCanvas.getContext("2d");
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-  const width = 260;
-  const height = 190;
+  const width = 300;
+  const height = 210;
 
   previewCanvas.width = Math.round(width * dpr);
   previewCanvas.height = Math.round(height * dpr);
@@ -310,42 +310,41 @@ function renderShareBowlPreview() {
   ui.sharePreview.appendChild(previewCanvas);
 
   const centerX = width / 2;
-  const centerY = height * 0.64;
+  const centerY = height * 0.66;
   const bowlRadius = 82;
 
-  // Draw fruit first so the bowl sits in front visually.
-  const fruit = bowl.collected;
-  const fruitCount = fruit.length;
-
-  fruit.forEach((item, index) => {
-    const ring = Math.floor(index / 6);
-    const indexInRing = index % 6;
-    const itemsInRing = Math.min(6, fruitCount - ring * 6);
-
-    const angle =
-      -Math.PI / 2 +
-      (indexInRing / Math.max(1, itemsInRing)) * Math.PI * 2 +
-      ring * 0.42;
-
-    const ringRadius = 16 + ring * 16;
-
-    const x = centerX + Math.cos(angle) * ringRadius;
-    const y = centerY - 38 + Math.sin(angle) * ringRadius * 0.42;
-
-    const radius = Math.max(17, Math.min(27, (item.radius || 28) * 0.38));
-
-    previewCtx.save();
-    previewCtx.translate(x, y);
-    previewCtx.rotate((index - fruitCount / 2) * 0.08);
-    drawFruitSvg(previewCtx, item.type, radius, "bowl");
-    previewCtx.restore();
-  });
-
-  // Draw the proper vector bowl.
+  // Draw bowl first
   previewCtx.save();
   previewCtx.translate(centerX, centerY);
   drawBowlSvg(previewCtx, bowlRadius);
   previewCtx.restore();
+
+  // Draw only actually collected fruit
+  const fruit = bowl.collected;
+
+  const layout = [
+    [-44, -60, 24],
+    [-18, -76, 23],
+    [14, -76, 23],
+    [44, -60, 24],
+    [-28, -48, 22],
+    [28, -48, 22],
+    [0, -58, 24],
+    [-4, -88, 20],
+  ];
+
+  fruit.forEach((item, index) => {
+    const [x, y, r] = layout[index % layout.length];
+
+    previewCtx.save();
+    previewCtx.translate(centerX + x, centerY + y);
+    previewCtx.rotate((index - fruit.length / 2) * 0.08);
+
+    const radius = Math.max(18, Math.min(28, item.radius ? item.radius * 0.32 : r));
+    drawFruitSvg(previewCtx, item.type, radius, "bowl");
+
+    previewCtx.restore();
+  });
 
   game.sharePreviewUrl = previewCanvas.toDataURL("image/png");
 }
