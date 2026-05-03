@@ -287,7 +287,8 @@ function updateMenuPanel() {
 function updateWorldSelectionUi() {
   return;
 }
-function renderShareBowlPreview() {
+
+function renderShareModalPreview() {
   ui.sharePreview.innerHTML = "";
   ui.sharePreview.style.backgroundImage = "";
 
@@ -295,83 +296,45 @@ function renderShareBowlPreview() {
   const previewCtx = previewCanvas.getContext("2d");
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-const width = 720;
-const height = 900;
+  const width = 420;
+  const height = 300;
 
   previewCanvas.width = Math.round(width * dpr);
   previewCanvas.height = Math.round(height * dpr);
-previewCanvas.style.width = "300px";
-previewCanvas.style.height = "375px";
+  previewCanvas.style.width = "360px";
+  previewCanvas.style.height = "258px";
 
   previewCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
   previewCtx.imageSmoothingEnabled = true;
   previewCtx.imageSmoothingQuality = "high";
 
   ui.sharePreview.appendChild(previewCanvas);
-
-// Background
-const bg = previewCtx.createLinearGradient(0, 0, 0, height);
-bg.addColorStop(0, "#f4ebd9");
-bg.addColorStop(0.58, "#fff3dc");
-bg.addColorStop(1, "#d9b172");
-
-previewCtx.fillStyle = bg;
-previewCtx.fillRect(0, 0, width, height);
-
-// soft sun / glow
-previewCtx.globalAlpha = 0.5;
-previewCtx.fillStyle = "#fff4c8";
-previewCtx.beginPath();
-previewCtx.arc(width * 0.78, height * 0.16, 120, 0, Math.PI * 2);
-previewCtx.fill();
-previewCtx.globalAlpha = 1;
-
-// title
-previewCtx.fillStyle = "#4c3125";
-previewCtx.textAlign = "center";
-previewCtx.textBaseline = "top";
-previewCtx.font = '400 96px "Reenie Beanie", cursive';
-previewCtx.fillText("what a bowl!", width / 2, 82);
-
-// context line
-previewCtx.fillStyle = "rgba(76, 49, 37, 0.72)";
-previewCtx.font = '400 44px "Reenie Beanie", cursive';
-previewCtx.fillText("i made this bowl of fruit", width / 2, 188);
-
-// score
-previewCtx.fillStyle = "#4c3125";
-previewCtx.font = '400 72px "Reenie Beanie", cursive';
-previewCtx.fillText(`${game.score} points`, width / 2, 250);
-
+  
 const centerX = width / 2;
-const centerY = height * 0.58;
-const bowlRadius = 150;
+const centerY = height * 0.70;
+const bowlRadius = 138;
 
 const fruit = bowl.collected;
 
-/*
-  Fruit is drawn first so the bowl can sit in front of it.
-  This makes the fruit look nested inside the shell instead of floating.
-*/
-const shellFruitLayout = [
-  [-104, -42, 36, -0.16],
-  [-72, -72, 40, 0.1],
-  [-30, -88, 42, -0.06],
-  [20, -88, 42, 0.08],
-  [68, -72, 40, 0.12],
-  [104, -42, 36, 0.16],
-  [-38, -48, 38, -0.08],
-  [38, -48, 38, 0.08],
+const backFruitLayout = [
+  [-92, -42, 36, -0.18],
+  [-58, -66, 40, 0.08],
+  [-20, -78, 42, -0.04],
+  [22, -78, 42, 0.06],
+  [60, -66, 40, 0.14],
+  [94, -42, 36, 0.2],
+  [-34, -44, 38, -0.08],
+  [34, -44, 38, 0.08],
 ];
 
 fruit.forEach((item, index) => {
   const [x, y, fallbackRadius, rotation] =
-    shellFruitLayout[index % shellFruitLayout.length];
+    backFruitLayout[index % backFruitLayout.length];
 
   const radius = Math.max(
-  30,
-  Math.min(48, item.radius ? item.radius * 0.52 : fallbackRadius)
-);
+    28,
+    Math.min(46, item.radius ? item.radius * 0.5 : fallbackRadius)
+  );
 
   previewCtx.save();
   previewCtx.translate(centerX + x, centerY + y);
@@ -380,30 +343,124 @@ fruit.forEach((item, index) => {
   previewCtx.restore();
 });
 
-// Draw bowl second, so it masks the lower part of the fruit cluster.
+// Bowl must be drawn AFTER the fruit so it masks the lower part.
 previewCtx.save();
 previewCtx.translate(centerX, centerY);
 drawBowlSvg(previewCtx, bowlRadius, false);
 previewCtx.restore();
 
-// invite / CTA
-previewCtx.fillStyle = "#4c3125";
-previewCtx.textAlign = "center";
-previewCtx.textBaseline = "top";
-previewCtx.font = '400 64px "Reenie Beanie", cursive';
-previewCtx.fillText("can you beat mine?", width / 2, height - 180);
+  // Bowl second, so fruits look inside it.
+  previewCtx.save();
+  previewCtx.translate(centerX, centerY);
+  drawBowlSvg(previewCtx, bowlRadius, false);
+  previewCtx.restore();
+}
 
-// small brand line
-previewCtx.fillStyle = "rgba(76, 49, 37, 0.62)";
-previewCtx.font = '400 38px "Reenie Beanie", cursive';
-previewCtx.fillText("play bowl", width / 2, height - 108);
+function renderShareExportImage() {
+  const exportCanvas = document.createElement("canvas");
+  const exportCtx = exportCanvas.getContext("2d");
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-  game.sharePreviewUrl = previewCanvas.toDataURL("image/png");
+  const width = 720;
+  const height = 900;
+
+  exportCanvas.width = Math.round(width * dpr);
+  exportCanvas.height = Math.round(height * dpr);
+
+  exportCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  exportCtx.imageSmoothingEnabled = true;
+  exportCtx.imageSmoothingQuality = "high";
+
+  // Background
+  const bg = exportCtx.createLinearGradient(0, 0, 0, height);
+  bg.addColorStop(0, "#f4ebd9");
+  bg.addColorStop(0.58, "#fff3dc");
+  bg.addColorStop(1, "#d9b172");
+
+  exportCtx.fillStyle = bg;
+  exportCtx.fillRect(0, 0, width, height);
+
+  // soft sun / glow
+  exportCtx.globalAlpha = 0.5;
+  exportCtx.fillStyle = "#fff4c8";
+  exportCtx.beginPath();
+  exportCtx.arc(width * 0.78, height * 0.16, 120, 0, Math.PI * 2);
+  exportCtx.fill();
+  exportCtx.globalAlpha = 1;
+
+  // title
+  exportCtx.fillStyle = "#4c3125";
+  exportCtx.textAlign = "center";
+  exportCtx.textBaseline = "top";
+  exportCtx.font = '400 96px "Reenie Beanie", cursive';
+  exportCtx.fillText("what a bowl!", width / 2, 82);
+
+  // context line
+  exportCtx.fillStyle = "rgba(76, 49, 37, 0.72)";
+  exportCtx.font = '400 44px "Reenie Beanie", cursive';
+  exportCtx.fillText("i made this bowl of fruit", width / 2, 188);
+
+  // score
+  exportCtx.fillStyle = "#4c3125";
+  exportCtx.font = '400 72px "Reenie Beanie", cursive';
+  exportCtx.fillText(`${game.score} points`, width / 2, 250);
+
+  const centerX = width / 2;
+  const centerY = height * 0.58;
+  const bowlRadius = 150;
+
+  const fruit = bowl.collected;
+
+  const fruitLayout = [
+    [-122, -50, 42, -0.16],
+    [-84, -86, 46, 0.1],
+    [-34, -106, 48, -0.06],
+    [24, -106, 48, 0.08],
+    [78, -86, 46, 0.12],
+    [122, -50, 42, 0.16],
+    [-44, -56, 44, -0.08],
+    [44, -56, 44, 0.08],
+  ];
+
+  fruit.forEach((item, index) => {
+    const [x, y, fallbackRadius, rotation] =
+      fruitLayout[index % fruitLayout.length];
+
+    const radius = Math.max(
+      34,
+      Math.min(54, item.radius ? item.radius * 0.58 : fallbackRadius)
+    );
+
+    exportCtx.save();
+    exportCtx.translate(centerX + x, centerY + y);
+    exportCtx.rotate(rotation);
+    drawFruitSvg(exportCtx, item.type, radius, "bowl");
+    exportCtx.restore();
+  });
+
+  exportCtx.save();
+  exportCtx.translate(centerX, centerY);
+  drawBowlSvg(exportCtx, bowlRadius, false);
+  exportCtx.restore();
+
+  // invite / CTA
+  exportCtx.fillStyle = "#4c3125";
+  exportCtx.textAlign = "center";
+  exportCtx.textBaseline = "top";
+  exportCtx.font = '400 64px "Reenie Beanie", cursive';
+  exportCtx.fillText("can you beat mine?", width / 2, height - 180);
+
+  exportCtx.fillStyle = "rgba(76, 49, 37, 0.62)";
+  exportCtx.font = '400 38px "Reenie Beanie", cursive';
+  exportCtx.fillText("play bowl", width / 2, height - 108);
+
+  return exportCanvas.toDataURL("image/png");
 }
 
 function openShareModal() {
   try {
-    renderShareBowlPreview();
+    renderShareModalPreview();
+    game.sharePreviewUrl = "";
   } catch (error) {
     console.warn("Unable to render share preview", error);
     game.sharePreviewUrl = "";
@@ -422,12 +479,13 @@ function closeShareModal() {
 }
 
 function downloadSharePreview() {
-  if (!game.sharePreviewUrl) {
-    openShareModal();
-  }
-  if (!game.sharePreviewUrl) {
+  try {
+    game.sharePreviewUrl = renderShareExportImage();
+  } catch (error) {
+    console.warn("Unable to render share export", error);
     return;
   }
+
   const anchor = document.createElement("a");
   anchor.href = game.sharePreviewUrl;
   anchor.download = `bowl-${Date.now()}.png`;
