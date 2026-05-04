@@ -50,6 +50,7 @@ const ui = {
   sharePreview: document.getElementById("ui-share-preview"),
   shareCloseX: document.getElementById("ui-share-close-x"),
   shareCloseButton: document.getElementById("ui-share-close"),
+  shareModeSelectButton: document.getElementById("ui-share-mode-select"),
   shareDownloadButton: document.getElementById("ui-share-download"),
   modeButtons: [...document.querySelectorAll("#mode-panel-modes [data-mode]")],
   modesPanel: document.getElementById("mode-panel-modes"),
@@ -109,6 +110,7 @@ const game = {
   forceLiteMode: false,
   soundMuted: false,
   sharePreviewUrl: "",
+  slicedFruitCounts: {},
   menuPanel: "modes",
   currentWorld: "sunset",
   countdownEndsAt: 0,
@@ -288,6 +290,46 @@ function updateWorldSelectionUi() {
   return;
 }
 
+function getShareFruitSummary() {
+
+  const counts = game.slicedFruitCounts ?? {};
+
+  const entries = Object.entries(counts)
+
+    .filter(([, count]) => count > 0)
+
+    .sort((a, b) => b[1] - a[1]);
+
+  const displayFruit = [];
+
+  for (const [type, count] of entries) {
+
+    let amount = 1;
+
+    if (count >= 4) amount = 2;
+
+    if (count >= 10) amount = 3;
+
+    for (let i = 0; i < amount; i += 1) {
+
+      displayFruit.push({
+
+        type,
+
+        radius: 82,
+
+        count,
+
+      });
+
+    }
+
+  }
+
+  return displayFruit.slice(0, 12);
+
+}
+
 function renderShareModalPreview() {
   ui.sharePreview.innerHTML = "";
   ui.sharePreview.style.backgroundImage = "";
@@ -296,13 +338,13 @@ function renderShareModalPreview() {
   const previewCtx = previewCanvas.getContext("2d");
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-  const width = 420;
-  const height = 340;
+  const width = 500;
+  const height = 360;
 
   previewCanvas.width = Math.round(width * dpr);
   previewCanvas.height = Math.round(height * dpr);
-  previewCanvas.style.width = "360px";
-  previewCanvas.style.height = "292px";
+  previewCanvas.style.width = "400px";
+  previewCanvas.style.height = "288px";
 
   previewCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
   previewCtx.imageSmoothingEnabled = true;
@@ -311,42 +353,45 @@ function renderShareModalPreview() {
   ui.sharePreview.appendChild(previewCanvas);
 
   const centerX = width / 2;
-  const fruitCenterY = height * 0.55;
-  const bowlCenterY = height * 0.52;
-  const bowlRadius = 140;
+const fruitCenterY = height * 0.48;
+const bowlCenterY = height * 0.35;
+  const bowlRadius = 158;
 
-  const fruit = bowl.collected;
+  const fruit = getShareFruitSummary();
+const fruitToDraw = fruit.length ? fruit : bowl.collected;
 
-const backFruitLayout = [
-  [-64, -72, 34, -0.12],
-  [-30, -90, 38, 0.06],
-  [8, -94, 40, -0.03],
-  [46, -84, 38, 0.08],
-  [78, -66, 34, 0.14],
+  const backFruitLayout = [
+    [-96, -72, 34, -0.18],
+    [-62, -96, 38, 0.08],
+    [-22, -108, 40, -0.04],
+    [20, -108, 40, 0.04],
+    [62, -96, 38, 0.1],
+    [96, -72, 34, 0.18],
 
-  [-50, -54, 34, -0.08],
-  [-12, -62, 36, 0.04],
-  [28, -60, 36, -0.04],
-  [64, -50, 34, 0.1],
-];
+    [-72, -54, 34, -0.12],
+    [-34, -66, 36, 0.04],
+    [8, -68, 37, -0.04],
+    [48, -62, 36, 0.08],
+    [82, -50, 34, 0.14],
+  ];
 
-const frontFruitLayout = [
-  [-48, -42, 30, -0.1],
-  [-12, -46, 32, 0.02],
-  [26, -44, 31, 0.08],
-];
+  const frontFruitLayout = [
+    [-58, -38, 30, -0.1],
+    [-20, -44, 32, 0.02],
+    [20, -44, 32, -0.02],
+    [58, -38, 30, 0.1],
+  ];
 
   function drawFruitLayer(layout, startIndex = 0) {
-    if (!fruit.length) {
-      return;
-    }
+    if (!fruitToDraw.length) return;
 
     layout.forEach(([x, y, fallbackRadius, rotation], layoutIndex) => {
-      const item = fruit[(startIndex + layoutIndex) % fruit.length];
+      const item =
+  fruitToDraw[(startIndex + layoutIndex) % fruitToDraw.length];
 
       const radius = Math.max(
-        26,
-        Math.min(38, item.radius ? item.radius * 0.42 : fallbackRadius)
+        25,
+        Math.min(39, item.radius ? item.radius * 0.42 : fallbackRadius)
       );
 
       previewCtx.save();
@@ -357,16 +402,13 @@ const frontFruitLayout = [
     });
   }
 
-  // Back fruits sit behind the shell.
   drawFruitLayer(backFruitLayout, 0);
 
-  // Bowl masks the lower part of back fruits.
   previewCtx.save();
   previewCtx.translate(centerX, bowlCenterY);
   drawBowlSvg(previewCtx, bowlRadius, false);
   previewCtx.restore();
 
-  // Front fruits sit visibly on top of the rim.
   drawFruitLayer(frontFruitLayout, backFruitLayout.length);
 }
 
@@ -394,14 +436,6 @@ function renderShareExportImage() {
   exportCtx.fillStyle = bg;
   exportCtx.fillRect(0, 0, width, height);
 
-  // Soft sun / glow
-  exportCtx.globalAlpha = 0.5;
-  exportCtx.fillStyle = "#fff4c8";
-  exportCtx.beginPath();
-  exportCtx.arc(width * 0.78, height * 0.16, 120, 0, Math.PI * 2);
-  exportCtx.fill();
-  exportCtx.globalAlpha = 1;
-
   // Title
   exportCtx.fillStyle = "#4c3125";
   exportCtx.textAlign = "center";
@@ -425,7 +459,8 @@ function renderShareExportImage() {
   const bowlCenterY = height * 0.55;
   const bowlRadius = 156;
 
-  const fruit = bowl.collected;
+  const fruit = getShareFruitSummary();
+const fruitToDraw = fruit.length ? fruit : bowl.collected;
   const scale = bowlRadius / 140;
 
   const backFruitLayout = [
@@ -448,12 +483,13 @@ function renderShareExportImage() {
   ];
 
   function drawFruitLayer(layout, startIndex = 0) {
-    if (!fruit.length) {
-      return;
-    }
+    if (!fruitToDraw.length) {
+  return;
+}
 
     layout.forEach(([x, y, fallbackRadius, rotation], layoutIndex) => {
-      const item = fruit[(startIndex + layoutIndex) % fruit.length];
+      const item =
+  fruitToDraw[(startIndex + layoutIndex) % fruitToDraw.length];
 
       const radius = Math.max(
         26 * scale,
@@ -839,6 +875,7 @@ function resetRound(nowMs, mode = game.currentMode) {
   game.currentMode = mode;
   game.score = 0;
   game.livesLost = 0;
+  game.slicedFruitCounts = {};
   game.entities = [];
   game.halves = [];
   game.particles = [];
@@ -1075,6 +1112,15 @@ function handleSlices(segments, nowMs) {
     }
 
     game.score += hit.entity.data.score;
+    const fruitType =
+  hit.entity.data.fruitType ??
+  hit.entity.data.type ??
+  hit.entity.type ??
+  hit.entity.data.name ??
+  "strawberry";
+
+game.slicedFruitCounts[fruitType] =
+  (game.slicedFruitCounts[fruitType] ?? 0) + 1;
     const impactScale = Math.min(
       1.8,
       Math.max(0.8, hit.segment.velocity / CONFIG.sliceVelocityThreshold)
@@ -1587,7 +1633,17 @@ async function init() {
 
   ui.shareCloseX.addEventListener("click", dismissShareModal);
   ui.shareCloseButton.addEventListener("click", dismissShareModal);
-  ui.shareDownloadButton.addEventListener("click", downloadSharePreview);
+  ui.shareDownloadButton.addEventListener("click", (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  downloadSharePreview();
+});
+
+ui.shareModeSelectButton.addEventListener("click", () => {
+  audio.unlock();
+  closeShareModal();
+  goToPlaySelect(performance.now());
+});
 
   for (const button of ui.modeButtons) {
     button.addEventListener("click", async () => {

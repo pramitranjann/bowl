@@ -1095,12 +1095,13 @@ textarea {
 .ui-share-sheet {
   z-index: 1;
   position: relative;
-  width: min(520px, calc(100vw - 64px));
-  padding: 42px 42px 38px;
+  width: min(500px, calc(100vw - 64px));
+  padding: 42px 34px 34px;
   display: grid;
   gap: 0;
   min-height: 580px;
   align-content: start;
+  justify-items: center;
 }
 
 .ui-share-stamp {
@@ -1111,6 +1112,46 @@ textarea {
 .ui-share-stamp span:nth-child(1) { font-size: 1.8rem; margin-bottom: 2px; }
 .ui-share-stamp span:nth-child(2) { font-size: 2.8rem; line-height: 0.84; }
 .ui-share-stamp span:nth-child(3) { font-size: 1.2rem; margin-top: 4px; opacity: 0.7; }
+
+.ui-share-mode-select {
+  position: absolute;
+  top: 20px;
+  right: 55px;
+  width: 54px;
+  height: 54px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 3;
+  isolation: isolate;
+}
+
+.ui-share-mode-select::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.ui-share-mode-select img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  display: block;
+  margin: auto;
+  transform: translateY(1px);
+}
+
+.ui-share-mode-select:hover,
+.ui-share-mode-select.is-finger-hovered {
+  filter: brightness(1.06);
+  transform: translateY(-1px) scale(1.03);
+}
 
 .ui-share-close {
   display: none;
@@ -1129,8 +1170,8 @@ textarea {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 4px 64px 0;
-  transform: translateX(-14px);
+  padding: 4px 32px 0;
+  transform: none;
 }
 
 .ui-share-title {
@@ -1159,8 +1200,8 @@ textarea {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 56px;
-  transform: translateX(-14px);
+  margin-top: 18px;
+  transform: none;
 }
 
 .ui-share-score-blob {
@@ -1186,9 +1227,9 @@ textarea {
 }
 
 .ui-share-preview {
-  width: 360px;
-  height: 292px;
-  margin-top: 30px;
+  width: 420px;
+  height: 300px;
+  margin-top: 10px;
   border-radius: 0;
   background: transparent !important;
   box-shadow: none;
@@ -1210,19 +1251,22 @@ textarea {
 
 .ui-share-actions {
   display: flex;
-  gap: 18px;
+  gap: 10px;
   width: 100%;
   justify-content: center;
+  align-items: center;
   margin-top: auto;
-  padding-top: 34px;
-  transform: translateX(-14px);
+  padding-top: 18px;
+  transform: none;
 }
 
 .ui-share-actions .ui-scribble-button {
-  flex: 1;
+  flex: 0 0 168px;
+  width: 168px;
   min-width: 0;
-  min-height: 78px;
-  font-size: clamp(1.95rem, 3vw, 2.5rem);
+  min-height: 76px;
+  padding: 12px 18px 16px;
+  font-size: clamp(1.95rem, 2.7vw, 2.45rem);
 }
 
 .ui-share-actions .ui-scribble-button::before {
