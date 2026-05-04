@@ -1343,19 +1343,29 @@ function renderHandMarkers(sceneCtx, hands) {
     const x = hand.rawX ?? hand.x;
     const y = hand.rawY ?? hand.y;
 
-    /* tiny cream touch point */
-    sceneCtx.globalAlpha = 0.82;
-    sceneCtx.fillStyle = "rgba(244, 235, 217, 0.86)";
-    sceneCtx.beginPath();
-    sceneCtx.arc(x, y, 6, 0, Math.PI * 2);
-    sceneCtx.fill();
+   /* tiny cream touch point */
 
-    /* small brown center */
-    sceneCtx.globalAlpha = 0.72;
-    sceneCtx.fillStyle = "rgba(76, 49, 37, 0.72)";
-    sceneCtx.beginPath();
-    sceneCtx.arc(x, y, 2.6, 0, Math.PI * 2);
-    sceneCtx.fill();
+sceneCtx.globalAlpha = 0.76;
+
+sceneCtx.fillStyle = "rgba(244, 235, 217, 0.78)";
+
+sceneCtx.beginPath();
+
+sceneCtx.arc(x, y, 4.2, 0, Math.PI * 2);
+
+sceneCtx.fill();
+
+/* small brown center */
+
+sceneCtx.globalAlpha = 0.72;
+
+sceneCtx.fillStyle = "rgba(76, 49, 37, 0.68)";
+
+sceneCtx.beginPath();
+
+sceneCtx.arc(x, y, 1.8, 0, Math.PI * 2);
+
+sceneCtx.fill();
   }
 
   sceneCtx.restore();
