@@ -1,6 +1,7 @@
 export class AudioEngine {
   constructor() {
     this.context = null;
+
     this.master = null;
     this.compressor = null;
     this.masterFilter = null;
@@ -14,11 +15,10 @@ export class AudioEngine {
 
     this.ambientVoices = [];
     this.ambientLfos = [];
-    this.ambientNoiseSource = null;
-    this.ambientPluckTimer = null;
+    this.rhythmTimer = null;
+    this.rhythmStep = 0;
 
     this.durianOscillators = [];
-    this.durianNoiseSource = null;
     this.durianFilter = null;
 
     this.muted = false;
@@ -39,29 +39,29 @@ export class AudioEngine {
       this.compressor = this.context.createDynamicsCompressor();
       this.compressor.threshold.value = -18;
       this.compressor.knee.value = 18;
-      this.compressor.ratio.value = 2.4;
+      this.compressor.ratio.value = 2.2;
       this.compressor.attack.value = 0.008;
-      this.compressor.release.value = 0.28;
+      this.compressor.release.value = 0.26;
 
       this.master = this.context.createGain();
-      this.master.gain.value = 0.88;
+      this.master.gain.value = 0.84;
 
       this.masterFilter = this.context.createBiquadFilter();
       this.masterFilter.type = "lowpass";
-      this.masterFilter.frequency.value = 8200;
-      this.masterFilter.Q.value = 0.14;
+      this.masterFilter.frequency.value = 8400;
+      this.masterFilter.Q.value = 0.12;
 
       this.ambientGain = this.context.createGain();
       this.ambientGain.gain.value = 0.0001;
 
       this.sliceBus = this.context.createGain();
-      this.sliceBus.gain.value = 0.92;
+      this.sliceBus.gain.value = 0.94;
 
       this.durianGain = this.context.createGain();
       this.durianGain.gain.value = 0.0001;
 
       this.uiGain = this.context.createGain();
-      this.uiGain.gain.value = 0.72;
+      this.uiGain.gain.value = 0.74;
 
       this.ambientGain.connect(this.master);
       this.sliceBus.connect(this.master);
@@ -74,7 +74,7 @@ export class AudioEngine {
     }
 
     if (!this.noiseBuffer) {
-      const noiseLength = Math.round(this.context.sampleRate * 2.6);
+      const noiseLength = Math.round(this.context.sampleRate * 1.2);
       const buffer = this.context.createBuffer(
         1,
         noiseLength,
@@ -90,23 +90,6 @@ export class AudioEngine {
     }
 
     return this.context;
-  }
-
-  createLoopingNoiseSource(targetNode, playbackRate = 1) {
-    const ctx = this.ensureContext();
-
-    if (!ctx || !this.noiseBuffer) {
-      return null;
-    }
-
-    const source = ctx.createBufferSource();
-    source.buffer = this.noiseBuffer;
-    source.loop = true;
-    source.playbackRate.value = playbackRate;
-    source.connect(targetNode);
-    source.start();
-
-    return source;
   }
 
   unlock() {
@@ -127,165 +110,170 @@ export class AudioEngine {
     }
 
     /*
-      Soft tropical handmade ambience:
-      - warm pad underneath
-      - filtered surf/air noise
-      - occasional quiet kalimba/marimba plucks
-      - low durian warning bed stays separate
+      Tropical toy percussion direction:
+      - no constant air / surf / fan layer
+      - very quiet warm base tone
+      - rhythmic coconut / marimba ticks
+      - durian warning is a separate low wobble
     */
 
-    const padFrequencies = [82, 123.5, 164.5, 247];
+    const padFrequencies = [82, 123.5, 164.5];
+
     this.ambientVoices = padFrequencies.map((frequency, index) => {
       const osc = ctx.createOscillator();
-      const voiceGain = ctx.createGain();
+      const gain = ctx.createGain();
       const filter = ctx.createBiquadFilter();
 
       osc.type = index === 1 ? "triangle" : "sine";
       osc.frequency.value = frequency;
-      osc.detune.value = [-5, 2, 7, -3][index] ?? 0;
+      osc.detune.value = [-4, 2, 6][index] ?? 0;
 
-      voiceGain.gain.value = [0.026, 0.017, 0.013, 0.008][index];
+      gain.gain.value = [0.012, 0.008, 0.005][index];
 
       filter.type = "lowpass";
-      filter.frequency.value = 620 - index * 65;
-      filter.Q.value = 0.28;
+      filter.frequency.value = 520 - index * 80;
+      filter.Q.value = 0.22;
 
       osc.connect(filter);
-      filter.connect(voiceGain);
-      voiceGain.connect(this.ambientGain);
+      filter.connect(gain);
+      gain.connect(this.ambientGain);
+
       osc.start();
 
       const lfo = ctx.createOscillator();
       const lfoDepth = ctx.createGain();
 
       lfo.type = "sine";
-      lfo.frequency.value = 0.035 + index * 0.014;
-      lfoDepth.gain.value = 0.006 + index * 0.0018;
+      lfo.frequency.value = 0.035 + index * 0.012;
+      lfoDepth.gain.value = 0.0035 + index * 0.001;
 
       lfo.connect(lfoDepth);
-      lfoDepth.connect(voiceGain.gain);
+      lfoDepth.connect(gain.gain);
       lfo.start();
 
       this.ambientLfos.push(lfo);
 
-      return { osc, voiceGain, filter };
+      return { osc, gain, filter };
     });
 
-    // Surf / airy beach-stall bed
-    const surfFilter = ctx.createBiquadFilter();
-    surfFilter.type = "bandpass";
-    surfFilter.frequency.value = 430;
-    surfFilter.Q.value = 0.34;
+    this.setupDurianWarningBed();
+    this.scheduleTropicalRhythm();
+  }
 
-    const surfHighCut = ctx.createBiquadFilter();
-    surfHighCut.type = "lowpass";
-    surfHighCut.frequency.value = 1400;
-    surfHighCut.Q.value = 0.2;
+  setupDurianWarningBed() {
+    const ctx = this.ensureContext();
 
-    const surfGain = ctx.createGain();
-    surfGain.gain.value = 0.04;
+    if (!ctx || this.durianOscillators.length) {
+      return;
+    }
 
-    surfFilter.connect(surfHighCut);
-    surfHighCut.connect(surfGain);
-    surfGain.connect(this.ambientGain);
+    const low = ctx.createOscillator();
+    const overtone = ctx.createOscillator();
 
-    this.ambientNoiseSource = this.createLoopingNoiseSource(surfFilter, 0.11);
+    low.type = "sine";
+    low.frequency.value = 74;
 
-    // Occasional quiet tropical plucks
-    this.scheduleAmbientPlucks();
+    overtone.type = "triangle";
+    overtone.frequency.value = 151;
 
-    // Durian warning bed
-    const durianFundamental = ctx.createOscillator();
-    durianFundamental.type = "sine";
-    durianFundamental.frequency.value = 74;
+    const lowGain = ctx.createGain();
+    const overtoneGain = ctx.createGain();
 
-    const durianOvertone = ctx.createOscillator();
-    durianOvertone.type = "triangle";
-    durianOvertone.frequency.value = 151;
-
-    const durianFundamentalGain = ctx.createGain();
-    const durianOvertoneGain = ctx.createGain();
-
-    durianFundamentalGain.gain.value = 0.055;
-    durianOvertoneGain.gain.value = 0.014;
+    lowGain.gain.value = 0.052;
+    overtoneGain.gain.value = 0.012;
 
     this.durianFilter = ctx.createBiquadFilter();
     this.durianFilter.type = "lowpass";
     this.durianFilter.frequency.value = 300;
-    this.durianFilter.Q.value = 1.3;
+    this.durianFilter.Q.value = 1.25;
 
-    durianFundamental.connect(durianFundamentalGain);
-    durianOvertone.connect(durianOvertoneGain);
-    durianFundamentalGain.connect(this.durianFilter);
-    durianOvertoneGain.connect(this.durianFilter);
+    low.connect(lowGain);
+    overtone.connect(overtoneGain);
 
-    const durianNoiseFilter = ctx.createBiquadFilter();
-    durianNoiseFilter.type = "lowpass";
-    durianNoiseFilter.frequency.value = 170;
-    durianNoiseFilter.Q.value = 0.9;
-
-    const durianNoiseGain = ctx.createGain();
-    durianNoiseGain.gain.value = 0.024;
-
-    durianNoiseFilter.connect(durianNoiseGain);
-    durianNoiseGain.connect(this.durianFilter);
+    lowGain.connect(this.durianFilter);
+    overtoneGain.connect(this.durianFilter);
 
     this.durianFilter.connect(this.durianGain);
-    this.durianNoiseSource = this.createLoopingNoiseSource(
-      durianNoiseFilter,
-      0.075
-    );
 
-    const durianLfo = ctx.createOscillator();
-    const durianLfoDepth = ctx.createGain();
+    const wobble = ctx.createOscillator();
+    const wobbleDepth = ctx.createGain();
 
-    durianLfo.type = "sine";
-    durianLfo.frequency.value = 0.78;
-    durianLfoDepth.gain.value = 7;
+    wobble.type = "sine";
+    wobble.frequency.value = 0.8;
+    wobbleDepth.gain.value = 7;
 
-    durianLfo.connect(durianLfoDepth);
-    durianLfoDepth.connect(durianFundamental.frequency);
-    durianLfo.start();
+    wobble.connect(wobbleDepth);
+    wobbleDepth.connect(low.frequency);
 
-    this.ambientLfos.push(durianLfo);
+    low.start();
+    overtone.start();
+    wobble.start();
 
-    durianFundamental.start();
-    durianOvertone.start();
-
-    this.durianOscillators = [durianFundamental, durianOvertone];
+    this.durianOscillators = [low, overtone, wobble];
   }
 
-  scheduleAmbientPlucks() {
+  scheduleTropicalRhythm() {
     const ctx = this.ensureContext();
 
-    if (!ctx || this.ambientPluckTimer) {
+    if (!ctx || this.rhythmTimer) {
       return;
     }
 
-    const playOnePluck = () => {
-      if (!this.context || this.muted) {
-        this.ambientPluckTimer = window.setTimeout(playOnePluck, 2400);
+const pattern = [
+  { delay: 0, note: 330, gain: 0.026, kind: "bowl" },
+  { delay: 380, note: 392, gain: 0.014, kind: "tick" },
+  { delay: 760, note: 330, gain: 0.02, kind: "bowl" },
+];
+
+    const playPattern = () => {
+      if (!this.context) {
+        this.rhythmTimer = window.setTimeout(playPattern, 900);
         return;
       }
 
-      const now = ctx.currentTime;
-      const notes = [392, 440, 523.25, 587.33, 659.25];
-      const frequency = notes[Math.floor(Math.random() * notes.length)];
+      const active = !this.muted && this.ambientTarget > 0.004;
 
-      this.playWoodPluck({
-        time: now,
-        frequency,
-        gain: 0.012,
-        duration: 0.42,
-        destination: this.ambientGain,
-        pan: Math.random() * 0.5 - 0.25,
-      });
+      if (active) {
+        const now = ctx.currentTime;
+        const rhythmScale = Math.min(1.25, Math.max(0.7, this.ambientTarget * 10));
 
-      const nextDelay = 2200 + Math.random() * 3600;
-      this.ambientPluckTimer = window.setTimeout(playOnePluck, nextDelay);
+        pattern.forEach((step, index) => {
+          const time = now + step.delay / 1000;
+          const pan = [-0.18, 0.1, -0.06, 0.16][index] ?? 0;
+
+          this.playWoodPluck({
+            time,
+            frequency: step.note,
+            gain: step.gain * rhythmScale,
+            duration: step.kind === "low" ? 0.2 : 0.16,
+            destination: this.ambientGain,
+            pan,
+          });
+
+          if (step.kind === "bowl") {
+  this.playCoconutKnock({
+    time,
+    gain: 0.032 * rhythmScale,
+    destination: this.ambientGain,
+  });
+} else {
+  this.playWoodPluck({
+    time,
+    frequency: step.note,
+    gain: step.gain * rhythmScale,
+    duration: 0.13,
+    destination: this.ambientGain,
+    pan,
+  });
+}
+        });
+      }
+
+      const nextDelay = 1150 + Math.random() * 260;
+      this.rhythmTimer = window.setTimeout(playPattern, nextDelay);
     };
 
-    this.ambientPluckTimer = window.setTimeout(playOnePluck, 1800);
+    this.rhythmTimer = window.setTimeout(playPattern, 500);
   }
 
   createNoiseBurst({
@@ -313,7 +301,7 @@ export class AudioEngine {
 
     const amp = ctx.createGain();
     amp.gain.setValueAtTime(0.0001, time);
-    amp.gain.exponentialRampToValueAtTime(gain, time + 0.008);
+    amp.gain.exponentialRampToValueAtTime(gain, time + 0.006);
     amp.gain.exponentialRampToValueAtTime(0.0001, time + duration);
 
     source.connect(filter);
@@ -328,7 +316,7 @@ export class AudioEngine {
     time,
     frequency,
     gain = 0.04,
-    duration = 0.22,
+    duration = 0.18,
     destination = this.sliceBus,
     pan = 0,
   }) {
@@ -345,16 +333,16 @@ export class AudioEngine {
     osc.type = "triangle";
     osc.frequency.setValueAtTime(frequency, time);
     osc.frequency.exponentialRampToValueAtTime(
-      Math.max(80, frequency * 0.86),
+      Math.max(80, frequency * 0.82),
       time + duration
     );
 
     filter.type = "bandpass";
-    filter.frequency.value = frequency * 1.7;
-    filter.Q.value = 2.2;
+    filter.frequency.value = frequency * 2.55;
+    filter.Q.value = 3.2;
 
     amp.gain.setValueAtTime(0.0001, time);
-    amp.gain.exponentialRampToValueAtTime(gain, time + 0.012);
+    amp.gain.exponentialRampToValueAtTime(gain, time + 0.008);
     amp.gain.exponentialRampToValueAtTime(0.0001, time + duration);
 
     osc.connect(filter);
@@ -370,7 +358,42 @@ export class AudioEngine {
     }
 
     osc.start(time);
-    osc.stop(time + duration + 0.03);
+    osc.stop(time + duration + 0.04);
+  }
+
+  playCoconutKnock({
+    time,
+    gain = 0.04,
+    destination = this.sliceBus,
+  }) {
+    const ctx = this.ensureContext();
+
+    if (!ctx) {
+      return;
+    }
+
+    const osc = ctx.createOscillator();
+    const amp = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+
+    osc.type = "triangle";
+  osc.frequency.setValueAtTime(132, time);
+osc.frequency.exponentialRampToValueAtTime(72, time + 0.11);
+
+    filter.type = "lowpass";
+   filter.frequency.value = 420;
+filter.Q.value = 1.4;
+
+    amp.gain.setValueAtTime(0.0001, time);
+    amp.gain.exponentialRampToValueAtTime(gain, time + 0.006);
+    amp.gain.exponentialRampToValueAtTime(0.0001, time + 0.13);
+
+    osc.connect(filter);
+    filter.connect(amp);
+    amp.connect(destination);
+
+    osc.start(time);
+    osc.stop(time + 0.15);
   }
 
   playJuicyPop(time, intensity, destination = this.sliceBus) {
@@ -385,26 +408,26 @@ export class AudioEngine {
     const popFilter = ctx.createBiquadFilter();
 
     pop.type = "sine";
-    pop.frequency.setValueAtTime(190 + intensity * 55, time);
-    pop.frequency.exponentialRampToValueAtTime(92, time + 0.07);
+    pop.frequency.setValueAtTime(150 + intensity * 34, time);
+    pop.frequency.exponentialRampToValueAtTime(92, time + 0.075);
 
     popFilter.type = "lowpass";
-    popFilter.frequency.value = 900;
-    popFilter.Q.value = 0.4;
+    popFilter.frequency.value = 980;
+    popFilter.Q.value = 0.42;
 
     popGain.gain.setValueAtTime(0.0001, time);
-    popGain.gain.exponentialRampToValueAtTime(
-      0.055 + intensity * 0.018,
-      time + 0.008
-    );
-    popGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.09);
+   popGain.gain.exponentialRampToValueAtTime(
+  0.026 + intensity * 0.008,
+  time + 0.007
+);
+    popGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.095);
 
     pop.connect(popFilter);
     popFilter.connect(popGain);
     popGain.connect(destination);
 
     pop.start(time);
-    pop.stop(time + 0.11);
+    pop.stop(time + 0.12);
   }
 
   playSlice(intensity = 1) {
@@ -423,46 +446,42 @@ export class AudioEngine {
     const now = ctx.currentTime;
     const clampedIntensity = Math.min(1.4, Math.max(0.7, intensity));
 
-    // Airy blade swipe
+    // Short blade swipe, not a constant ambience.
     this.createNoiseBurst({
-      time: now,
-      duration: 0.15,
-      gain: 0.12 + clampedIntensity * 0.045,
-      filterType: "bandpass",
-      frequency: 980 + clampedIntensity * 700,
-      q: 0.72,
-      destination: this.sliceBus,
-    });
+  time: now,
+  duration: 0.06,
+  gain: 0.024 + clampedIntensity * 0.01,
+  filterType: "bandpass",
+  frequency: 760 + clampedIntensity * 260,
+  q: 0.95,
+  destination: this.sliceBus,
+});
 
-    // Brighter edge of the swipe
-    this.createNoiseBurst({
-      time: now + 0.012,
-      duration: 0.09,
-      gain: 0.045 + clampedIntensity * 0.018,
-      filterType: "highpass",
-      frequency: 2200 + clampedIntensity * 800,
-      q: 0.5,
-      destination: this.sliceBus,
-    });
+    // Juicy pop.
+    this.playJuicyPop(now + 0.014, clampedIntensity, this.sliceBus);
 
-    // Juicy pop
-    this.playJuicyPop(now + 0.018, clampedIntensity, this.sliceBus);
+    // Coconut knock gives the slice a tactile hit.
+    this.playCoconutKnock({
+  time: now + 0.022,
+  gain: 0.072 + clampedIntensity * 0.026,
+  destination: this.sliceBus,
+});
 
-    // Tropical wooden/marimba note
-    const noteSet = [392, 440, 523.25, 587.33, 659.25];
+    // Marimba / toy pluck.
+    const noteSet = [392, 440, 493.88, 523.25, 587.33, 659.25];
     const noteIndex = Math.min(
       noteSet.length - 1,
-      Math.floor((clampedIntensity - 0.7) * 3.4)
+      Math.floor((clampedIntensity - 0.7) * 4.2)
     );
 
     this.playWoodPluck({
-      time: now + 0.026,
-      frequency: noteSet[noteIndex],
-      gain: 0.034 + clampedIntensity * 0.016,
-      duration: 0.24,
-      destination: this.sliceBus,
-      pan: Math.random() * 0.24 - 0.12,
-    });
+  time: now + 0.045,
+  frequency: noteSet[noteIndex],
+  gain: 0.024 + clampedIntensity * 0.012,
+  duration: 0.16,
+  destination: this.sliceBus,
+  pan: Math.random() * 0.16 - 0.08,
+});
   }
 
   playDurianHit(intensity = 1) {
@@ -481,74 +500,47 @@ export class AudioEngine {
     const now = ctx.currentTime;
     const clampedIntensity = Math.min(1.4, Math.max(0.7, intensity));
 
-    // Crunchy spiky burst
+    // Crunchy spiky crack.
     this.createNoiseBurst({
       time: now,
-      duration: 0.18,
-      gain: 0.16 + clampedIntensity * 0.055,
+      duration: 0.14,
+      gain: 0.15 + clampedIntensity * 0.05,
       filterType: "bandpass",
-      frequency: 520 + clampedIntensity * 260,
-      q: 2.2,
+      frequency: 540 + clampedIntensity * 260,
+      q: 2.4,
       destination: this.sliceBus,
     });
 
-    // Low wooden thonk
-    const thonk = ctx.createOscillator();
-    const thonkGain = ctx.createGain();
-    const thonkFilter = ctx.createBiquadFilter();
+    // Heavy coconut thud.
+    this.playCoconutKnock({
+      time: now + 0.012,
+      gain: 0.13,
+      destination: this.sliceBus,
+    });
 
-    thonk.type = "triangle";
-    thonk.frequency.setValueAtTime(145 + clampedIntensity * 20, now);
-    thonk.frequency.exponentialRampToValueAtTime(58, now + 0.16);
-
-    thonkFilter.type = "lowpass";
-    thonkFilter.frequency.value = 560;
-    thonkFilter.Q.value = 0.9;
-
-    thonkGain.gain.setValueAtTime(0.0001, now);
-    thonkGain.gain.exponentialRampToValueAtTime(0.12, now + 0.012);
-    thonkGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
-
-    thonk.connect(thonkFilter);
-    thonkFilter.connect(thonkGain);
-    thonkGain.connect(this.sliceBus);
-
-    thonk.start(now);
-    thonk.stop(now + 0.24);
-
-    // Sour wobble, instantly different from normal fruit
+    // Sour wobble, clearly different from fruit.
     const wobble = ctx.createOscillator();
-    const wobbleLfo = ctx.createOscillator();
-    const wobbleLfoDepth = ctx.createGain();
     const wobbleGain = ctx.createGain();
     const wobbleFilter = ctx.createBiquadFilter();
 
     wobble.type = "sawtooth";
-    wobble.frequency.value = 92;
-
-    wobbleLfo.type = "sine";
-    wobbleLfo.frequency.value = 18;
-    wobbleLfoDepth.gain.value = 18;
-
-    wobbleLfo.connect(wobbleLfoDepth);
-    wobbleLfoDepth.connect(wobble.frequency);
+    wobble.frequency.setValueAtTime(104, now);
+    wobble.frequency.exponentialRampToValueAtTime(58, now + 0.25);
 
     wobbleFilter.type = "lowpass";
     wobbleFilter.frequency.value = 420;
-    wobbleFilter.Q.value = 1.2;
+    wobbleFilter.Q.value = 1.1;
 
     wobbleGain.gain.setValueAtTime(0.0001, now);
-    wobbleGain.gain.exponentialRampToValueAtTime(0.045, now + 0.018);
-    wobbleGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
+    wobbleGain.gain.exponentialRampToValueAtTime(0.048, now + 0.018);
+    wobbleGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
 
     wobble.connect(wobbleFilter);
     wobbleFilter.connect(wobbleGain);
     wobbleGain.connect(this.sliceBus);
 
     wobble.start(now);
-    wobbleLfo.start(now);
-    wobble.stop(now + 0.34);
-    wobbleLfo.stop(now + 0.34);
+    wobble.stop(now + 0.3);
   }
 
   playButtonTap() {
@@ -567,8 +559,8 @@ export class AudioEngine {
     this.playWoodPluck({
       time: now,
       frequency: 440,
-      gain: 0.028,
-      duration: 0.16,
+      gain: 0.03,
+      duration: 0.14,
       destination: this.uiGain,
     });
   }
@@ -591,8 +583,8 @@ export class AudioEngine {
       this.playWoodPluck({
         time: now + index * 0.055,
         frequency,
-        gain: 0.032 - index * 0.004,
-        duration: 0.22,
+        gain: 0.036 - index * 0.004,
+        duration: 0.2,
         destination: this.uiGain,
         pan: (index - 1) * 0.08,
       });
@@ -614,13 +606,13 @@ export class AudioEngine {
 
     this.ambientGain.gain.cancelScheduledValues(now);
     this.ambientGain.gain.setValueAtTime(this.ambientGain.gain.value, now);
-    this.ambientGain.gain.linearRampToValueAtTime(nextLevel, now + 0.42);
+    this.ambientGain.gain.linearRampToValueAtTime(nextLevel, now + 0.35);
 
     this.master.gain.cancelScheduledValues(now);
     this.master.gain.setValueAtTime(this.master.gain.value, now);
     this.master.gain.linearRampToValueAtTime(
-      this.muted ? 0.0001 : Math.min(0.9, 0.74 + nextLevel * 0.85),
-      now + 0.42
+      this.muted ? 0.0001 : Math.min(0.84, 0.68 + nextLevel * 0.75),
+      now + 0.35
     );
   }
 
@@ -640,7 +632,7 @@ export class AudioEngine {
     this.durianGain.gain.cancelScheduledValues(now);
     this.durianGain.gain.setValueAtTime(this.durianGain.gain.value, now);
     this.durianGain.gain.linearRampToValueAtTime(
-      warningLevel ? 0.052 : 0.0001,
+      warningLevel ? 0.045 : 0.0001,
       now + (warningLevel ? 0.12 : 0.2)
     );
 
@@ -651,7 +643,7 @@ export class AudioEngine {
         now
       );
       this.durianFilter.frequency.linearRampToValueAtTime(
-        warningLevel ? 440 : 300,
+        warningLevel ? 430 : 300,
         now + 0.18
       );
     }

@@ -1,5 +1,5 @@
 import { CONFIG } from "./config.js";
-import { AudioEngine } from "./audio.js";
+import { AudioEngine } from "./audio.js?v=10";
 import { BowlSystem } from "./bowl.js?v=3";
 import { Compositor } from "./compositor.js";
 import { createDevPanel } from "./dev-panel.js";
@@ -1095,21 +1095,30 @@ function handleSlices(segments, nowMs) {
     hitIds.add(hit.entity.id);
     hit.entity.dead = true;
 
-    if (hit.entity.kind === "durian") {
-      game.livesLost += 1;
-      game.flashStrength = 1;
-      appendParticles(
-        createDurianBurst({
-          x: hit.point.x,
-          y: hit.point.y,
-          color: hit.entity.data.warningColor,
-        })
-      );
-      if (game.livesLost >= CONFIG.maxDurianHits) {
-        beginGameOver(nowMs);
-      }
-      continue;
-    }
+if (hit.entity.kind === "durian") {
+  game.livesLost += 1;
+  game.flashStrength = 1;
+
+  if (typeof audio.playDurianHit === "function") {
+    audio.playDurianHit(
+      Math.min(1.3, hit.segment.velocity / (CONFIG.sliceVelocityThreshold * 1.4))
+    );
+  }
+
+  appendParticles(
+    createDurianBurst({
+      x: hit.point.x,
+      y: hit.point.y,
+      color: hit.entity.data.warningColor,
+    })
+  );
+
+  if (game.livesLost >= CONFIG.maxDurianHits) {
+    beginGameOver(nowMs);
+  }
+
+  continue;
+}
 
     game.score += hit.entity.data.score;
     const fruitType =
