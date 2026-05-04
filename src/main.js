@@ -289,166 +289,258 @@ function updateWorldSelectionUi() {
 }
 
 function renderShareModalPreview() {
+
   ui.sharePreview.innerHTML = "";
+
   ui.sharePreview.style.backgroundImage = "";
 
   const previewCanvas = document.createElement("canvas");
+
   const previewCtx = previewCanvas.getContext("2d");
+
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
   const width = 420;
+
   const height = 340;
 
   previewCanvas.width = Math.round(width * dpr);
+
   previewCanvas.height = Math.round(height * dpr);
+
   previewCanvas.style.width = "360px";
+
   previewCanvas.style.height = "292px";
 
   previewCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
   previewCtx.imageSmoothingEnabled = true;
+
   previewCtx.imageSmoothingQuality = "high";
 
   ui.sharePreview.appendChild(previewCanvas);
 
   const centerX = width / 2;
-  const centerY = height * 0.58;
-  const bowlRadius = 128;
+
+  const fruitCenterY = height * 0.55;
+
+  const bowlCenterY = height * 0.52;
+
+  const bowlRadius = 136;
 
   const fruit = bowl.collected;
 
-  const backFruitLayout = [
-    [-88, -54, 34, -0.16],
-    [-58, -78, 38, 0.08],
-    [-22, -88, 40, -0.04],
-    [20, -88, 40, 0.06],
-    [56, -78, 38, 0.12],
-    [88, -54, 34, 0.16],
-    [-34, -58, 36, -0.08],
-    [34, -58, 36, 0.08],
+  const fruitLayout = [
+
+    [-88, -44, 34, -0.16],
+
+    [-58, -68, 38, 0.08],
+
+    [-22, -78, 40, -0.04],
+
+    [20, -78, 40, 0.06],
+
+    [56, -68, 38, 0.12],
+
+    [88, -44, 34, 0.16],
+
+    [-34, -48, 36, -0.08],
+
+    [34, -48, 36, 0.08],
+
   ];
 
-  // Draw fruits first.
   fruit.forEach((item, index) => {
+
     const [x, y, fallbackRadius, rotation] =
-      backFruitLayout[index % backFruitLayout.length];
+
+      fruitLayout[index % fruitLayout.length];
 
     const radius = Math.max(
+
       28,
+
       Math.min(44, item.radius ? item.radius * 0.48 : fallbackRadius)
+
     );
 
     previewCtx.save();
+
     previewCtx.translate(centerX + x, fruitCenterY + y);
+
     previewCtx.rotate(rotation);
+
     drawFruitSvg(previewCtx, item.type, radius, "bowl");
+
     previewCtx.restore();
+
   });
 
-  // Draw bowl second so the rim covers the lower part of the fruits.
   previewCtx.save();
-  previewCtx.translate(centerX, centerY);
+
+  previewCtx.translate(centerX, bowlCenterY);
+
   drawBowlSvg(previewCtx, bowlRadius, false);
+
   previewCtx.restore();
+
 }
 
 function renderShareExportImage() {
+
   const exportCanvas = document.createElement("canvas");
+
   const exportCtx = exportCanvas.getContext("2d");
+
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
   const width = 720;
+
   const height = 900;
 
   exportCanvas.width = Math.round(width * dpr);
+
   exportCanvas.height = Math.round(height * dpr);
 
   exportCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
   exportCtx.imageSmoothingEnabled = true;
+
   exportCtx.imageSmoothingQuality = "high";
 
-  // Background
   const bg = exportCtx.createLinearGradient(0, 0, 0, height);
+
   bg.addColorStop(0, "#f4ebd9");
+
   bg.addColorStop(0.58, "#fff3dc");
+
   bg.addColorStop(1, "#d9b172");
 
   exportCtx.fillStyle = bg;
+
   exportCtx.fillRect(0, 0, width, height);
 
-  // title
+  exportCtx.globalAlpha = 0.5;
+
+  exportCtx.fillStyle = "#fff4c8";
+
+  exportCtx.beginPath();
+
+  exportCtx.arc(width * 0.78, height * 0.16, 120, 0, Math.PI * 2);
+
+  exportCtx.fill();
+
+  exportCtx.globalAlpha = 1;
+
   exportCtx.fillStyle = "#4c3125";
+
   exportCtx.textAlign = "center";
+
   exportCtx.textBaseline = "top";
+
   exportCtx.font = '400 96px "Reenie Beanie", cursive';
+
   exportCtx.fillText("what a bowl!", width / 2, 82);
 
-  // context line
   exportCtx.fillStyle = "rgba(76, 49, 37, 0.72)";
+
   exportCtx.font = '400 44px "Reenie Beanie", cursive';
+
   exportCtx.fillText("i made this bowl of fruit", width / 2, 188);
 
-  // score
   exportCtx.fillStyle = "#4c3125";
+
   exportCtx.font = '400 72px "Reenie Beanie", cursive';
+
   exportCtx.fillText(`${game.score} points`, width / 2, 250);
 
   const centerX = width / 2;
-const fruitCenterY = height * 0.58;
-const bowlCenterY = height * 0.50;
-const bowlRadius = 136;
 
-const fruit = bowl.collected;
+  const fruitCenterY = height * 0.55;
 
-const fruitLayout = [
-  [-82, -18, 34, -0.16],
-  [-52, -34, 38, 0.08],
-  [-18, -42, 40, -0.04],
-  [18, -42, 40, 0.06],
-  [52, -34, 38, 0.12],
-  [82, -18, 34, 0.16],
-  [-28, -20, 36, -0.08],
-  [28, -20, 36, 0.08],
-];
+  const bowlCenterY = height * 0.55;
 
-fruit.forEach((item, index) => {
-  const [x, y, fallbackRadius, rotation] =
-    fruitLayout[index % fruitLayout.length];
+  const bowlRadius = 156;
 
-  const radius = Math.max(
-    28,
-    Math.min(44, item.radius ? item.radius * 0.48 : fallbackRadius)
-  );
+  const fruit = bowl.collected;
 
-  previewCtx.save();
-  previewCtx.translate(centerX + x, centerY + y);
-  previewCtx.rotate(rotation);
-  drawFruitSvg(previewCtx, item.type, radius, "bowl");
-  previewCtx.restore();
-});
+  const fruitLayout = [
 
-// Bowl must be drawn AFTER the fruit so it covers the lower part.
-previewCtx.save();
-previewCtx.translate(centerX, bowlCenterY);
-drawBowlSvg(previewCtx, bowlRadius, false);
-previewCtx.restore();
+    [-112, -50, 42, -0.16],
 
-  // invite / CTA
+    [-76, -86, 46, 0.08],
+
+    [-28, -102, 48, -0.04],
+
+    [26, -102, 48, 0.06],
+
+    [74, -86, 46, 0.12],
+
+    [112, -50, 42, 0.16],
+
+    [-42, -56, 44, -0.08],
+
+    [42, -56, 44, 0.08],
+
+  ];
+
+  fruit.forEach((item, index) => {
+
+    const [x, y, fallbackRadius, rotation] =
+
+      fruitLayout[index % fruitLayout.length];
+
+    const radius = Math.max(
+
+      34,
+
+      Math.min(54, item.radius ? item.radius * 0.58 : fallbackRadius)
+
+    );
+
+    exportCtx.save();
+
+    exportCtx.translate(centerX + x, fruitCenterY + y);
+
+    exportCtx.rotate(rotation);
+
+    drawFruitSvg(exportCtx, item.type, radius, "bowl");
+
+    exportCtx.restore();
+
+  });
+
+  exportCtx.save();
+
+  exportCtx.translate(centerX, bowlCenterY);
+
+  drawBowlSvg(exportCtx, bowlRadius, false);
+
+  exportCtx.restore();
+
   exportCtx.fillStyle = "#4c3125";
+
   exportCtx.textAlign = "center";
+
   exportCtx.textBaseline = "top";
+
   exportCtx.font = '400 64px "Reenie Beanie", cursive';
+
   exportCtx.fillText("can you beat mine?", width / 2, height - 180);
 
- exportCtx.fillStyle = "rgba(76, 49, 37, 0.72)";
-exportCtx.font = '400 42px "Reenie Beanie", cursive';
-exportCtx.fillText("play bowl", width / 2, height - 118);
+  exportCtx.fillStyle = "rgba(76, 49, 37, 0.72)";
 
-exportCtx.fillStyle = "rgba(76, 49, 37, 0.58)";
-exportCtx.font = '400 30px "Reenie Beanie", cursive';
-exportCtx.fillText("https://bowl-nu.vercel.app/", width / 2, height - 78);
+  exportCtx.font = '400 42px "Reenie Beanie", cursive';
 
-  return exportCanvas.toDataURL("image/png");
-}
+  exportCtx.fillText("play bowl", width / 2, height - 118);
+
+  exportCtx.fillStyle = "rgba(76, 49, 37, 0.58)";
+
+  exportCtx.font = '400 30px "Reenie Beanie", cursive';
+
+  exportCtx.fillText("https://bowl-nu.vercel.app/", width / 2, height - 78);
+
+  r
 
 function openShareModal() {
   try {
@@ -471,18 +563,30 @@ function closeShareModal() {
   resetAllTrackedUiButtons();
 }
 
+
+
 function downloadSharePreview() {
+
   try {
+
     game.sharePreviewUrl = renderShareExportImage();
+
   } catch (error) {
+
     console.warn("Unable to render share export", error);
+
     return;
+
   }
 
   const anchor = document.createElement("a");
+
   anchor.href = game.sharePreviewUrl;
+
   anchor.download = `bowl-${Date.now()}.png`;
+
   anchor.click();
+
 }
 
 function setSoundMuted(muted) {
@@ -1572,3 +1676,4 @@ async function init() {
 }
 
 init();
+}
