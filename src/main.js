@@ -1,4 +1,5 @@
 import { CONFIG } from "./config.js";
+import { AudioEngine } from "./audio.js?v=11";
 import { BowlSystem } from "./bowl.js?v=3";
 import { Compositor } from "./compositor.js";
 import { createDevPanel } from "./dev-panel.js";
@@ -1101,14 +1102,14 @@ if (hit.entity.kind === "durian") {
   game.flashStrength = 1;
 
   if (typeof audio.playDurianHit === "function") {
-  try {
-    audio.playDurianHit(
-      Math.min(1.3, hit.segment.velocity / (CONFIG.sliceVelocityThreshold * 1.4))
-    );
-  } catch (error) {
-    console.warn("Durian audio failed", error);
+    try {
+      audio.playDurianHit(
+        Math.min(1.3, hit.segment.velocity / (CONFIG.sliceVelocityThreshold * 1.4))
+      );
+    } catch (error) {
+      console.warn("Durian audio failed", error);
+    }
   }
-}
 
   appendParticles(
     createDurianBurst({
@@ -1151,15 +1152,19 @@ game.slicedFruitCounts[fruitType] =
     );
 
     if (
-      hit.entity.data.behavior === "reveal" &&
-      Math.abs(hit.point.x - hit.entity.x) < hit.entity.radius * 0.18
-    ) {
-      game.slowMotionUntil = nowMs + 200;
-    }
+  hit.entity.data.behavior === "reveal" &&
+  Math.abs(hit.point.x - hit.entity.x) < hit.entity.radius * 0.18
+) {
+  game.slowMotionUntil = nowMs + 200;
+}
 
-    audio.playSlice(
-      Math.min(1.3, hit.segment.velocity / (CONFIG.sliceVelocityThreshold * 1.4))
-    );
+try {
+  audio.playSlice(
+    Math.min(1.3, hit.segment.velocity / (CONFIG.sliceVelocityThreshold * 1.4))
+  );
+} catch (error) {
+  console.warn("Slice audio failed", error);
+}
   }
 
   game.entities = game.entities.filter((entity) => !entity.dead);
