@@ -311,29 +311,30 @@ function renderShareModalPreview() {
   ui.sharePreview.appendChild(previewCanvas);
 
   const centerX = width / 2;
-  const fruitCenterY = height * 0.56;
+  const fruitCenterY = height * 0.55;
   const bowlCenterY = height * 0.52;
   const bowlRadius = 140;
 
   const fruit = bowl.collected;
 
-  const backFruitLayout = [
-    [-58, -72, 36, -0.1],
-    [-22, -86, 39, 0.04],
-    [18, -84, 39, -0.03],
-    [56, -70, 36, 0.12],
-    [-72, -44, 34, -0.16],
-    [-34, -52, 37, 0.08],
-    [4, -56, 38, -0.04],
-    [42, -52, 37, 0.1],
-    [76, -42, 34, 0.16],
-  ];
+const backFruitLayout = [
+  [-64, -72, 34, -0.12],
+  [-30, -90, 38, 0.06],
+  [8, -94, 40, -0.03],
+  [46, -84, 38, 0.08],
+  [78, -66, 34, 0.14],
 
-  const frontFruitLayout = [
-    [-42, -26, 32, -0.08],
-    [0, -30, 34, 0.02],
-    [42, -26, 32, 0.08],
-  ];
+  [-50, -54, 34, -0.08],
+  [-12, -62, 36, 0.04],
+  [28, -60, 36, -0.04],
+  [64, -50, 34, 0.1],
+];
+
+const frontFruitLayout = [
+  [-48, -42, 30, -0.1],
+  [-12, -46, 32, 0.02],
+  [26, -44, 31, 0.08],
+];
 
   function drawFruitLayer(layout, startIndex = 0) {
     if (!fruit.length) {
@@ -345,7 +346,7 @@ function renderShareModalPreview() {
 
       const radius = Math.max(
         26,
-        Math.min(42, item.radius ? item.radius * 0.46 : fallbackRadius)
+        Math.min(38, item.radius ? item.radius * 0.42 : fallbackRadius)
       );
 
       previewCtx.save();
@@ -370,155 +371,134 @@ function renderShareModalPreview() {
 }
 
 function renderShareExportImage() {
-
   const exportCanvas = document.createElement("canvas");
-
   const exportCtx = exportCanvas.getContext("2d");
-
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
   const width = 720;
-
   const height = 900;
 
   exportCanvas.width = Math.round(width * dpr);
-
   exportCanvas.height = Math.round(height * dpr);
 
   exportCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
   exportCtx.imageSmoothingEnabled = true;
-
   exportCtx.imageSmoothingQuality = "high";
 
+  // Background
   const bg = exportCtx.createLinearGradient(0, 0, 0, height);
-
   bg.addColorStop(0, "#f4ebd9");
-
   bg.addColorStop(0.58, "#fff3dc");
-
   bg.addColorStop(1, "#d9b172");
 
   exportCtx.fillStyle = bg;
-
   exportCtx.fillRect(0, 0, width, height);
 
+  // Soft sun / glow
   exportCtx.globalAlpha = 0.5;
-
   exportCtx.fillStyle = "#fff4c8";
-
   exportCtx.beginPath();
-
   exportCtx.arc(width * 0.78, height * 0.16, 120, 0, Math.PI * 2);
-
   exportCtx.fill();
-
   exportCtx.globalAlpha = 1;
 
+  // Title
   exportCtx.fillStyle = "#4c3125";
-
   exportCtx.textAlign = "center";
-
   exportCtx.textBaseline = "top";
-
   exportCtx.font = '400 96px "Reenie Beanie", cursive';
-
   exportCtx.fillText("what a bowl!", width / 2, 82);
 
+  // Context line
   exportCtx.fillStyle = "rgba(76, 49, 37, 0.72)";
-
   exportCtx.font = '400 44px "Reenie Beanie", cursive';
-
   exportCtx.fillText("i made this bowl of fruit", width / 2, 188);
 
+  // Score
   exportCtx.fillStyle = "#4c3125";
-
   exportCtx.font = '400 72px "Reenie Beanie", cursive';
-
   exportCtx.fillText(`${game.score} points`, width / 2, 250);
 
+  // Bowl composition
   const centerX = width / 2;
-
   const fruitCenterY = height * 0.55;
-
   const bowlCenterY = height * 0.55;
-
   const bowlRadius = 156;
 
   const fruit = bowl.collected;
+  const scale = bowlRadius / 140;
 
-const fruitLayout = [
-  // back row
-  [-70, -58, 34, -0.14],
-  [-36, -76, 38, 0.08],
-  [0, -82, 40, -0.03],
-  [36, -76, 38, 0.1],
-  [70, -58, 34, 0.14],
+  const backFruitLayout = [
+    [-64, -72, 34, -0.12],
+    [-30, -90, 38, 0.06],
+    [8, -94, 40, -0.03],
+    [46, -84, 38, 0.08],
+    [78, -66, 34, 0.14],
 
-  // front row, closer to rim
-  [-46, -36, 36, -0.08],
-  [-12, -42, 38, 0.04],
-  [24, -40, 36, 0.08],
-];
+    [-50, -54, 34, -0.08],
+    [-12, -62, 36, 0.04],
+    [28, -60, 36, -0.04],
+    [64, -50, 34, 0.1],
+  ];
 
-  fruit.forEach((item, index) => {
+  const frontFruitLayout = [
+    [-48, -42, 30, -0.1],
+    [-12, -46, 32, 0.02],
+    [26, -44, 31, 0.08],
+  ];
 
-    const [x, y, fallbackRadius, rotation] =
+  function drawFruitLayer(layout, startIndex = 0) {
+    if (!fruit.length) {
+      return;
+    }
 
-      fruitLayout[index % fruitLayout.length];
+    layout.forEach(([x, y, fallbackRadius, rotation], layoutIndex) => {
+      const item = fruit[(startIndex + layoutIndex) % fruit.length];
 
-    const radius = Math.max(
+      const radius = Math.max(
+        26 * scale,
+        Math.min(
+          40 * scale,
+          item.radius ? item.radius * 0.43 * scale : fallbackRadius * scale
+        )
+      );
 
-      34,
+      exportCtx.save();
+      exportCtx.translate(centerX + x * scale, fruitCenterY + y * scale);
+      exportCtx.rotate(rotation);
+      drawFruitSvg(exportCtx, item.type, radius, "bowl");
+      exportCtx.restore();
+    });
+  }
 
-      Math.min(54, item.radius ? item.radius * 0.58 : fallbackRadius)
+  // Back fruits go behind the bowl.
+  drawFruitLayer(backFruitLayout, 0);
 
-    );
-
-    exportCtx.save();
-
-    exportCtx.translate(centerX + x, fruitCenterY + y);
-
-    exportCtx.rotate(rotation);
-
-    drawFruitSvg(exportCtx, item.type, radius, "bowl");
-
-    exportCtx.restore();
-
-  });
-
+  // Bowl masks the lower parts of the back fruits.
   exportCtx.save();
-
   exportCtx.translate(centerX, bowlCenterY);
-
   drawBowlSvg(exportCtx, bowlRadius, false);
-
   exportCtx.restore();
 
+  // Front fruits sit on top of the rim.
+  drawFruitLayer(frontFruitLayout, backFruitLayout.length);
+
+  // Invite / CTA
   exportCtx.fillStyle = "#4c3125";
-
   exportCtx.textAlign = "center";
-
   exportCtx.textBaseline = "top";
-
   exportCtx.font = '400 64px "Reenie Beanie", cursive';
-
   exportCtx.fillText("can you beat mine?", width / 2, height - 180);
 
   exportCtx.fillStyle = "rgba(76, 49, 37, 0.72)";
-
   exportCtx.font = '400 42px "Reenie Beanie", cursive';
-
   exportCtx.fillText("play bowl", width / 2, height - 118);
 
   exportCtx.fillStyle = "rgba(76, 49, 37, 0.58)";
-
   exportCtx.font = '400 30px "Reenie Beanie", cursive';
-
   exportCtx.fillText("https://bowl-nu.vercel.app/", width / 2, height - 78);
 
-    return exportCanvas.toDataURL("image/png");
-
+  return exportCanvas.toDataURL("image/png");
 }
 
 function openShareModal() {
