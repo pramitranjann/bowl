@@ -1100,10 +1100,14 @@ if (hit.entity.kind === "durian") {
   game.flashStrength = 1;
 
   if (typeof audio.playDurianHit === "function") {
+  try {
     audio.playDurianHit(
       Math.min(1.3, hit.segment.velocity / (CONFIG.sliceVelocityThreshold * 1.4))
     );
+  } catch (error) {
+    console.warn("Durian audio failed", error);
   }
+}
 
   appendParticles(
     createDurianBurst({
