@@ -561,29 +561,36 @@ function closeShareModal() {
 
 
 function downloadSharePreview() {
+  let dataUrl = "";
 
   try {
-
-    game.sharePreviewUrl = renderShareExportImage();
-
+    dataUrl = renderShareExportImage();
+    game.sharePreviewUrl = dataUrl;
   } catch (error) {
-
     console.warn("Unable to render share export", error);
-
     return;
-
   }
 
-  const anchor = document.createElement("a");
+  try {
+    const anchor = document.createElement("a");
+    anchor.href = dataUrl;
+    anchor.download = `bowl-${Date.now()}.png`;
+    anchor.rel = "noopener";
+    anchor.style.display = "none";
 
-  anchor.href = game.sharePreviewUrl;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+  } catch (error) {
+    console.warn("Download failed", error);
 
-  anchor.download = `bowl-${Date.now()}.png`;
-
-  anchor.click();
-
+    try {
+      window.open(dataUrl, "_blank", "noopener,noreferrer");
+    } catch (openError) {
+      console.warn("Unable to open share image", openError);
+    }
+  }
 }
-
 function setSoundMuted(muted) {
   game.soundMuted = muted;
   audio.setMuted(muted);
@@ -689,14 +696,19 @@ function getTrackedUiButtons() {
     : [...ui.shareModal.querySelectorAll(".hand-target")];
 
   return buttons.flatMap((button) => {
-    if (
-      button.hidden ||
-      button.disabled ||
-      button.getAttribute("aria-disabled") === "true"
-    ) {
-      setTrackedUiButtonHover(button, 0);
-      return [];
-    }
+  if (button.id === "ui-share-download") {
+    setTrackedUiButtonHover(button, 0);
+    return [];
+  }
+
+  if (
+    button.hidden ||
+    button.disabled ||
+    button.getAttribute("aria-disabled") === "true"
+  ) {
+    setTrackedUiButtonHover(button, 0);
+    return [];
+  }
 
     const rect = button.getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) {
@@ -794,7 +806,19 @@ function updateTrackedUiButtons(hands, nowMs) {
     }
 
     hoverState.activated = true;
-    button.button.click();
+
+try {
+  button.button.click();
+} catch (error) {
+  const message = error instanceof Error ? error.message : String(error);
+
+  if (message.includes("queue.submit")) {
+    console.warn("Ignored non-fatal button click error:", message);
+    continue;
+  }
+
+  throw error;
+}
   }
 }
 
