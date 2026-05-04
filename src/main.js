@@ -860,18 +860,6 @@ function toErrorMessage(error, fallback) {
 }
 
 function handleFatalError(error, phase = "runtime") {
-  const message = toErrorMessage(error, "runtime failed");
-
-  // Safari / browser-internal issue that can happen from media/audio/download flows.
-  // Do not let it kill the game.
-  if (
-    message.includes("queue.submit") ||
-    message.includes("undefined is not an object")
-  ) {
-    console.warn("Ignored non-fatal browser/internal error:", error);
-    return;
-  }
-
   console.error(error);
 
   const nowMs = performance.now();
@@ -1690,11 +1678,8 @@ ui.shareModeSelectButton.addEventListener("click", () => {
 window.addEventListener("error", (event) => {
   const message = event.message || event.error?.message || "";
 
-  if (
-    message.includes("queue.submit") ||
-    message.includes("undefined is not an object")
-  ) {
-    console.warn("Ignored non-fatal window error:", message);
+  if (message.includes("queue.submit")) {
+    console.warn("Ignored non-fatal browser/internal error:", message);
     event.preventDefault();
     return;
   }
@@ -1711,10 +1696,7 @@ window.addEventListener("unhandledrejection", (event) => {
       ? event.reason.message
       : String(event.reason ?? "");
 
-  if (
-    message.includes("queue.submit") ||
-    message.includes("undefined is not an object")
-  ) {
+  if (message.includes("queue.submit")) {
     console.warn("Ignored non-fatal promise error:", message);
     event.preventDefault();
     return;
