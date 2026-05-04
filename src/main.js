@@ -1,5 +1,5 @@
 import { CONFIG } from "./config.js";
-import { AudioEngine } from "./audio.js?v=10";
+import { AudioEngine } from "./audio.js";
 import { BowlSystem } from "./bowl.js?v=3";
 import { Compositor } from "./compositor.js";
 import { createDevPanel } from "./dev-panel.js";
