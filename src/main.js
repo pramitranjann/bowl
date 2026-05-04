@@ -289,116 +289,84 @@ function updateWorldSelectionUi() {
 }
 
 function renderShareModalPreview() {
-
   ui.sharePreview.innerHTML = "";
-
   ui.sharePreview.style.backgroundImage = "";
 
   const previewCanvas = document.createElement("canvas");
-
   const previewCtx = previewCanvas.getContext("2d");
-
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
   const width = 420;
-
   const height = 340;
 
   previewCanvas.width = Math.round(width * dpr);
-
   previewCanvas.height = Math.round(height * dpr);
-
   previewCanvas.style.width = "360px";
-
   previewCanvas.style.height = "292px";
 
   previewCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
   previewCtx.imageSmoothingEnabled = true;
-
   previewCtx.imageSmoothingQuality = "high";
 
   ui.sharePreview.appendChild(previewCanvas);
 
   const centerX = width / 2;
-
- const centerX = width / 2;
-const bowlCenterY = height * 0.52;
-const bowlRadius = 140;
+  const fruitCenterY = height * 0.56;
+  const bowlCenterY = height * 0.52;
+  const bowlRadius = 140;
 
   const fruit = bowl.collected;
 
-/*
-  Claude-style bowl composition:
-  Instead of random x/y offsets, fruit is placed inside an invisible
-  fruit zone above the bowl. Each fruit uses percentage positioning
-  inside that zone, closer to how the Claude UI kit works.
-*/
+  const backFruitLayout = [
+    [-58, -72, 36, -0.1],
+    [-22, -86, 39, 0.04],
+    [18, -84, 39, -0.03],
+    [56, -70, 36, 0.12],
+    [-72, -44, 34, -0.16],
+    [-34, -52, 37, 0.08],
+    [4, -56, 38, -0.04],
+    [42, -52, 37, 0.1],
+    [76, -42, 34, 0.16],
+  ];
 
-const bowlVisualWidth = bowlRadius * 2.2;
-const bowlVisualHeight = bowlRadius * 1.58;
+  const frontFruitLayout = [
+    [-42, -26, 32, -0.08],
+    [0, -30, 34, 0.02],
+    [42, -26, 32, 0.08],
+  ];
 
-const fruitZone = {
-  x: centerX - bowlVisualWidth * 0.66 / 2,
-  y: bowlCenterY - bowlVisualHeight * 0.48,
-  width: bowlVisualWidth * 0.66,
-  height: bowlVisualHeight * 0.42,
-};
+  function drawFruitLayer(layout, startIndex = 0) {
+    if (!fruit.length) {
+      return;
+    }
 
-const backFruitLayout = [
-  // x%, y%, size, rotation
-  [12, 58, 34, -14],
-  [28, 34, 39, 8],
-  [48, 24, 41, -3],
-  [68, 34, 39, 10],
-  [86, 58, 34, 14],
-];
+    layout.forEach(([x, y, fallbackRadius, rotation], layoutIndex) => {
+      const item = fruit[(startIndex + layoutIndex) % fruit.length];
 
-const frontFruitLayout = [
-  [24, 72, 35, -8],
-  [50, 68, 38, 2],
-  [76, 72, 35, 8],
-];
+      const radius = Math.max(
+        26,
+        Math.min(42, item.radius ? item.radius * 0.46 : fallbackRadius)
+      );
 
-function drawFruitAtPercent(item, layout) {
-  const [xPercent, yPercent, fallbackRadius, rotationDeg] = layout;
+      previewCtx.save();
+      previewCtx.translate(centerX + x, fruitCenterY + y);
+      previewCtx.rotate(rotation);
+      drawFruitSvg(previewCtx, item.type, radius, "bowl");
+      previewCtx.restore();
+    });
+  }
 
-  const x = fruitZone.x + (xPercent / 100) * fruitZone.width;
-  const y = fruitZone.y + (yPercent / 100) * fruitZone.height;
+  // Back fruits sit behind the shell.
+  drawFruitLayer(backFruitLayout, 0);
 
-  const radius = Math.max(
-    26,
-    Math.min(42, item.radius ? item.radius * 0.46 : fallbackRadius)
-  );
-
+  // Bowl masks the lower part of back fruits.
   previewCtx.save();
-  previewCtx.translate(x, y);
-  previewCtx.rotate((rotationDeg * Math.PI) / 180);
-  drawFruitSvg(previewCtx, item.type, radius, "bowl");
+  previewCtx.translate(centerX, bowlCenterY);
+  drawBowlSvg(previewCtx, bowlRadius, false);
   previewCtx.restore();
-}
 
-// 1. Back fruits: behind the bowl
-backFruitLayout.forEach((layout, index) => {
-  if (!fruit.length) return;
-  drawFruitAtPercent(fruit[index % fruit.length], layout);
-});
-
-// 2. Bowl: covers lower parts of back fruits
-previewCtx.save();
-previewCtx.translate(centerX, bowlCenterY);
-drawBowlSvg(previewCtx, bowlRadius, false);
-previewCtx.restore();
-
-// 3. Front fruits: drawn on top of the rim
-frontFruitLayout.forEach((layout, index) => {
-  if (!fruit.length) return;
-  drawFruitAtPercent(
-    fruit[(backFruitLayout.length + index) % fruit.length],
-    layout
-  );
-});
-
+  // Front fruits sit visibly on top of the rim.
+  drawFruitLayer(frontFruitLayout, backFruitLayout.length);
 }
 
 function renderShareExportImage() {
