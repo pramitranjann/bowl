@@ -540,7 +540,9 @@ function renderShareExportImage() {
 
   exportCtx.fillText("https://bowl-nu.vercel.app/", width / 2, height - 78);
 
-  r
+    return exportCanvas.toDataURL("image/png");
+
+}
 
 function openShareModal() {
   try {
@@ -1676,4 +1678,3 @@ async function init() {
 }
 
 init();
-}
