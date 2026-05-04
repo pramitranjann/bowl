@@ -860,7 +860,20 @@ function toErrorMessage(error, fallback) {
 }
 
 function handleFatalError(error, phase = "runtime") {
+  const message = toErrorMessage(error, "runtime failed");
+
+  // Safari / browser-internal issue that can happen from media/audio/download flows.
+  // Do not let it kill the game.
+  if (
+    message.includes("queue.submit") ||
+    message.includes("undefined is not an object")
+  ) {
+    console.warn("Ignored non-fatal browser/internal error:", error);
+    return;
+  }
+
   console.error(error);
+
   const nowMs = performance.now();
   const statusText =
     phase === "startup"
@@ -868,6 +881,7 @@ function handleFatalError(error, phase = "runtime") {
       : phase === "sunset"
         ? toErrorMessage(error, "sunset setup failed")
         : toErrorMessage(error, "runtime failed");
+
   setState(STATES.ERROR, nowMs, statusText);
 }
 
@@ -1673,19 +1687,44 @@ ui.shareModeSelectButton.addEventListener("click", () => {
     });
   }
 
-  window.addEventListener("error", (event) => {
-    handleFatalError(
-      event.error ?? new Error(event.message),
-      startupComplete ? "runtime" : "startup"
-    );
-  });
+window.addEventListener("error", (event) => {
+  const message = event.message || event.error?.message || "";
 
-  window.addEventListener("unhandledrejection", (event) => {
-    handleFatalError(
-      event.reason,
-      startupComplete ? "runtime" : "startup"
-    );
-  });
+  if (
+    message.includes("queue.submit") ||
+    message.includes("undefined is not an object")
+  ) {
+    console.warn("Ignored non-fatal window error:", message);
+    event.preventDefault();
+    return;
+  }
+
+  handleFatalError(
+    event.error ?? new Error(event.message),
+    startupComplete ? "runtime" : "startup"
+  );
+});
+
+window.addEventListener("unhandledrejection", (event) => {
+  const message =
+    event.reason instanceof Error
+      ? event.reason.message
+      : String(event.reason ?? "");
+
+  if (
+    message.includes("queue.submit") ||
+    message.includes("undefined is not an object")
+  ) {
+    console.warn("Ignored non-fatal promise error:", message);
+    event.preventDefault();
+    return;
+  }
+
+  handleFatalError(
+    event.reason,
+    startupComplete ? "runtime" : "startup"
+  );
+});
 
   requestAnimationFrame(animate);
 
