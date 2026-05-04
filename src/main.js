@@ -322,67 +322,82 @@ function renderShareModalPreview() {
 
   const centerX = width / 2;
 
-  const fruitCenterY = height * 0.55;
-
-  const bowlCenterY = height * 0.52;
-
-  const bowlRadius = 136;
+ const centerX = width / 2;
+const bowlCenterY = height * 0.52;
+const bowlRadius = 140;
 
   const fruit = bowl.collected;
 
-  const fruitLayout = [
+/*
+  Claude-style bowl composition:
+  Instead of random x/y offsets, fruit is placed inside an invisible
+  fruit zone above the bowl. Each fruit uses percentage positioning
+  inside that zone, closer to how the Claude UI kit works.
+*/
 
-    [-88, -44, 34, -0.16],
+const bowlVisualWidth = bowlRadius * 2.2;
+const bowlVisualHeight = bowlRadius * 1.58;
 
-    [-58, -68, 38, 0.08],
+const fruitZone = {
+  x: centerX - bowlVisualWidth * 0.66 / 2,
+  y: bowlCenterY - bowlVisualHeight * 0.48,
+  width: bowlVisualWidth * 0.66,
+  height: bowlVisualHeight * 0.42,
+};
 
-    [-22, -78, 40, -0.04],
+const backFruitLayout = [
+  // x%, y%, size, rotation
+  [12, 58, 34, -14],
+  [28, 34, 39, 8],
+  [48, 24, 41, -3],
+  [68, 34, 39, 10],
+  [86, 58, 34, 14],
+];
 
-    [20, -78, 40, 0.06],
+const frontFruitLayout = [
+  [24, 72, 35, -8],
+  [50, 68, 38, 2],
+  [76, 72, 35, 8],
+];
 
-    [56, -68, 38, 0.12],
+function drawFruitAtPercent(item, layout) {
+  const [xPercent, yPercent, fallbackRadius, rotationDeg] = layout;
 
-    [88, -44, 34, 0.16],
+  const x = fruitZone.x + (xPercent / 100) * fruitZone.width;
+  const y = fruitZone.y + (yPercent / 100) * fruitZone.height;
 
-    [-34, -48, 36, -0.08],
-
-    [34, -48, 36, 0.08],
-
-  ];
-
-  fruit.forEach((item, index) => {
-
-    const [x, y, fallbackRadius, rotation] =
-
-      fruitLayout[index % fruitLayout.length];
-
-    const radius = Math.max(
-
-      28,
-
-      Math.min(44, item.radius ? item.radius * 0.48 : fallbackRadius)
-
-    );
-
-    previewCtx.save();
-
-    previewCtx.translate(centerX + x, fruitCenterY + y);
-
-    previewCtx.rotate(rotation);
-
-    drawFruitSvg(previewCtx, item.type, radius, "bowl");
-
-    previewCtx.restore();
-
-  });
+  const radius = Math.max(
+    26,
+    Math.min(42, item.radius ? item.radius * 0.46 : fallbackRadius)
+  );
 
   previewCtx.save();
-
-  previewCtx.translate(centerX, bowlCenterY);
-
-  drawBowlSvg(previewCtx, bowlRadius, false);
-
+  previewCtx.translate(x, y);
+  previewCtx.rotate((rotationDeg * Math.PI) / 180);
+  drawFruitSvg(previewCtx, item.type, radius, "bowl");
   previewCtx.restore();
+}
+
+// 1. Back fruits: behind the bowl
+backFruitLayout.forEach((layout, index) => {
+  if (!fruit.length) return;
+  drawFruitAtPercent(fruit[index % fruit.length], layout);
+});
+
+// 2. Bowl: covers lower parts of back fruits
+previewCtx.save();
+previewCtx.translate(centerX, bowlCenterY);
+drawBowlSvg(previewCtx, bowlRadius, false);
+previewCtx.restore();
+
+// 3. Front fruits: drawn on top of the rim
+frontFruitLayout.forEach((layout, index) => {
+  if (!fruit.length) return;
+  drawFruitAtPercent(
+    fruit[(backFruitLayout.length + index) % fruit.length],
+    layout
+  );
+});
 
 }
 
