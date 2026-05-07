@@ -1500,7 +1500,7 @@ function renderScene(nowMs, hands, frame, segmentation) {
 
   if (game.flashStrength > 0) {
     sceneCtx.save();
-    sceneCtx.fillStyle = `rgba(197, 197, 51, ${game.flashStrength * 0.25})`;
+    sceneCtx.fillStyle = `rgba(217, 68, 35, ${game.flashStrength * 0.25})`;
     sceneCtx.fillRect(0, 0, viewport.width, viewport.height);
     sceneCtx.restore();
   }

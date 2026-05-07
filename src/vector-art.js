@@ -152,7 +152,7 @@ const FRUIT_ART = {
     bowlScale: 1.24,
     svg: `
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-        <path d="M96 12 L 104 12 L 102 28 L 98 28 Z" fill="#4a3220" stroke="#4c3125" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M96 12 L 104 12 L 102 28 L 98 28 Z" fill="#4a3220" stroke="#d94423" stroke-width="3" stroke-linejoin="round"/>
         <path d="M100 22 L 116 36 L 138 30 L 144 50 L 168 60 L 162 82 L 184 96 L 172 116 L 184 138 L 162 146 L 156 168 L 134 162 L 116 180 L 100 168 L 84 180 L 66 162 L 44 168 L 38 146 L 16 138 L 28 116 L 16 96 L 38 82 L 32 60 L 56 50 L 62 30 L 84 36 Z" fill="#c5c533" stroke="#4c3125" stroke-width="6" stroke-linejoin="round"/>
         <g fill="#4c3125" opacity="0.86">
           <path d="M100 50 L 106 64 L 94 64 Z"/><path d="M76 60 L 82 74 L 68 72 Z"/><path d="M124 60 L 132 72 L 118 74 Z"/>
